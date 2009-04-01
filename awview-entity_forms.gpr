@@ -17,7 +17,7 @@ with "aws";
 
 with "awview";
 
-project AwView.Forms is
+project AwView.Entity_Forms is
 
 	version := "0.1.0";
 	
@@ -31,7 +31,7 @@ project AwView.Forms is
 	
 	-- LIBRARY
 	for Library_Dir use "lib";
-	for Library_Name use "awview-forms";
+	for Library_Name use "awview-entity_forms";
 	case target is
 		when "Windows_NT" =>
 			for Library_Kind use "static";
@@ -39,7 +39,7 @@ project AwView.Forms is
 		when "GNU/Linux" =>
 			for Library_Kind use "dynamic";
 	end case;
-	for Library_Version use "libawview-forms.so." & Version;
+	for Library_Version use "libawview-entity_forms.so." & Version;
 	
 	
 	package Compiler is
@@ -48,5 +48,5 @@ project AwView.Forms is
 
 	package Linker renames AwLib.Linker;
 
-end AwView.Forms;
+end AwView.Entity_Forms;
 
