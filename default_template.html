@@ -20,8 +20,17 @@
 		<!-- Enter the main loop for entities -->
 		@@_TABLE_@@
 			<tr>
-				<th>@_FIELDS_LABEL_@</th>	<!-- the label for this field -->
-				<td>@_FIELDS_INPUT_@</th>	<!-- the field input -->
+				@@ IF FIELDS_IS_MULTILINE THEN @@
+					<th colspan='2'>
+						@_FIELDS_LABEL_@
+					</th></tr>
+					<tr><td colspan='2'>
+						@_FIELDS_INPUT_@
+					</td>
+				@@ ELSE @@
+					<th>@_FIELDS_LABEL_@</th>	<!-- the label for this field -->
+					<td>@_FIELDS_INPUT_@</th>	<!-- the field input -->
+				@@ END_IF @@
 			</tr>
 		@@_END_TABLE_@@
 
