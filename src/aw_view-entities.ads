@@ -4,7 +4,7 @@
 -- Ada 2005 --
 --------------
 with Ada.Strings.Unbounded;		use Ada.Strings.Unbounded;
-with Ada.Tags
+with Ada.Tags;
 
 ---------------
 -- Ada Works --
