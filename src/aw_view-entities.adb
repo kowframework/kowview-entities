@@ -1,12 +1,15 @@
 --------------
 -- Ada 2005 --
 --------------
-with Ada.Tags;
+with Ada.Directories;
+with Ada.Text_IO;	use Ada.Text_IO;
 
 ---------------
 -- Ada Works --
 ---------------
+with Aw_Lib.File_System;
 with Aw_View;
+with Aw_View.Components_Registry;
 
 
 ---------
@@ -35,6 +38,21 @@ package body Aw_View.Entities is
 	end Initialize;
 
 
+
+	function Get_Default_View_Template_Name( Component : in Component_Type ) return Unbounded_String is
+		use Aw_Lib.File_System;
+	begin
+		return To_Unbounded_String(
+				Aw_View.Components_Registry.Locate_Resource(
+						Component_Name  => "entities",
+						Resource        => "default_templates" & Separator & "view_entity",
+						Extension       => "html",
+						Kind            => Ada.Directories.Ordinary_File
+					)
+				);
+	end Get_Default_View_Template_Name;
+
+
 	overriding
 	function Create_Instance(
 			Component	: in Component_Type;
@@ -49,6 +67,14 @@ package body Aw_View.Entities is
 		View_Entity : View_Entity_Module;
 	begin
 		if Module_Name = "view_entity" then
+			View_Entity.Entity_Tag	:= Aw_Config.Element( Config, "entity_tag" );
+			View_Entity.Id		:= Aw_Ent.To_ID( Aw_Config.Element( Config, "id" ) );
+			View_Entity.Template_Name	:= Aw_Config.Value( Config, "template_name", Null_Unbounded_String );
+
+			if View_Entity.Template_Name = Null_Unbounded_String then
+				View_Entity.Template_Name := Get_Default_View_Template_Name( Component );
+			end if;
+
 			return View_Entity;
 		else
 			raise Aw_View.Components.MODULE_ERROR with "Unknown module :: " & Module_Name;
@@ -125,7 +151,7 @@ package body Aw_View.Entities is
 		My_Parameters : Templates_Parser.Translate_Set;
 
 	begin
-
+		Aw_Ent.Load( Entity, Module.Id );
 		Properties := Aw_Ent.Entity_Registry.Get_Properties( Module.Entity_Tag );
 
 		Aw_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
@@ -136,7 +162,7 @@ package body Aw_View.Entities is
 		Response := Response &
 			To_Unbounded_String(
 				Templates_Parser.Parse(
-						To_String( Module.Template_File_name ),
+						To_String( Module.Template_Name ),
 						My_Parameters
 					)
 				);

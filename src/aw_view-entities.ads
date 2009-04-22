@@ -127,8 +127,8 @@ package Aw_View.Entities is
 private
 	type View_Entity_Module is new Aw_View.Components.Module_Instance_Interface with record
 		Id			: Aw_Ent.ID_Type;
-		Entity_Tag		: Ada.Tags.Tag;
-		Template_File_Name	: Unbounded_String;
+		Entity_Tag		: Unbounded_String;
+		Template_Name		: Unbounded_String;
 	end record;
 
 end Aw_View.Entities;
