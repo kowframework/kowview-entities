@@ -1,74 +1,39 @@
-------------------------------------------------------------------------------
---                                                                          --
---                         Ada Works :: Entity Forms                        --
---                                                                          --
---                                Ada Works                                 --
---                                                                          --
---                                 S p e c                                  --
---                                                                          --
---               Copyright (C) 2007-2009, Ada Works Project                 --
---                                                                          --
---                                                                          --
--- Aw_Lib is free library;  you can redistribute it  and/or modify it under --
--- terms of the  GNU General Public License as published  by the Free Soft- --
--- ware  Foundation;  either version 2,  or (at your option) any later ver- --
--- sion. Aw_Lib is distributed in the hope that it will be useful, but WITH---
--- OUT ANY WARRANTY;  without even the  implied warranty of MERCHANTABILITY --
--- or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License --
--- for  more details.  You should have  received  a copy of the GNU General --
--- Public License  distributed with Aw_Lib; see file COPYING. If not, write --
--- to  the Free Software Foundation,  59 Temple Place - Suite 330,  Boston, --
--- MA 02111-1307, USA.                                                      --
---                                                                          --
--- As a special exception,  if other files  instantiate  generics from this --
--- unit, or you link  this unit with other files  to produce an executable, --
--- this  unit  does not  by itself cause  the resulting  executable  to  be --
--- covered  by the  GNU  General  Public  License.  This exception does not --
--- however invalidate  any other reasons why  the executable file  might be --
--- covered by the  GNU Public License.                                      --
-------------------------------------------------------------------------------
 
 
-
--- Main Aw_View :: Entity_Forms package.
---
--- This package implements a generic way for dealing with entities
---
--- author Marcelo C. de Freitas <marcelo@kow.com.br>
--- createdAt 2009-04-XX
---
--- Repository information:
--- $Date: $
--- $Revision: $
--- $Author: $
-
-
-
----------
--- AWS --
----------
-with AWS.Status;
-with Templates_Parser;
+--------------
+-- Ada 2005 --
+--------------
+with Ada.Strings.Unbounded;		use Ada.Strings.Unbounded;
+with Ada.Tags
 
 ---------------
 -- Ada Works --
 ---------------
-with Aw_View;
+with Aw_Config;
+with Aw_Ent;
+with Aw_View.Components;
 
-package Aw_View.Entity_Forms is
+---------
+-- AWS --
+---------
+with AWS.Response;
+with AWS.Status;
+with Templates_Parser;
+
+package Aw_View.Entities is
 
 
 
-	function Read_Form_Data( Request : in AWS.Status.Data ) return Entity_Type;
+	function Read_Form_Data( Request : in AWS.Status.Data ) return Aw_Ent.Entity_Type;
 	-- Read the form data, returning one entity
 	--
 
 
-	------------------------
-	-- The FORM Component --
-	------------------------
+	--------------------------
+	-- The Entity Component --
+	--------------------------
 
-	type Component_Type is new Aw_View.Component_Interface with private;
+	type Component_Type is new Aw_View.Components.Component_Interface with null record;
 
 
 
@@ -83,16 +48,13 @@ package Aw_View.Entity_Forms is
 	
 
 
-	------------------------------------
-	-- Modules for the FORM component --
-	------------------------------------
 
 	overriding
 	function Create_Instance(
 			Component	: in Component_Type;
 			Module_Name	: in String;
 			Config		: in Aw_Config.Config_File
-		) return Aw_View.Module_Instance_Interface'Class;
+		) return Aw_View.Components.Module_Instance_Interface'Class;
 	-- create a module instance by given name
 	-- Available module:
 	-- 	view_entity
@@ -101,27 +63,79 @@ package Aw_View.Entity_Forms is
 	
 
 
-	type View_Entity_Module is new Aw_View.Module_Instance_Interface with private;
+	overriding
+	function Create_Instance(
+			Component	: in Component_Type;
+			Service_Name	: in String;
+			Service_Mapping	: in String
+		) return Aw_View.Components.Service_Instance_Interface'Class;
+
+
+	--------------------------------------
+	-- Modules for the Entity component --
+	--------------------------------------
+
+
+	type View_Entity_Module is new Aw_View.Components.Module_Instance_Interface with private;
 	-- a type for rendering FORMS for entities.
 
-	overriding
+
+
+	procedure Initialize_Request(
+			Module		: in out View_Entity_Module;
+			Request		: in     AWS.Status.Data;
+			Parameters	: in out Templates_Parser.Translate_Set;
+			Response	: in out AWS.Response.Data;
+			Is_Final	: out    Boolean
+		) is null;
+	-- TODO :: implement Initialize_Request so it'll check user's permission to view the entity
+
+	procedure Process_Header(
+			Module		: in out View_Entity_Module;
+			Request		: in     AWS.Status.Data;
+			Parameters	: in out Templates_Parser.Translate_Set;
+			Response	: in out Unbounded_String
+		) is null;
+	-- TODO :: implement as optional in the template
+
 	procedure Process_Request(
 			Module		: in out View_Entity_Module;
 			Request		: in     AWS.Status.Data;
 			Parameters	: in out Templates_Parser.Translate_Set;
 			Response	: in out Unbounded_String
 		);
-	-- Draws a the entity as text (usualy HTML text)
+	-- draws the main template for this entity
+
+	procedure Process_Footer(
+			Module		: in out View_Entity_Module;
+			Request		: in     AWS.Status.Data;
+			Parameters	: in out Templates_Parser.Translate_Set;
+			Response	: in out Unbounded_String
+		) is null;
+	-- TODO :: implement as optional in the template
+
+	procedure Finalize_Request(
+			Module		: in out View_Entity_Module;
+			Request		: in     AWS.Status.Data;
+			Parameters	: in out Templates_Parser.Translate_Set
+		) is null;
+	-- TODO :: implement something in here just to be cool. :D
+
+
+
+	---------------------------------------
+	-- Services for the Entity component --
+	---------------------------------------
+
+
+	-- TODO: create all the needed services
 
 
 private
-	type View_Entity_Module is new Aw_View.Module_Instance_Interface with record
-		--Entity	: Entity_Type;
-		Entity_Tag	: Ada.Tags.Tag;
-
+	type View_Entity_Module is new Aw_View.Components.Module_Instance_Interface with record
+		Id			: Aw_Ent.ID_Type;
+		Entity_Tag		: Ada.Tags.Tag;
+		Template_File_Name	: Unbounded_String;
 	end record;
 
-
-
-
-end Aw_View.Entity_Forms;
+end Aw_View.Entities;

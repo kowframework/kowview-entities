@@ -9,13 +9,14 @@
 
 with "awconfig";
 with "awconfig-text";
+with "awent";
 with "awlib";
 with "awsec";
+with "awview";
 
 with "aws";
 
 
-with "awview";
 
 project AwView.Entities is
 
