@@ -20,19 +20,9 @@ package body Aw_View.Entities is
 
 
 
-	function Read_Form_Data( Request : in AWS.Status.Data ) return Entity_Type;
-	-- Read the form data, returning one entity
-	--
-
-
 	--------------------------
 	-- The Entity Component --
 	--------------------------
-
-	type Component_Type is new Aw_View.Components.Component_Interface with private;
-
-
-
 
 	overriding
 	procedure Initialize(
@@ -58,14 +48,16 @@ package body Aw_View.Entities is
 	-- 	TODO :: create_entity
 		View_Entity : View_Entity_Module;
 	begin
-		if Component_Name = "view_entity" then
-			return View_Module;
+		if Module_Name = "view_entity" then
+			return View_Entity;
 		else
-			raise MODULE_ERROR with "Unknown module :: " & Module_Name;
+			raise Aw_View.Components.MODULE_ERROR with "Unknown module :: " & Module_Name;
 		end if;
 	end Create_Instance;
 
 
+
+	type Dumb_Service is new Aw_View.COmponents.Service_Instance_Interface with null record;
 
 	overriding
 	function Create_Instance(
@@ -73,8 +65,11 @@ package body Aw_View.Entities is
 			Service_Name	: in String;
 			Service_Mapping	: in String
 		) return Aw_View.Components.Service_Instance_Interface'Class is
+		Dumb : Dumb_Service;
 	begin
 		raise Aw_View.Components.SERVICE_ERROR with "there is no service implemented in the entities component yet";
+
+		return Dumb;
 	end Create_Instance;
 
 
@@ -109,20 +104,21 @@ package body Aw_View.Entities is
 			Parameters	: in out Templates_Parser.Translate_Set;
 			Response	: in out Unbounded_String
 		) is
+		use Templates_Parser;
 
 
 		Properties	: Aw_Ent.Property_Lists.List;
-		Entity		: Aw_Ent.Entity_Type'Class := Aw_Ent.New_Entity( Module.Tag );
+		Entity		: Aw_Ent.Entity_Type'Class := Aw_Ent.New_Entity( Module.Entity_Tag );
 
+		Labels_Tag	: Templates_Parser.Tag;
+		Values_Tag	: Templates_Parser.Tag;
 
 		procedure Iterator( C : Aw_Ent.Property_Lists.Cursor ) is
-			Label_Tag	: Templates_Parser.Tag;
-			Input_Tag	: Templates_Parser.Tag;
 			P		: Aw_Ent.Entity_Property_Ptr;
 		begin
 			P := Aw_Ent.Property_Lists.Element( C );
-			Label_Tag := Label_Tag & Get_Label( Module, P.all );
-			Input_Tag := Input_Tag & Get_Input( Module, P.all, Entity );
+			Labels_Tag := Labels_Tag & Get_Label( Module, P.all );
+			Values_Tag := Values_Tag & Get_Input( Module, P.all, Entity );
 		end Iterator;
 
 
@@ -130,16 +126,12 @@ package body Aw_View.Entities is
 
 	begin
 
-		if not Module.Tag in Aw_Ent.Entity_Type'Class then
-			raise MODULE_ERROR with "Not an entity :: " & Ada.Tags.Expanded_Name( Module.Tag );
-		end if;
-
-		Properties := Aw_Ent.Entity_Registry.Get_Properties( Module.Tag );
+		Properties := Aw_Ent.Entity_Registry.Get_Properties( Module.Entity_Tag );
 
 		Aw_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
 
-		Templates_Parser.Assoc( My_Parameters, "entity_labels", Label_Tag );
-		Templates_Parser.Assoc( My_Parameters, "entity_values", Input_Tag );
+		Insert( My_Parameters, Assoc( "entity_labels", Labels_Tag ) );
+		Insert( My_Parameters, Assoc( "entity_values", Values_Tag ) );
 
 		Response := Response &
 			To_Unbounded_String(

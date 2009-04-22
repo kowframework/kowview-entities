@@ -22,13 +22,6 @@ with Templates_Parser;
 
 package Aw_View.Entities is
 
-
-
-	function Read_Form_Data( Request : in AWS.Status.Data ) return Aw_Ent.Entity_Type;
-	-- Read the form data, returning one entity
-	--
-
-
 	--------------------------
 	-- The Entity Component --
 	--------------------------
