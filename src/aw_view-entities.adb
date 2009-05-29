@@ -10,6 +10,7 @@ with Ada.Text_IO;	use Ada.Text_IO;
 with Aw_Lib.File_System;
 with Aw_View;
 with Aw_View.Components_Registry;
+with Aw_View.Entities_Helper;
 
 
 ---------
@@ -52,6 +53,21 @@ package body Aw_View.Entities is
 				);
 	end Get_Default_View_Template_Name;
 
+	function Get_Default_Edit_Template_Name( Component : in Component_Type ) return Unbounded_String is
+		use Aw_Lib.File_System;
+	begin
+		return To_Unbounded_String(
+				Aw_View.Components_Registry.Locate_Resource(
+						Component_Name  => "entities",
+						Resource        => "default_templates" & Separator & "edit_entity",
+						Extension       => "html",
+						Kind            => Ada.Directories.Ordinary_File
+					)
+				);
+	end Get_Default_Edit_Template_Name;
+
+
+
 
 	overriding
 	function Create_Instance(
@@ -62,9 +78,8 @@ package body Aw_View.Entities is
 	-- create a module instance by given name
 	-- Available module:
 	-- 	view_entity
-	-- 	TODO :: edit_entity
-	-- 	TODO :: create_entity
 		View_Entity : View_Entity_Module;
+		Edit_Entity : Edit_Entity_Module;
 	begin
 		if Module_Name = "view_entity" then
 			View_Entity.Entity_Tag	:= Aw_Config.Element( Config, "entity_tag" );
@@ -76,6 +91,17 @@ package body Aw_View.Entities is
 			end if;
 
 			return View_Entity;
+		elsif Module_Name = "edit_entity" then
+			Edit_Entity.Entity_Tag	:= Aw_Config.Element( Config, "entity_tag" );
+			Edit_Entity.Id		:= Aw_Ent.To_ID( Aw_Config.Element( Config, "id" ) );
+			Edit_Entity.Template_Name	:= Aw_Config.Value( Config, "template_name", Null_Unbounded_String );
+
+			if Edit_Entity.Template_Name = Null_Unbounded_String then
+				Edit_Entity.Template_Name := Get_Default_Edit_Template_Name( Component );
+			end if;
+
+			return Edit_Entity;
+
 		else
 			raise Aw_View.Components.MODULE_ERROR with "Unknown module :: " & Module_Name;
 		end if;
@@ -83,19 +109,15 @@ package body Aw_View.Entities is
 
 
 
-	type Dumb_Service is new Aw_View.COmponents.Service_Instance_Interface with null record;
-
 	overriding
 	function Create_Instance(
 			Component	: in Component_Type;
 			Service_Name	: in String;
 			Service_Mapping	: in String
 		) return Aw_View.Components.Service_Instance_Interface'Class is
-		Dumb : Dumb_Service;
+		Store : Store_Entity_Service;
 	begin
-		raise Aw_View.Components.SERVICE_ERROR with "there is no service implemented in the entities component yet";
-
-		return Dumb;
+		return Store;
 	end Create_Instance;
 
 
@@ -103,23 +125,6 @@ package body Aw_View.Entities is
 	-- Modules for the Entity component --
 	--------------------------------------
 
-	function Get_Label(
-			Module		: in View_Entity_Module;
-			Property	: in Aw_Ent.Entity_Property_Type'Class
-		) return String is
-	begin
-		-- TODO: implement a proper way for handling labels:
-		return To_String( Property.Column_Name );
-	end Get_Label;
-
-	function Get_Input(
-			Module		: in View_Entity_Module;
-			Property	: in Aw_Ent.Entity_Property_Type'Class;
-			Entity		: in Aw_Ent.Entity_Type'Class
-		) return String is
-	begin
-		return Aw_Ent.Get_Property( Property, Entity );
-	end Get_Input;
 
 
 
@@ -136,28 +141,17 @@ package body Aw_View.Entities is
 		Properties	: Aw_Ent.Property_Lists.List;
 		Entity		: Aw_Ent.Entity_Type'Class := Aw_Ent.New_Entity( Module.Entity_Tag );
 
-		Labels_Tag	: Templates_Parser.Tag;
-		Values_Tag	: Templates_Parser.Tag;
-
-		procedure Iterator( C : Aw_Ent.Property_Lists.Cursor ) is
-			P		: Aw_Ent.Entity_Property_Ptr;
-		begin
-			P := Aw_Ent.Property_Lists.Element( C );
-			Labels_Tag := Labels_Tag & Get_Label( Module, P.all );
-			Values_Tag := Values_Tag & Get_Input( Module, P.all, Entity );
-		end Iterator;
-
-
 		My_Parameters : Templates_Parser.Translate_Set;
 
 	begin
 		Aw_Ent.Load( Entity, Module.Id );
 		Properties := Aw_Ent.Entity_Registry.Get_Properties( Module.Entity_Tag );
 
-		Aw_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
-
-		Insert( My_Parameters, Assoc( "entity_labels", Labels_Tag ) );
-		Insert( My_Parameters, Assoc( "entity_values", Values_Tag ) );
+		Aw_View.Entities_Helper.Insert(
+					My_Parameters,
+					"entity",
+					Entity
+				);
 
 		Response := Response &
 			To_Unbounded_String(
@@ -173,6 +167,23 @@ package body Aw_View.Entities is
 	---------------------------------------
 	-- Services for the Entity component --
 	---------------------------------------
+	overriding
+	procedure Process_Request(
+			Service		: in out Store_Entity_Service;
+			Request		: in     AWS.Status.Data;
+			Response	: in out AWS.Response.Data
+		) is
+		-- read the entity from the form and process it.
+		-- save it back to the database backend afterwards
+
+		Entity: Aw_Ent.Entity_Type'Class := Aw_View.Entities_Helper.Load(
+							Request,
+							Service.Variable_Prefix
+						);
+	begin
+		Aw_Ent.Store( Entity );
+		Response := AWS.Response.URL( AWS.Status.Referer( Request ) );
+	end Process_Request;
 
 
 end Aw_View.Entities;

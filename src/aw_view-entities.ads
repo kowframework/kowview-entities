@@ -68,9 +68,12 @@ package Aw_View.Entities is
 	-- Modules for the Entity component --
 	--------------------------------------
 
+	--
+	-- View Entity
+	--
 
 	type View_Entity_Module is new Aw_View.Components.Module_Instance_Interface with private;
-	-- a type for rendering FORMS for entities.
+	-- a type for rendering the data from entities in a determined form area
 
 
 
@@ -112,23 +115,62 @@ package Aw_View.Entities is
 			Request		: in     AWS.Status.Data;
 			Parameters	: in out Templates_Parser.Translate_Set
 		) is null;
-	-- TODO :: implement something in here just to be cool. :D
 
+
+	--
+	-- Edit Entity
+	--
+
+	type Edit_Entity_Module is new View_Entity_Module with private;
+	-- a type for rendering the data from entities into a form that can save the entity back
+	-- for now it's the same as the View_Entity_Module but with a different default template.
+	-- it should change anytime soon though
 
 
 	---------------------------------------
 	-- Services for the Entity component --
 	---------------------------------------
 
+	type Store_Entity_Service is new Aw_View.Components.Service_Instance_Interface with private;
 
-	-- TODO: create all the needed services
+
+	overriding
+	procedure Process_Request(
+			Service		: in out Store_Entity_Service;
+			Request		: in     AWS.Status.Data;
+			Response	: in out AWS.Response.Data
+		);
+	-- read the entity from the form and process it.
+	-- save it back to the database backend afterwards
+
+
 
 
 private
+
+
+	--------------------------------------
+	-- Modules for the Entity component --
+	--------------------------------------
+
 	type View_Entity_Module is new Aw_View.Components.Module_Instance_Interface with record
 		Id			: Aw_Ent.ID_Type;
 		Entity_Tag		: Unbounded_String;
 		Template_Name		: Unbounded_String;
 	end record;
+
+
+	type Edit_Entity_Module is new View_Entity_Module with null record;
+
+
+	---------------------------------------
+	-- Services for the Entity component --
+	---------------------------------------
+
+	type Store_Entity_Service is new Aw_View.Components.Service_Instance_Interface with record
+		Variable_Prefix : String( 1 .. 6 ) := "entity";
+		-- the prefix for every variable to be processed by this service
+	end record;
+
 
 end Aw_View.Entities;
