@@ -66,6 +66,20 @@ package Aw_View.Entities_Helper is
 	-- if the type is a Foreign Key, get not the ID but the label for this single related entity
 
 
+
+
+	function Assoc_Form_Elements(
+			Variable_Name	: in String;
+			Entity		: in Aw_Ent.Entity_Type'Class;
+			Locale		: in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale;
+			Name_Prefix	: in String := "entity"
+		) return Templates_Parser.Association;
+	-- create a Tag inside with the corresponding Form element for each entity property.
+	-- currently it supports:
+	-- 	string (default)
+	-- 	locale
+
+
 	function Assoc_Id(
 			Variable_Name	: in String;
 			Entity		: in Aw_Ent.Entity_Type'Class
@@ -79,17 +93,22 @@ package Aw_View.Entities_Helper is
 	-- create a Tag inside with all Ids (ordered by the entity's registry) as string
 
 
+
+
+
 	procedure Insert(
 			Set		: in out Templates_Parser.Translate_Set;
 			Variable_Prefix	: in     String;
 			Entity		: in     Aw_Ent.Entity_Type'Class;
-			Locale		: in     Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+			Locale		: in     Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale;
+			Include_Form	: in     Boolean := False
 		);
 	-- call all Assoc_* functions inserting the results in the translated set.
 	-- create the associations :
 	-- 	[P]_values
 	-- 	[P]_labels
 	-- 	[P]_column_ids
+	-- 	[P]_form_element
 	-- Where [P] is the value for Variable_Prefix
 
 

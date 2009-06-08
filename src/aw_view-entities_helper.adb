@@ -192,6 +192,14 @@ package body Aw_View.Entities_Helper is
 						);
 					Values_Tag := Values_Tag & Aw_Ent.To_String( Related_Entity );
 				end;
+			elsif P.all in Aw_Ent.Properties.Locale_Property_Type'Class then
+				declare
+					PP : Aw_Ent.Properties.Locale_property_Type'Class :=
+							Aw_Ent.Properties.Locale_Property_Type'Class( P.all );
+					Locale : Aw_Lib.Locales.Locale := PP.Getter.all( Entity );
+				begin
+					Values_Tag := Values_Tag & Locale.Name;
+				end;
 			else
 				Values_Tag := Values_Tag & Aw_Ent.Get_Property( P.all, Entity );
 			end if;
@@ -201,6 +209,170 @@ package body Aw_View.Entities_Helper is
 		Aw_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
 		return Templates_Parser.Assoc( Variable_Name, Values_Tag );
 	end Assoc_Resolved_Values;
+
+
+
+
+
+	function Assoc_Form_Elements(
+			Variable_Name	: in String;
+			Entity		: in Aw_Ent.Entity_Type'Class;
+			Locale		: in Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale;
+			Name_Prefix	: in String := "entity"
+		) return Templates_Parser.Association is
+		-- create a Tag inside with the corresponding Form element for each entity property.
+		-- currently it supports:
+		-- 	string (default)
+		-- 	locale
+	
+		Elements_Tag	: Templates_Parser.Tag;
+		Properties	: Aw_Ent.Property_Lists.List;
+		Pref		: constant Unbounded_String := To_Unbounded_String( Name_Prefix & '_' );
+
+
+
+
+		function Form_Element(
+					Name	: in Unbounded_String;
+					P	: Aw_Ent.Entity_Property_Type'Class
+				) return Unbounded_String is
+
+
+			String_Value : String := Aw_Ent.Get_Property( P, Entity );
+	
+			Ret : Unbounded_String;
+
+			function T( Str : in String ) return Unbounded_String renames To_Unbounded_String;
+
+
+
+			procedure Foreign_Key_Iterator( Entity : in Aw_Ent.Entity_Type'Class ) is
+				use Aw_Ent;
+				
+				ID : Id_Type := Aw_Ent.To_ID( Natural'Value( String_Value ) );
+				String_Id : String := Aw_Ent.To_String( Entity.Id );
+
+			begin
+				Ret := Ret & T( "<option value=""" );
+				Ret := Ret & T( String_ID );
+				Ret := Ret & T( """" );
+				ID.My_Tag := Entity'Tag;
+				if ID = Entity.Id then
+					Ret := Ret & T( " selected=""1""" );
+				end if;
+				Ret := Ret & T( ">" );
+				Ret := Ret & T( Aw_Ent.To_String( Entity ) );
+				Ret := Ret & T( "</option>" );
+			end Foreign_Key_Iterator;
+
+
+
+			procedure Locale_Iterator( C: in Aw_Lib.Locales.Locale_Tables.Cursor ) is
+				use Aw_Lib.Locales.Locale_Tables;
+			begin
+
+				if Element( C ).Auto_Generalized then
+					-- we want to avoid authomatically generalized elements
+					-- so there are no dupplicated elements in the option list
+					return;
+				end if;
+
+				Ret := Ret & T( "<option value=""" );
+				Ret := Ret & Key( C );
+				Ret := Ret & T( """" );
+				if String_Value = Key ( C ) then
+					Ret := Ret & "selected=""1""";
+				end if;
+				Ret := Ret & T( ">" );
+				Ret := Ret & Element( C ).Name;
+				Ret := Ret & T( "</option>" );
+			end Locale_Iterator;
+
+
+
+		begin
+			if P in Aw_Ent.Properties.Boolean_Property_Type'Class then
+				Ret := T( "<div onClick=""trueFalseMe(this)"">" );
+				Ret := Ret & T( "<input type=""hidden"" name=""") & Name & T( """ " );
+
+				if Aw_Ent.Properties.Boolean_Property_Type'Class( P ).Getter.all( Entity ) then
+					Ret := Ret & T( "value=""true""/>" );
+					Ret := Ret & T( "<img src=""/themes/true.png""/>" );
+				else
+					Ret := Ret & T( "value=""false""/>" );
+					Ret := Ret & T( "<img src=""/themes/false.png""/>" );
+				end if;
+				Ret := Ret & T( "</div>" );
+			elsif P in Aw_Ent.Properties.Foreign_Key_Property_Type'Class then
+				Ret := T( "<select name=""" );
+				Ret := Ret & Name;
+				Ret := Ret & T( """>" );
+
+				declare
+					PP : Aw_Ent.Properties.Foreign_Key_Property_Type'Class :=
+						Aw_Ent.Properties.Foreign_Key_Property_Type'Class( P );
+					Entity  : Aw_Ent.Entity_Type'Class := Aw_Ent.New_Entity( PP.Related_Entity_Tag );
+					All_Ids : Aw_Ent.Id_Array_Type := Aw_Ent.Get_All_Ids( PP.Related_Entity_Tag );
+				begin
+					for i in All_Ids'First .. All_Ids'Last loop
+						Aw_Ent.Load( Entity, All_Ids( i ) );
+						Foreign_Key_Iterator( Entity );
+					end loop;
+				end;
+
+				Ret := Ret & T("</select>" );
+			elsif P in Aw_Ent.Properties.Locale_property_type'Class then
+				Ret := T( "<select name=""" );
+				Ret := Ret & Name;
+				Ret := Ret & T( """>" );
+
+				Aw_Lib.Locales.Locale_Tables.Iterate(
+						Aw_Lib.Locales.Supported_Locales,
+						Locale_Iterator'Access
+					);
+
+				Ret := Ret & T("</select>" );
+
+
+			else
+				Ret := To_Unbounded_String( "<input type=""text"" name=""" );
+				Ret := Ret & Name;
+				Ret := Ret & To_Unbounded_String(
+							""" value=""" & String_Value & """ />"
+						);
+			end if;
+
+			return Ret;
+		end Form_Element;
+
+		procedure Iterator( C : Aw_Ent.Property_Lists.Cursor ) is
+			P 	: Aw_Ent.Entity_Property_Ptr;
+			T	: constant Unbounded_String := To_Unbounded_String(
+						Ada.Characters.Handling.To_Lower(
+							Ada.Tags.Expanded_Name( Entity'Tag )
+						)
+					);
+			Name	: Unbounded_String;
+		begin
+			P	:= Aw_Ent.Property_Lists.Element( C );
+			Name	:= Pref & T & "__" & P.Column_Name;
+
+			
+
+
+			Elements_Tag := Elements_Tag & Form_Element( Name, P.all );
+		end Iterator;
+	begin
+		Properties := Aw_Ent.Entity_Registry.Get_Properties( Entity'Tag );
+		Aw_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
+		return Templates_Parser.Assoc( Variable_Name, Elements_Tag );
+
+	end Assoc_Form_Elements;
+
+
+
+
+
 
 
 	function Assoc_Id(
@@ -257,13 +429,15 @@ package body Aw_View.Entities_Helper is
 			Set		: in out Templates_Parser.Translate_Set;
 			Variable_Prefix	: in     String;
 			Entity		: in     Aw_Ent.Entity_Type'Class;
-			Locale		: in     Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale
+			Locale		: in     Aw_Lib.Locales.Locale := Aw_Lib.Locales.Default_Locale;
+			Include_Form	: in     Boolean := False
 		) is
 		-- call all Assoc_* functions inserting the results in the translated set.
 		-- create the associations :
 		-- 	[P]_values
 		-- 	[P]_labels
 		-- 	[P]_column_ids
+		-- 	[P]_form_element
 		-- Where [P] is the value for Variable_Prefix
 
 
@@ -281,6 +455,10 @@ package body Aw_View.Entities_Helper is
 		Insert( Set, Assoc_Resolved_Labels( P & "_resolved_labels", Entity, Locale ) );
 		Insert( Set, Assoc_Values( P & "_values", Entity, Locale ) );
 		Insert( Set, Assoc_Resolved_Values( P & "_resolved_values", Entity, Locale ) );
+		
+		if Include_Form then
+			Insert( Set, Assoc_Form_Elements( P & "_form_elements", Entity, Locale ) );
+		end if;
 	end Insert;
 
 

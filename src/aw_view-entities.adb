@@ -127,6 +127,9 @@ package body Aw_View.Entities is
 
 
 
+	--
+	-- View_Entity
+	--
 
 	overriding
 	procedure Process_Request(
@@ -162,7 +165,44 @@ package body Aw_View.Entities is
 				);
 	end Process_Request;
 
+	--
+	-- Edit_Entity
+	--
 
+	overriding
+	procedure Process_Request(
+			Module		: in out Edit_Entity_Module;
+			Request		: in     AWS.Status.Data;
+			Parameters	: in out Templates_Parser.Translate_Set;
+			Response	: in out Unbounded_String
+		) is
+		use Templates_Parser;
+
+
+		Properties	: Aw_Ent.Property_Lists.List;
+		Entity		: Aw_Ent.Entity_Type'Class := Aw_Ent.New_Entity( Module.Entity_Tag );
+
+		My_Parameters : Templates_Parser.Translate_Set;
+
+	begin
+		Aw_Ent.Load( Entity, Module.Id );
+		Properties := Aw_Ent.Entity_Registry.Get_Properties( Module.Entity_Tag );
+
+		Aw_View.Entities_Helper.Insert(
+					My_Parameters,
+					"entity",
+					Entity,
+					Include_Form => True
+				);
+
+		Response := Response &
+			To_Unbounded_String(
+				Templates_Parser.Parse(
+						To_String( Module.Template_Name ),
+						My_Parameters
+					)
+				);
+	end Process_Request;
 
 	---------------------------------------
 	-- Services for the Entity component --

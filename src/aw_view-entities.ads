@@ -121,10 +121,27 @@ package Aw_View.Entities is
 	-- Edit Entity
 	--
 
+
+
+
+
 	type Edit_Entity_Module is new View_Entity_Module with private;
 	-- a type for rendering the data from entities into a form that can save the entity back
 	-- for now it's the same as the View_Entity_Module but with a different default template.
 	-- it should change anytime soon though
+
+
+	overriding
+	procedure Process_Request(
+			Module		: in out Edit_Entity_Module;
+			Request		: in     AWS.Status.Data;
+			Parameters	: in out Templates_Parser.Translate_Set;
+			Response	: in out Unbounded_String
+		);
+	-- the same as the View_Entity's Process_Request except for the FORM elements.
+	-- this is so there can be a different form element type for each data type in the entity
+	-- TODO :: make it possible for the user to extend the supported form element types
+
 
 
 	---------------------------------------
