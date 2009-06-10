@@ -11,6 +11,7 @@ with Ada.Tags;
 ---------------
 with Aw_Config;
 with Aw_Ent;
+with Aw_Lib.File_System;
 with Aw_View.Components;
 
 ---------
@@ -125,10 +126,8 @@ package Aw_View.Entities is
 
 
 
-	type Edit_Entity_Module is new View_Entity_Module with private;
+	type Edit_Entity_Module is new Aw_View.Components.Module_Instance_Interface with private;
 	-- a type for rendering the data from entities into a form that can save the entity back
-	-- for now it's the same as the View_Entity_Module but with a different default template.
-	-- it should change anytime soon though
 
 
 	overriding
@@ -138,11 +137,54 @@ package Aw_View.Entities is
 			Parameters	: in out Templates_Parser.Translate_Set;
 			Response	: in out Unbounded_String
 		);
-	-- the same as the View_Entity's Process_Request except for the FORM elements.
-	-- this is so there can be a different form element type for each data type in the entity
-	-- TODO :: make it possible for the user to extend the supported form element types
 
 
+	--
+	-- Create Entity
+	--
+
+	type Create_Entity_Module is new Aw_View.Components.Module_Instance_Interface with private;
+	-- a type for rendering the form for creating new entities
+
+
+	overriding
+	procedure Process_Request(
+			Module		: in out Create_Entity_Module;
+			Request		: in     AWS.Status.Data;
+			Parameters	: in out Templates_Parser.Translate_Set;
+			Response	: in out Unbounded_String
+		);
+
+
+
+	-- 
+	-- Entity Browser Module
+	--
+	
+	type Entity_Browser_Module is new Aw_View.Components.Module_Instance_Interface with private;
+	-- The entity browser module not only browse throughout entities of various kinds but
+	-- also allows the user to edit and create new ones.
+	--
+	-- It can be controlled by HTTP parameters.
+	--
+	--
+	-- Available parameters:
+	-- 	entity_tag		=> the tag for the entity to browse.
+	-- 	allow_creation		=> can we create new entities ( true/false )
+	-- 	allow_edit		=> can the entity be edited?
+	-- 	view_entity_template	=> the tempate when viewing an entity
+	-- 	edit_entity_template	=> the template when editting an entity
+	--	listing_template	=> the template for listing the entity
+
+
+	overriding
+	procedure Process_Request(
+			Module		: in out Entity_Browser_Module;
+			Request		: in     AWS.Status.Data;
+			Parameters	: in out Templates_Parser.Translate_Set;
+			Response	: in out Unbounded_String
+		);
+	-- the entire cycle for this module is inside this single procedure.
 
 	---------------------------------------
 	-- Services for the Entity component --
@@ -166,6 +208,12 @@ package Aw_View.Entities is
 private
 
 
+
+	Default_View_Entity_Template_Name	: constant Unbounded_String := To_Unbounded_String( "default_templates" & Aw_Lib.File_System.Separator & "view_entity" );
+	Default_Edit_Entity_Template_Name	: constant Unbounded_String := To_Unbounded_String( "default_templates" & Aw_Lib.File_System.Separator & "edit_entity" );
+	Default_Create_Entity_Template_Name	: constant Unbounded_String := To_Unbounded_String( "default_templates" & Aw_Lib.File_System.Separator & "create_entity" );
+	Default_List_Entities_Template_Name	: constant Unbounded_String := To_Unbounded_String( "default_templates" & Aw_Lib.File_System.Separator & "list_entities" );
+
 	--------------------------------------
 	-- Modules for the Entity component --
 	--------------------------------------
@@ -177,7 +225,44 @@ private
 	end record;
 
 
-	type Edit_Entity_Module is new View_Entity_Module with null record;
+	type Edit_Entity_Module is new Aw_View.Components.Module_Instance_Interface with record
+		Id			: Aw_Ent.ID_Type;
+		Entity_Tag		: Unbounded_String;
+		Template_Name		: Unbounded_String;
+	end record;
+
+
+
+
+	type Create_Entity_Module is new Aw_View.Components.Module_Instance_Interface with record
+		Entity_Tag		: Unbounded_String;
+		Template_Name		: Unbounded_String;
+	end record;
+
+
+
+	type Entity_Browser_Module is new Aw_View.Components.Module_Instance_Interface with record
+		Entity_Tag	: Unbounded_String;
+		-- the tag for the entity to browse
+
+		Allow_Creation	: Boolean;
+		-- can the user create new entities?
+		Allow_Editting	: Boolean;
+		-- can the user edit the available entities?
+
+
+		View_Entity_Template_Name	: Unbounded_String;
+		-- the template used when viewing entities
+
+		Edit_Entity_Template_Name	: Unbounded_String;
+		-- the template used when editting an entity
+
+		Create_Entity_Template_Name	: Unbounded_String;
+		-- the template used when creating a new entity
+
+		List_Entities_Template_Name	: Unbounded_String;
+		-- the template used when listing the entities
+	end record;
 
 
 	---------------------------------------
@@ -188,6 +273,8 @@ private
 		Variable_Prefix : String( 1 .. 6 ) := "entity";
 		-- the prefix for every variable to be processed by this service
 	end record;
+
+
 
 
 end Aw_View.Entities;

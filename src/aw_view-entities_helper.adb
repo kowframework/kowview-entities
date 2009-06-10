@@ -174,7 +174,18 @@ package body Aw_View.Entities_Helper is
 		begin
 			P := Aw_Ent.Property_Lists.Element( C );
 
-			if P.all in Aw_Ent.Properties.Foreign_Key_Property_Type'Class then
+			if P.all in Aw_Ent.Properties.Boolean_Property_Type'Class then
+				declare
+					PP : Aw_Ent.Properties.Boolean_Property_Type'Class :=
+							Aw_Ent.Properties.Boolean_Property_Type'Class( P.all );
+				begin
+					if PP.Getter( Entity ) then
+						Values_Tag := Values_Tag & "<img src=""/themes/true.png"" alt=""true""/>";
+					else
+						Values_Tag := Values_Tag & "<img src=""/themes/false.png"" alt=""false""/>";
+					end if;
+				end;
+			elsif P.all in Aw_Ent.Properties.Foreign_Key_Property_Type'Class then
 				declare
 					PP : Aw_Ent.Properties.Foreign_Key_Property_Type'Class :=
 							Aw_Ent.Properties.Foreign_Key_Property_Type'Class( P.all );
