@@ -1,4 +1,4 @@
--- Build file for Aw_View - Web Framework for Ada Works.
+-- Build file for KOW_View - Web Framework for Ada Works.
 --
 -- author Eduardo Calderini Jr <ecalderini@ydeasolutions.com.br>
 --
@@ -7,18 +7,18 @@
 -- $Revision: $
 -- $Author: $
 
-with "awconfig";
-with "awconfig-text";
-with "awent";
-with "awlib";
-with "awsec";
-with "awview";
+with "kowconfig";
+with "kowconfig-text";
+with "kowent";
+with "kowlib";
+with "kowsec";
+with "kowview";
 
 with "aws";
 
 
 
-project AwView.Entities is
+project KOWView.Entities is
 
 	version := "0.1.0";
 	
@@ -32,7 +32,7 @@ project AwView.Entities is
 	
 	-- LIBRARY
 	for Library_Dir use "lib";
-	for Library_Name use "awview-entities";
+	for Library_Name use "kowview-entities";
 	case target is
 		when "Windows_NT" =>
 			for Library_Kind use "static";
@@ -40,14 +40,14 @@ project AwView.Entities is
 		when "GNU/Linux" =>
 			for Library_Kind use "dynamic";
 	end case;
-	for Library_Version use "libawview-entities.so." & Version;
+	for Library_Version use "libkowview-entities.so." & Version;
 	
 	
 	package Compiler is
 		for Default_Switches ("ada") use ("-O2", "-gnat05");
 	end Compiler;
 
-	package Linker renames AwLib.Linker;
+	package Linker renames KOWLib.Linker;
 
-end AwView.Entities;
+end KOWView.Entities;
 

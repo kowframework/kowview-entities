@@ -7,10 +7,10 @@ with Ada.Text_IO;	use Ada.Text_IO;
 ---------------
 -- Ada Works --
 ---------------
-with Aw_View;
-with Aw_View.Components_Registry;
-with Aw_View.Entities_Helper;
-with Aw_View.Security;
+with KOW_View;
+with KOW_View.Components_Registry;
+with KOW_View.Entities_Helper;
+with KOW_View.Security;
 
 
 ---------
@@ -21,14 +21,14 @@ with AWS.Status;
 with Templates_Parser;
 
 
-package body Aw_View.Entities is
+package body KOW_View.Entities is
 
 	----------------------
 	-- Helper Functions --
 	----------------------
 	function Get_Template( Template_Name : Unbounded_String ) return String is
 	begin
-		return Aw_View.Components_Registry.Locate_Resource(
+		return KOW_View.Components_Registry.Locate_Resource(
 						Component_Name  => "entities",
 						Resource        => To_String( Template_Name ),
 						Extension       => "html",
@@ -46,7 +46,7 @@ package body Aw_View.Entities is
 	procedure Initialize(
 			Component	: in out Component_Type;
 			Component_Name	: in     String;
-			Config		: in out Aw_Config.Config_File
+			Config		: in out KOW_Config.Config_File
 		) is
 	begin
 		null;
@@ -60,8 +60,8 @@ package body Aw_View.Entities is
 	function Create_Instance(
 			Component	: in Component_Type;
 			Module_Name	: in String;
-			Config		: in Aw_Config.Config_File
-		) return Aw_View.Components.Module_Instance_Interface'Class is
+			Config		: in KOW_Config.Config_File
+		) return KOW_View.Components.Module_Instance_Interface'Class is
 	-- create a module instance by given name
 	-- Available module:
 	-- 	view_entity
@@ -71,37 +71,37 @@ package body Aw_View.Entities is
 		Entity_Browser	: Entity_Browser_Module;
 	begin
 		if Module_Name = "view_entity" then
-			View_Entity.Entity_Tag	:= Aw_Config.Element( Config, "entity_tag" );
-			View_Entity.Id		:= Aw_Ent.To_ID( Aw_Config.Element( Config, "id" ) );
-			View_Entity.Template_Name	:= Aw_Config.Value( Config, "template_name", Default_View_ENtity_Template_Name );
+			View_Entity.Entity_Tag	:= KOW_Config.Element( Config, "entity_tag" );
+			View_Entity.Id		:= KOW_Ent.To_ID( KOW_Config.Element( Config, "id" ) );
+			View_Entity.Template_Name	:= KOW_Config.Value( Config, "template_name", Default_View_ENtity_Template_Name );
 
 			return View_Entity;
 		elsif Module_Name = "edit_entity" then
-			Edit_Entity.Entity_Tag	:= Aw_Config.Element( Config, "entity_tag" );
-			Edit_Entity.Id		:= Aw_Ent.To_ID( Aw_Config.Element( Config, "id" ) );
-			Edit_Entity.Template_Name	:= Aw_Config.Value( Config, "template_name", Default_Edit_Entity_Template_Name );
+			Edit_Entity.Entity_Tag	:= KOW_Config.Element( Config, "entity_tag" );
+			Edit_Entity.Id		:= KOW_Ent.To_ID( KOW_Config.Element( Config, "id" ) );
+			Edit_Entity.Template_Name	:= KOW_Config.Value( Config, "template_name", Default_Edit_Entity_Template_Name );
 
 			return Edit_Entity;
 
 		elsif Module_Name = "create_entity" then
-			Create_Entity.Entity_Tag 	:= Aw_Config.Element( Config, "entity_tag" );
-			Create_Entity.Template_Name	:= Aw_Config.Value( Config, "template_name", Default_Create_Entity_Template_Name );
+			Create_Entity.Entity_Tag 	:= KOW_Config.Element( Config, "entity_tag" );
+			Create_Entity.Template_Name	:= KOW_Config.Value( Config, "template_name", Default_Create_Entity_Template_Name );
 
 			return Create_Entity;
 		elsif Module_Name = "entity_browser" then
-			Entity_Browser.Entity_Tag := Aw_Config.Element( Config, "entity_tag" );
-			Entity_Browser.Allow_Creation := Aw_Config.Value( Config, "allow_creation", False );
-			Entity_Browser.Allow_Editting := Aw_Config.Value( Config, "allow_editting", False );
-			Entity_Browser.View_Entity_Template_Name := Aw_Config.Value( Config, "view_entity_template_name", Default_View_Entity_Template_Name );
-			Entity_Browser.Edit_Entity_Template_Name := Aw_Config.Value( Config, "edit_entity_template_name", Default_Edit_Entity_Template_Name );
-			Entity_Browser.Create_Entity_Template_Name := Aw_Config.Value( Config, "edit_entity_template_name", Default_Create_Entity_Template_Name );
-			Entity_Browser.List_Entities_Template_Name := Aw_Config.Value( Config, "list_entities_template_name", Default_List_Entities_Template_Name );
+			Entity_Browser.Entity_Tag := KOW_Config.Element( Config, "entity_tag" );
+			Entity_Browser.Allow_Creation := KOW_Config.Value( Config, "allow_creation", False );
+			Entity_Browser.Allow_Editting := KOW_Config.Value( Config, "allow_editting", False );
+			Entity_Browser.View_Entity_Template_Name := KOW_Config.Value( Config, "view_entity_template_name", Default_View_Entity_Template_Name );
+			Entity_Browser.Edit_Entity_Template_Name := KOW_Config.Value( Config, "edit_entity_template_name", Default_Edit_Entity_Template_Name );
+			Entity_Browser.Create_Entity_Template_Name := KOW_Config.Value( Config, "edit_entity_template_name", Default_Create_Entity_Template_Name );
+			Entity_Browser.List_Entities_Template_Name := KOW_Config.Value( Config, "list_entities_template_name", Default_List_Entities_Template_Name );
 
 
 			return Entity_Browser;
 
 		else
-			raise Aw_View.Components.MODULE_ERROR with "Unknown module :: " & Module_Name;
+			raise KOW_View.Components.MODULE_ERROR with "Unknown module :: " & Module_Name;
 		end if;
 	end Create_Instance;
 
@@ -112,7 +112,7 @@ package body Aw_View.Entities is
 			Component	: in Component_Type;
 			Service_Name	: in String;
 			Service_Mapping	: in String
-		) return Aw_View.Components.Service_Instance_Interface'Class is
+		) return KOW_View.Components.Service_Instance_Interface'Class is
 		Store : Store_Entity_Service;
 	begin
 		return Store;
@@ -139,16 +139,16 @@ package body Aw_View.Entities is
 		use Templates_Parser;
 
 
-		Properties	: Aw_Ent.Property_Lists.List;
-		Entity		: Aw_Ent.Entity_Type'Class := Aw_Ent.New_Entity( Module.Entity_Tag );
+		Properties	: KOW_Ent.Property_Lists.List;
+		Entity		: KOW_Ent.Entity_Type'Class := KOW_Ent.New_Entity( Module.Entity_Tag );
 
 		My_Parameters : Templates_Parser.Translate_Set;
 
 	begin
-		Aw_Ent.Load( Entity, Module.Id );
-		Properties := Aw_Ent.Entity_Registry.Get_Properties( Module.Entity_Tag );
+		KOW_Ent.Load( Entity, Module.Id );
+		Properties := KOW_Ent.Entity_Registry.Get_Properties( Module.Entity_Tag );
 
-		Aw_View.Entities_Helper.Insert(
+		KOW_View.Entities_Helper.Insert(
 					My_Parameters,
 					"entity",
 					Entity
@@ -177,16 +177,16 @@ package body Aw_View.Entities is
 		use Templates_Parser;
 
 
-		Properties	: Aw_Ent.Property_Lists.List;
-		Entity		: Aw_Ent.Entity_Type'Class := Aw_Ent.New_Entity( Module.Entity_Tag );
+		Properties	: KOW_Ent.Property_Lists.List;
+		Entity		: KOW_Ent.Entity_Type'Class := KOW_Ent.New_Entity( Module.Entity_Tag );
 
 		My_Parameters : Templates_Parser.Translate_Set;
 
 	begin
-		Aw_Ent.Load( Entity, Module.Id );
-		Properties := Aw_Ent.Entity_Registry.Get_Properties( Module.Entity_Tag );
+		KOW_Ent.Load( Entity, Module.Id );
+		Properties := KOW_Ent.Entity_Registry.Get_Properties( Module.Entity_Tag );
 
-		Aw_View.Entities_Helper.Insert(
+		KOW_View.Entities_Helper.Insert(
 					My_Parameters,
 					"entity",
 					Entity,
@@ -194,10 +194,10 @@ package body Aw_View.Entities is
 				);
 
 
-		Aw_View.Security.Grant_Authorization(
+		KOW_View.Security.Grant_Authorization(
 				Request,
-				Ada.Tags.Expanded_Name( Entity'Tag ) & "::" & Aw_Ent.To_String( Entity.Id ),
-				Aw_View.Security.Edit
+				Ada.Tags.Expanded_Name( Entity'Tag ) & "::" & KOW_Ent.To_String( Entity.Id ),
+				KOW_View.Security.Edit
 			);
 
 
@@ -226,15 +226,15 @@ package body Aw_View.Entities is
 		use Templates_Parser;
 
 
-		Properties	: Aw_Ent.Property_Lists.List;
-		Entity		: Aw_Ent.Entity_Type'Class := Aw_Ent.New_Entity( Module.Entity_Tag );
+		Properties	: KOW_Ent.Property_Lists.List;
+		Entity		: KOW_Ent.Entity_Type'Class := KOW_Ent.New_Entity( Module.Entity_Tag );
 
 		My_Parameters : Templates_Parser.Translate_Set;
 
 	begin
-		Properties := Aw_Ent.Entity_Registry.Get_Properties( Module.Entity_Tag );
+		Properties := KOW_Ent.Entity_Registry.Get_Properties( Module.Entity_Tag );
 
-		Aw_View.Entities_Helper.Insert(
+		KOW_View.Entities_Helper.Insert(
 					My_Parameters,
 					"entity",
 					Entity,
@@ -242,10 +242,10 @@ package body Aw_View.Entities is
 				);
 
 
-		Aw_View.Security.Grant_Authorization(
+		KOW_View.Security.Grant_Authorization(
 				Request,
 				Ada.Tags.Expanded_Name( Entity'Tag ),
-				Aw_View.Security.Edit
+				KOW_View.Security.Edit
 			);
 
 
@@ -281,8 +281,8 @@ package body Aw_View.Entities is
 
 
 		procedure Process_Listing_Request is
-			Entity  : Aw_Ent.Entity_Type'Class := Aw_Ent.New_Entity( Module.Entity_Tag );
-			All_Ids : Aw_Ent.Id_Array_Type := Aw_Ent.Get_All_Ids( Module.Entity_Tag );
+			Entity  : KOW_Ent.Entity_Type'Class := KOW_Ent.New_Entity( Module.Entity_Tag );
+			All_Ids : KOW_Ent.Id_Array_Type := KOW_Ent.Get_All_Ids( Module.Entity_Tag );
 
 			Ids_Tag		: Templates_Parser.Tag;
 			Labels_Tag	: Templates_Parser.Tag;
@@ -294,10 +294,10 @@ package body Aw_View.Entities is
 			use Templates_Parser;
 		begin
 			for i in All_Ids'First .. All_Ids'Last loop
-				Aw_Ent.Load( Entity, All_Ids( i ) );
+				KOW_Ent.Load( Entity, All_Ids( i ) );
 
-				Ids_Tag := Ids_Tag & Aw_Ent.To_String( Entity.Id );
-				Labels_Tag := Labels_Tag & Aw_Ent.To_String( Entity );
+				Ids_Tag := Ids_Tag & KOW_Ent.To_String( Entity.Id );
+				Labels_Tag := Labels_Tag & KOW_Ent.To_String( Entity );
 			end loop;
 
 
@@ -352,7 +352,7 @@ package body Aw_View.Entities is
 			Edit_Entity : Edit_Entity_Module;
 		begin
 			Edit_Entity.Entity_Tag := Module.Entity_Tag;
-			Edit_Entity.Id := Aw_Ent.To_Id( Natural'Value( ID ) );
+			Edit_Entity.Id := KOW_Ent.To_Id( Natural'Value( ID ) );
 			Edit_Entity.Template_Name := Module.Edit_Entity_Template_Name;
 
 			Process_Request(
@@ -368,7 +368,7 @@ package body Aw_View.Entities is
 			View_Entity : View_Entity_Module;
 		begin
 			View_Entity.Entity_Tag := Module.Entity_Tag;
-			View_Entity.Id := Aw_Ent.To_Id( Natural'Value( ID ) );
+			View_Entity.Id := KOW_Ent.To_Id( Natural'Value( ID ) );
 			View_Entity.Template_Name := Module.View_Entity_Template_Name;
 
 			Process_Request(
@@ -407,32 +407,32 @@ package body Aw_View.Entities is
 		-- read the entity from the form and process it.
 		-- save it back to the database backend afterwards
 
-		Entity: Aw_Ent.Entity_Type'Class := Aw_View.Entities_Helper.Load(
+		Entity: KOW_Ent.Entity_Type'Class := KOW_View.Entities_Helper.Load(
 							Request,
 							Service.Variable_Prefix
 						);
 
-		use Aw_Ent;
+		use KOW_Ent;
 		use Ada.Tags;
 	begin
 
 		if Entity.Id.My_Tag = Ada.Tags.No_Tag then
-			Aw_View.Security.Request_Authorization(
+			KOW_View.Security.Request_Authorization(
 					Request,
 					Ada.Tags.Expanded_Name( Entity'Tag ),
-					Aw_View.Security.Create
+					KOW_View.Security.Create
 				);
 		else
-			Aw_View.Security.Request_Authorization(
+			KOW_View.Security.Request_Authorization(
 					Request,
-					Ada.Tags.Expanded_Name( Entity'Tag ) & "::" & Aw_Ent.To_String( Entity.Id ),
-					Aw_View.Security.Edit
+					Ada.Tags.Expanded_Name( Entity'Tag ) & "::" & KOW_Ent.To_String( Entity.Id ),
+					KOW_View.Security.Edit
 				);
 		end if;
 		
-		Aw_Ent.Store( Entity );
+		KOW_Ent.Store( Entity );
 		Response := AWS.Response.URL( AWS.Status.Referer( Request ) );
 	end Process_Request;
 
 
-end Aw_View.Entities;
+end KOW_View.Entities;

@@ -10,10 +10,10 @@
 all: libs
 
 libs:
-	gnatmake -P awview-entities.gpr
+	gnatmake -P kowview-entities.gpr
 
 clean: 
-	gnatclean -P awview-entities.gpr
+	gnatclean -P kowview-entities.gpr
 	@echo "All clean"
 
 docs:

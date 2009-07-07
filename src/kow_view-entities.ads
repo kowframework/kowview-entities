@@ -9,10 +9,10 @@ with Ada.Tags;
 ---------------
 -- Ada Works --
 ---------------
-with Aw_Config;
-with Aw_Ent;
-with Aw_Lib.File_System;
-with Aw_View.Components;
+with KOW_Config;
+with KOW_Ent;
+with KOW_Lib.File_System;
+with KOW_View.Components;
 
 ---------
 -- AWS --
@@ -21,13 +21,13 @@ with AWS.Response;
 with AWS.Status;
 with Templates_Parser;
 
-package Aw_View.Entities is
+package KOW_View.Entities is
 
 	--------------------------
 	-- The Entity Component --
 	--------------------------
 
-	type Component_Type is new Aw_View.Components.Component_Interface with null record;
+	type Component_Type is new KOW_View.Components.Component_Interface with null record;
 
 
 
@@ -36,7 +36,7 @@ package Aw_View.Entities is
 	procedure Initialize(
 			Component	: in out Component_Type;
 			Component_Name	: in     String;
-			Config		: in out Aw_Config.Config_File
+			Config		: in out KOW_Config.Config_File
 		);
 	-- initialize this component
 	
@@ -47,8 +47,8 @@ package Aw_View.Entities is
 	function Create_Instance(
 			Component	: in Component_Type;
 			Module_Name	: in String;
-			Config		: in Aw_Config.Config_File
-		) return Aw_View.Components.Module_Instance_Interface'Class;
+			Config		: in KOW_Config.Config_File
+		) return KOW_View.Components.Module_Instance_Interface'Class;
 	-- create a module instance by given name
 	-- Available module:
 	-- 	view_entity
@@ -62,7 +62,7 @@ package Aw_View.Entities is
 			Component	: in Component_Type;
 			Service_Name	: in String;
 			Service_Mapping	: in String
-		) return Aw_View.Components.Service_Instance_Interface'Class;
+		) return KOW_View.Components.Service_Instance_Interface'Class;
 
 
 	--------------------------------------
@@ -73,7 +73,7 @@ package Aw_View.Entities is
 	-- View Entity
 	--
 
-	type View_Entity_Module is new Aw_View.Components.Module_Instance_Interface with private;
+	type View_Entity_Module is new KOW_View.Components.Module_Instance_Interface with private;
 	-- a type for rendering the data from entities in a determined form area
 
 
@@ -126,7 +126,7 @@ package Aw_View.Entities is
 
 
 
-	type Edit_Entity_Module is new Aw_View.Components.Module_Instance_Interface with private;
+	type Edit_Entity_Module is new KOW_View.Components.Module_Instance_Interface with private;
 	-- a type for rendering the data from entities into a form that can save the entity back
 
 
@@ -143,7 +143,7 @@ package Aw_View.Entities is
 	-- Create Entity
 	--
 
-	type Create_Entity_Module is new Aw_View.Components.Module_Instance_Interface with private;
+	type Create_Entity_Module is new KOW_View.Components.Module_Instance_Interface with private;
 	-- a type for rendering the form for creating new entities
 
 
@@ -161,7 +161,7 @@ package Aw_View.Entities is
 	-- Entity Browser Module
 	--
 	
-	type Entity_Browser_Module is new Aw_View.Components.Module_Instance_Interface with private;
+	type Entity_Browser_Module is new KOW_View.Components.Module_Instance_Interface with private;
 	-- The entity browser module not only browse throughout entities of various kinds but
 	-- also allows the user to edit and create new ones.
 	--
@@ -190,7 +190,7 @@ package Aw_View.Entities is
 	-- Services for the Entity component --
 	---------------------------------------
 
-	type Store_Entity_Service is new Aw_View.Components.Service_Instance_Interface with private;
+	type Store_Entity_Service is new KOW_View.Components.Service_Instance_Interface with private;
 
 
 	overriding
@@ -209,39 +209,39 @@ private
 
 
 
-	Default_View_Entity_Template_Name	: constant Unbounded_String := To_Unbounded_String( "default_templates" & Aw_Lib.File_System.Separator & "view_entity" );
-	Default_Edit_Entity_Template_Name	: constant Unbounded_String := To_Unbounded_String( "default_templates" & Aw_Lib.File_System.Separator & "edit_entity" );
-	Default_Create_Entity_Template_Name	: constant Unbounded_String := To_Unbounded_String( "default_templates" & Aw_Lib.File_System.Separator & "create_entity" );
-	Default_List_Entities_Template_Name	: constant Unbounded_String := To_Unbounded_String( "default_templates" & Aw_Lib.File_System.Separator & "list_entities" );
+	Default_View_Entity_Template_Name	: constant Unbounded_String := To_Unbounded_String( "default_templates" & KOW_Lib.File_System.Separator & "view_entity" );
+	Default_Edit_Entity_Template_Name	: constant Unbounded_String := To_Unbounded_String( "default_templates" & KOW_Lib.File_System.Separator & "edit_entity" );
+	Default_Create_Entity_Template_Name	: constant Unbounded_String := To_Unbounded_String( "default_templates" & KOW_Lib.File_System.Separator & "create_entity" );
+	Default_List_Entities_Template_Name	: constant Unbounded_String := To_Unbounded_String( "default_templates" & KOW_Lib.File_System.Separator & "list_entities" );
 
 	--------------------------------------
 	-- Modules for the Entity component --
 	--------------------------------------
 
-	type View_Entity_Module is new Aw_View.Components.Module_Instance_Interface with record
-		Id			: Aw_Ent.ID_Type;
+	type View_Entity_Module is new KOW_View.Components.Module_Instance_Interface with record
+		Id			: KOW_Ent.ID_Type;
 		Entity_Tag		: Unbounded_String;
 		Template_Name		: Unbounded_String;
 	end record;
 
 
-	type Edit_Entity_Module is new Aw_View.Components.Module_Instance_Interface with record
-		Id			: Aw_Ent.ID_Type;
-		Entity_Tag		: Unbounded_String;
-		Template_Name		: Unbounded_String;
-	end record;
-
-
-
-
-	type Create_Entity_Module is new Aw_View.Components.Module_Instance_Interface with record
+	type Edit_Entity_Module is new KOW_View.Components.Module_Instance_Interface with record
+		Id			: KOW_Ent.ID_Type;
 		Entity_Tag		: Unbounded_String;
 		Template_Name		: Unbounded_String;
 	end record;
 
 
 
-	type Entity_Browser_Module is new Aw_View.Components.Module_Instance_Interface with record
+
+	type Create_Entity_Module is new KOW_View.Components.Module_Instance_Interface with record
+		Entity_Tag		: Unbounded_String;
+		Template_Name		: Unbounded_String;
+	end record;
+
+
+
+	type Entity_Browser_Module is new KOW_View.Components.Module_Instance_Interface with record
 		Entity_Tag	: Unbounded_String;
 		-- the tag for the entity to browse
 
@@ -269,7 +269,7 @@ private
 	-- Services for the Entity component --
 	---------------------------------------
 
-	type Store_Entity_Service is new Aw_View.Components.Service_Instance_Interface with record
+	type Store_Entity_Service is new KOW_View.Components.Service_Instance_Interface with record
 		Variable_Prefix : String( 1 .. 6 ) := "entity";
 		-- the prefix for every variable to be processed by this service
 	end record;
@@ -277,4 +277,4 @@ private
 
 
 
-end Aw_View.Entities;
+end KOW_View.Entities;
