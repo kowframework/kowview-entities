@@ -344,6 +344,12 @@ package body KOW_View.Entities_Helper is
 
 				Ret := Ret & T("</select>" );
 
+			elsif P in KOW_Ent.Properties.Password_Property_Type'Class then
+				Ret := To_Unbounded_String( "<input type=""password"" name=""" );
+				Ret := Ret & Name;
+				Ret := Ret & To_Unbounded_String(
+							""" value=""" & String_Value & """ />"
+						);
 
 			else
 				Ret := To_Unbounded_String( "<input type=""text"" name=""" );
