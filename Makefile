@@ -2,6 +2,12 @@
 # 
 # @author Eduardo Calderini Jr <ecalderini@ydeasolutions.com.br>
 
+ifndef ($(PREFIX))
+	PREFIX=/usr/local
+endif
+INCLUDE_PREFIX=$(PREFIX)/include/kowview-entities
+LIB_PREFIX=$(PREFIX)/lib
+GPR_PREFIX=$(LIB_PREFIX)/gnat
 
 
 
@@ -23,6 +29,25 @@ docs:
 
 install:
 	@cat INSTALL
-# TODO: implement the install target	
-# FIXME: I should create gpr files to be included by other projects.
 
+
+gprfile:
+	@echo "Preparing GPR file.."
+	@echo version:=\"$(VERSION)\" > gpr/kowview-entities.def
+	@echo prefix:=\"$(PREFIX)\" >> gpr/kowview-entities.def
+	@gnatprep gpr/kowview-entities.gpr.in gpr/kowview-entities.gpr gpr/kowview-entities.def
+
+gprclean:
+	@rm -f gpr/*gpr
+	@rm -f gpr/*.def
+
+
+install: gprfile
+	@echo "Installing files"
+	install -d $(INCLUDE_PREFIX)
+	install -d $(LIB_PREFIX)
+	install -d $(GPR_PREFIX)
+	install src/* -t $(INCLUDE_PREFIX)
+	install lib/* -t $(LIB_PREFIX)
+	install gpr/*.gpr -t $(GPR_PREFIX)
+	make gprclean
