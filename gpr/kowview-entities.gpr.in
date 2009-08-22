@@ -20,7 +20,8 @@ with "aws";
 
 project KOWView.Entities is
 
-	version := KOWView.Version;
+	version	:= KOWView.Version;
+	prefix	:= $prefix;
 	
 	
 	for Source_Dirs use ( prefix & "/include/kowview-entities" );
