@@ -21,13 +21,13 @@ with "aws";
 project KOWView.Entities is
 
 	version	:= KOWView.Version;
-	prefix	:= $prefix;
 	
 	
-	for Source_Dirs use ( prefix & "/include/kowview-entities" );
+	
+	for Source_Dirs use ( $include_prefix ); 
 	
 	-- LIBRARY
-	for Library_Dir use prefix & "/lib";
+	for Library_Dir use $lib_prefix;
 	for Library_Name use "kowview-entities";
 	for Library_Kind use KOWView'Library_Kind;
 	for Library_Version use "libkowview-entities.so." & Version;

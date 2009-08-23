@@ -5,9 +5,17 @@
 ifndef ($(PREFIX))
 	PREFIX=/usr/local
 endif
-INCLUDE_PREFIX=$(PREFIX)/include/kowview-entities
-LIB_PREFIX=$(PREFIX)/lib
-GPR_PREFIX=$(LIB_PREFIX)/gnat
+
+ifndef ($(INCLUDE_PREFIX))
+	INCLUDE_PREFIX=$(PREFIX)/include/kowview-entities
+endif
+
+ifndef ($(LIB_PREFIX))
+	LIB_PREFIX=$(PREFIX)/lib
+endif
+ifndef ($(GPR_PREFIX)) 
+	GPR_PREFIX=$(LIB_PREFIX)/gnat 
+endif
 
 
 
@@ -35,6 +43,8 @@ gprfile:
 	@echo "Preparing GPR file.."
 	@echo version:=\"$(VERSION)\" > gpr/kowview-entities.def
 	@echo prefix:=\"$(PREFIX)\" >> gpr/kowview-entities.def
+	@echo lib_prefix:=\"$(LIB_PREFIX)\" >> gpr/kowview-entities.def
+	@echo include_prefix:=\"$(INCLUDE_PREFIX)\" >> gpr/kowview-entities.def
 	@gnatprep gpr/kowview-entities.gpr.in gpr/kowview-entities.gpr gpr/kowview-entities.def
 
 gprclean:
