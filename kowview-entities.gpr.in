@@ -20,7 +20,7 @@ with "aws";
 
 project KOWView.Entities is
 
-	version := KOWView.Version;
+	version := $version;
 	
 	
 	for Source_Dirs use ( "src" );
