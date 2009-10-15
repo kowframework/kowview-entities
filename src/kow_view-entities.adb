@@ -4,9 +4,11 @@
 with Ada.Directories;
 with Ada.Text_IO;	use Ada.Text_IO;
 
----------------
--- Ada Works --
----------------
+-------------------
+-- KOW Framework --
+-------------------
+with KOW_Sec;
+with KOW_Sec.Authentication.Entities;
 with KOW_View;
 with KOW_View.Components_Registry;
 with KOW_View.Entities_Helper;
@@ -67,6 +69,7 @@ package body KOW_View.Entities is
 	-- 	view_entity
 		View_Entity 	: View_Entity_Module;
 		Edit_Entity 	: Edit_Entity_Module;
+		Edit_User	: Edit_User_Entity_Module;
 		Create_Entity 	: Create_Entity_Module;
 		Entity_Browser	: Entity_Browser_Module;
 	begin
@@ -82,6 +85,11 @@ package body KOW_View.Entities is
 			Edit_Entity.Template_Name	:= KOW_Config.Value( Config, "template_name", Default_Edit_Entity_Template_Name );
 
 			return Edit_Entity;
+
+		elsif Module_Name = "edit_user_entity" then
+			Edit_User.Template_Name := KOW_Config.Value( Config, "template_name", Default_Edit_Entity_Template_Name );
+
+			return Edit_User;
 
 		elsif Module_Name = "create_entity" then
 			Create_Entity.Entity_Tag 	:= KOW_Config.Element( Config, "entity_tag" );
@@ -208,6 +216,60 @@ package body KOW_View.Entities is
 						My_Parameters
 					)
 				);
+	end Process_Request;
+
+
+
+	overriding
+	procedure Process_Request(
+			Module		: in out Edit_User_Entity_Module;
+			Request		: in     AWS.Status.Data;
+			Parameters	: in out Templates_Parser.Translate_Set;
+			Response	: in out Unbounded_String
+		) is
+		-- draw up the form for the loged user
+		-- if no user is loged ir it's loged as other user type, return an empty string
+		--
+		-- also, make sure to reload the entity from the database at loading time
+		The_User : KOW_Sec.User_Access := KOW_View.Security.Get_User( Request );
+		use KOW_Sec;
+	begin
+		if The_User = null then
+			Response := Response & "you should be loged in to do that";
+			return;
+		elsif The_User.all not in KOW_Sec.Authentication.Entities.User_Type'Class then
+			Response := Response & "invalid user type :: " & Ada.Tags.Expanded_Name( The_User.all'Tag );
+			return;
+		end if;
+
+
+		-- if got here, time to work things out
+
+		Module.ID := KOW_Sec.Authentication.Entities.User_Type'Class( The_User.all ).ID;
+		Module.Entity_Tag := To_Unbounded_String(
+					Ada.Tags.Expanded_Name( Module.ID.My_Tag )
+				);
+
+		-- time to reload the entity...
+		declare
+			Entity : KOW_Sec.Authentication.Entities.User_Entity_Type'Class :=
+					KOW_Sec.Authentication.Entities.To_User_Entity(
+							KOW_Sec.Authentication.Entities.User_Type'Class( The_User.all )
+						);
+		begin
+			KOW_Ent.Load( Entity, Module.ID );
+
+			KOW_Sec.Authentication.Entities.User_Type'Class( The_User.all ) := KOW_Sec.Authentication.Entities.To_User( Entity );
+			-- in order for these operations to be safe, we need the user types to be quite consistent
+		end;
+
+		Process_Request(
+				Edit_Entity_Module( Module ),
+				Request,
+				Parameters,
+				Response
+			);
+
 	end Process_Request;
 
 

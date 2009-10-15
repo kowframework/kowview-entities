@@ -12,6 +12,7 @@ with "kowconfig-text";
 with "kowent";
 with "kowlib";
 with "kowsec";
+with "kowsec-entities";
 with "kowview";
 
 with "aws";

@@ -140,6 +140,29 @@ package KOW_View.Entities is
 
 
 	--
+	-- Edit User Entity
+	--
+	
+	type Edit_User_Entity_Module is new Edit_Entity_Module with private;
+	-- use Edit_Entity_Module to create a form to edit user properties to user
+	-- types derived from kow_sec.entities.user_type
+
+	overriding
+	procedure Process_Request(
+			Module		: in out Edit_User_Entity_Module;
+			Request		: in     AWS.Status.Data;
+			Parameters	: in out Templates_Parser.Translate_Set;
+			Response	: in out Unbounded_String
+		);
+	-- draw up the form for the loged user
+	-- if no user is loged ir it's loged as other user type, return an empty string
+	--
+	-- also, make sure to reload the entity from the database at loading time
+	
+
+
+
+	--
 	-- Create Entity
 	--
 
@@ -230,6 +253,11 @@ private
 		Entity_Tag		: Unbounded_String;
 		Template_Name		: Unbounded_String;
 	end record;
+
+	type Edit_User_Entity_Module is new Edit_Entity_Module with null record;
+	-- use Edit_Entity_Module to create a form to edit user properties to user
+	-- types derived from kow_sec.entities.user_type
+
 
 
 
