@@ -286,6 +286,8 @@ package body KOW_View.Entities is
 
 			Ids_Tag		: Templates_Parser.Tag;
 			Labels_Tag	: Templates_Parser.Tag;
+			Descriptions_Tag: Templates_Parser.Tag;
+			Image_URLs_Tag	: Templates_Parser.Tag;
 
 
 			My_Parameters : Templates_Parser.Translate_Set := Parameters;
@@ -298,6 +300,8 @@ package body KOW_View.Entities is
 
 				Ids_Tag := Ids_Tag & KOW_Ent.To_String( Entity.Id );
 				Labels_Tag := Labels_Tag & KOW_Ent.To_String( Entity );
+				Descriptions_Tag := Descriptions_Tag & KOW_Ent.Describe( Entity );
+				Image_URLs_Tag := Image_URLs_Tag & KOW_Ent.Image_URL( Entity );
 			end loop;
 
 
@@ -309,6 +313,15 @@ package body KOW_View.Entities is
 			Templates_Parser.Insert(
 					My_Parameters,
 					Templates_Parser.Assoc( "labels", Labels_Tag )
+				);
+
+			Templates_Parser.Insert(
+					My_Parameters,
+					Templates_Parser.Assoc( "descriptions", Descriptions_Tag )
+				);
+			Templates_Parser.Insert(
+					My_parameters,
+					Templates_Parser.Assoc( "image_urls", Image_URLs_Tag )
 				);
 
 			Templates_Parser.Insert(
