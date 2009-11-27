@@ -23,6 +23,7 @@ with Templates_Parser;
 
 package KOW_View.Entities is
 
+
 	--------------------------
 	-- The Entity Component --
 	--------------------------

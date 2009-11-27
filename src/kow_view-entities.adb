@@ -198,7 +198,8 @@ package body KOW_View.Entities is
 					My_Parameters,
 					"entity",
 					Entity,
-					Include_Form => True
+					Include_Form	=> True,
+					Form_Mode	=> KOW_View.Entities_Helper.Edit
 				);
 
 
@@ -300,7 +301,8 @@ package body KOW_View.Entities is
 					My_Parameters,
 					"entity",
 					Entity,
-					Include_Form => True
+					Include_Form	=> True,
+					Form_Mode	=> KOW_View.Entities_Helper.Create
 				);
 
 

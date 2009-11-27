@@ -24,6 +24,11 @@ with Templates_Parser;
 
 package KOW_View.Entities_Helper is
 
+	type Form_Mode_Type is ( Edit, Create );
+	-- instructs if it's the form for creating or editing the entity
+
+
+
 	function Assoc_Label(
 			Variable_Name	: in String;
 			Entity		: in KOW_Ent.Entity_Type'Class;
@@ -72,7 +77,8 @@ package KOW_View.Entities_Helper is
 			Variable_Name	: in String;
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
-			Name_Prefix	: in String := "entity"
+			Name_Prefix	: in String := "entity";
+			Form_Mode	: in Form_Mode_Type := Edit
 		) return Templates_Parser.Association;
 	-- create a Tag inside with the corresponding Form element for each entity property.
 	-- currently it supports:
@@ -101,7 +107,8 @@ package KOW_View.Entities_Helper is
 			Variable_Prefix	: in     String;
 			Entity		: in     KOW_Ent.Entity_Type'Class;
 			Locale		: in     KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
-			Include_Form	: in     Boolean := False
+			Include_Form	: in     Boolean := False;
+			Form_Mode	: in     Form_Mode_Type := Edit
 		);
 	-- call all Assoc_* functions inserting the results in the translated set.
 	-- create the associations :

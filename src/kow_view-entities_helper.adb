@@ -229,7 +229,8 @@ package body KOW_View.Entities_Helper is
 			Variable_Name	: in String;
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
-			Name_Prefix	: in String := "entity"
+			Name_Prefix	: in String := "entity";
+			Form_Mode	: in Form_Mode_Type := Edit
 		) return Templates_Parser.Association is
 		-- create a Tag inside with the corresponding Form element for each entity property.
 		-- currently it supports:
@@ -255,6 +256,15 @@ package body KOW_View.Entities_Helper is
 
 			function T( Str : in String ) return Unbounded_String renames To_Unbounded_String;
 
+
+			function Disabled_Enabled( Entity : in KOW_Ent.Entity_Property_Type'CLass ) return String is
+			begin
+				if Form_Mode = Edit AND THEN P.Immutable then
+					return " disabled ";
+				else
+					return "";
+				end if;
+			end Disabled_Enabled;
 
 
 			procedure Foreign_Key_Iterator( Entity : in KOW_Ent.Entity_Type'Class ) is
@@ -303,7 +313,12 @@ package body KOW_View.Entities_Helper is
 
 		begin
 			if P in KOW_Ent.Properties.Boolean_Property_Type'Class then
-				Ret := T( "<div onClick=""trueFalseMe(this)"">" );
+				if Form_Mode = Edit and then P.Immutable then
+					Ret := T( "<div>" );
+				else
+					Ret := T( "<div onClick=""trueFalseMe(this)"">" );
+				end if;
+
 				Ret := Ret & T( "<input type=""hidden"" name=""") & Name & T( """ " );
 
 				if KOW_Ent.Properties.Boolean_Property_Type'Class( P ).Getter.all( Entity ) then
@@ -316,8 +331,9 @@ package body KOW_View.Entities_Helper is
 				Ret := Ret & T( "</div>" );
 			elsif P in KOW_Ent.Properties.Foreign_Key_Property_Type'Class then
 				Ret := T( "<select dojoType=""dijit.form.FilteringSelect"" name=""" );
-				Ret := Ret & Name;
-				Ret := Ret & T( """>" );
+				Ret := Ret & Name & """";
+				Ret := Ret & T( Disabled_Enabled( P ) );
+				Ret := Ret & T( ">" );
 
 				declare
 					PP : KOW_Ent.Properties.Foreign_Key_Property_Type'Class :=
@@ -334,8 +350,9 @@ package body KOW_View.Entities_Helper is
 				Ret := Ret & T("</select>" );
 			elsif P in KOW_Ent.Properties.Locale_property_type'Class then
 				Ret := T( "<select dojoType=""dijit.form.FilteringSelect"" name=""" );
-				Ret := Ret & Name;
-				Ret := Ret & T( """>" );
+				Ret := Ret & Name & """";
+				Ret := Ret & T( Disabled_Enabled( P ) );
+				Ret := Ret & T( ">" );
 
 				KOW_Lib.Locales.Locale_Tables.Iterate(
 						KOW_Lib.Locales.Supported_Locales,
@@ -348,15 +365,18 @@ package body KOW_View.Entities_Helper is
 				Ret := To_Unbounded_String( "<input type=""password"" name=""" );
 				Ret := Ret & Name;
 				Ret := Ret & To_Unbounded_String(
-							""" value=""" & String_Value & """ />"
+							""" value=""" & String_Value & """"
 						);
+
+				Ret := Ret & T( Disabled_Enabled( P ) & "/>");
 
 			else
 				Ret := To_Unbounded_String( "<input type=""text"" name=""" );
 				Ret := Ret & Name;
 				Ret := Ret & To_Unbounded_String(
-							""" value=""" & String_Value & """ />"
+							""" value=""" & String_Value & """"
 						);
+				Ret := Ret & T( Disabled_Enabled( P ) & "/>");
 			end if;
 
 			return Ret;
@@ -447,7 +467,8 @@ package body KOW_View.Entities_Helper is
 			Variable_Prefix	: in     String;
 			Entity		: in     KOW_Ent.Entity_Type'Class;
 			Locale		: in     KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
-			Include_Form	: in     Boolean := False
+			Include_Form	: in     Boolean := False;
+			Form_Mode	: in     Form_Mode_Type := Edit
 		) is
 		-- call all Assoc_* functions inserting the results in the translated set.
 		-- create the associations :
