@@ -315,7 +315,7 @@ package body KOW_View.Entities_Helper is
 				end if;
 				Ret := Ret & T( "</div>" );
 			elsif P in KOW_Ent.Properties.Foreign_Key_Property_Type'Class then
-				Ret := T( "<select name=""" );
+				Ret := T( "<select dojoType=""dijit.form.FilteringSelect"" name=""" );
 				Ret := Ret & Name;
 				Ret := Ret & T( """>" );
 
@@ -333,7 +333,7 @@ package body KOW_View.Entities_Helper is
 
 				Ret := Ret & T("</select>" );
 			elsif P in KOW_Ent.Properties.Locale_property_type'Class then
-				Ret := T( "<select name=""" );
+				Ret := T( "<select dojoType=""dijit.form.FilteringSelect"" name=""" );
 				Ret := Ret & Name;
 				Ret := Ret & T( """>" );
 
