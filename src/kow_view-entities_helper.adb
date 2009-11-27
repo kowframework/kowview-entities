@@ -17,6 +17,7 @@ with Ada.Tags;
 with KOW_Ent;
 with KOW_Ent.Properties;
 with KOW_Lib.Locales;
+with KOW_Lib.Log;
 
 
 ---------
@@ -28,6 +29,20 @@ with Templates_Parser;			use Templates_Parser;
 
 
 package body KOW_View.Entities_Helper is
+
+
+	Logger : KOW_Lib.Log.Logger_Type := KOW_Lib.Log.Get_Logger( "KOW_View.Entities_Helper" );
+
+	procedure Log( Message : in String; Level : in KOW_Lib.Log.Log_Level := KOW_Lib.Log.Level_Debug ) is
+	begin
+		KOW_Lib.Log.Log(
+				Logger	=> Logger,
+				Level	=> Level,
+				Message	=> Message
+			);
+	end Log;
+
+
 
 
 	----------------------
@@ -230,7 +245,7 @@ package body KOW_View.Entities_Helper is
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
 			Name_Prefix	: in String := "entity";
-			Form_Mode	: in Form_Mode_Type := Edit
+			Form_Mode	: in Form_Mode_Type
 		) return Templates_Parser.Association is
 		-- create a Tag inside with the corresponding Form element for each entity property.
 		-- currently it supports:
@@ -260,8 +275,10 @@ package body KOW_View.Entities_Helper is
 			function Disabled_Enabled( Entity : in KOW_Ent.Entity_Property_Type'CLass ) return String is
 			begin
 				if Form_Mode = Edit AND THEN P.Immutable then
+					Log( "Field as disabled.." );
 					return " disabled ";
 				else
+					Log( "Field as enabled.." );
 					return "";
 				end if;
 			end Disabled_Enabled;
@@ -468,7 +485,7 @@ package body KOW_View.Entities_Helper is
 			Entity		: in     KOW_Ent.Entity_Type'Class;
 			Locale		: in     KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
 			Include_Form	: in     Boolean := False;
-			Form_Mode	: in     Form_Mode_Type := Edit
+			Form_Mode	: in     Form_Mode_Type 
 		) is
 		-- call all Assoc_* functions inserting the results in the translated set.
 		-- create the associations :
@@ -495,7 +512,7 @@ package body KOW_View.Entities_Helper is
 		Insert( Set, Assoc_Resolved_Values( P & "_resolved_values", Entity, Locale ) );
 		
 		if Include_Form then
-			Insert( Set, Assoc_Form_Elements( P & "_form_elements", Entity, Locale ) );
+			Insert( Set, Assoc_Form_Elements( P & "_form_elements", Entity, Locale, Form_Mode => Form_Mode ) );
 		end if;
 	end Insert;
 

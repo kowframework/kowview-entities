@@ -78,7 +78,7 @@ package KOW_View.Entities_Helper is
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
 			Name_Prefix	: in String := "entity";
-			Form_Mode	: in Form_Mode_Type := Edit
+			Form_Mode	: in Form_Mode_Type 
 		) return Templates_Parser.Association;
 	-- create a Tag inside with the corresponding Form element for each entity property.
 	-- currently it supports:
@@ -108,7 +108,7 @@ package KOW_View.Entities_Helper is
 			Entity		: in     KOW_Ent.Entity_Type'Class;
 			Locale		: in     KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
 			Include_Form	: in     Boolean := False;
-			Form_Mode	: in     Form_Mode_Type := Edit
+			Form_Mode	: in     Form_Mode_Type
 		);
 	-- call all Assoc_* functions inserting the results in the translated set.
 	-- create the associations :

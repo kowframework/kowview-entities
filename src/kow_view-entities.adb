@@ -7,6 +7,7 @@ with Ada.Text_IO;	use Ada.Text_IO;
 -------------------
 -- KOW Framework --
 -------------------
+with KOW_Lib.Log;
 with KOW_Sec;
 with KOW_Sec.Authentication.Entities;
 with KOW_View;
@@ -24,6 +25,17 @@ with Templates_Parser;
 
 
 package body KOW_View.Entities is
+
+	Logger : KOW_Lib.Log.Logger_Type := KOW_Lib.Log.Get_Logger( "KOW_View.Entities" );
+
+	procedure Log( Message : in String; Level : in KOW_Lib.Log.Log_Level := KOW_Lib.Log.Level_Debug ) is
+	begin
+		KOW_Lib.Log.Log(
+				Logger	=> Logger,
+				Level	=> Level,
+				Message	=> Message
+			);
+	end Log;
 
 	----------------------
 	-- Helper Functions --
@@ -159,7 +171,8 @@ package body KOW_View.Entities is
 		KOW_View.Entities_Helper.Insert(
 					My_Parameters,
 					"entity",
-					Entity
+					Entity,
+					Form_Mode => KOW_View.Entities_Helper.Edit
 				);
 
 		Response := Response &
@@ -191,6 +204,7 @@ package body KOW_View.Entities is
 		My_Parameters : Templates_Parser.Translate_Set;
 
 	begin
+		Log( "Editing entity of tag " & To_String( Module.Entity_Tag ) );
 		KOW_Ent.Load( Entity, Module.Id );
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Module.Entity_Tag );
 
@@ -297,6 +311,7 @@ package body KOW_View.Entities is
 	begin
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Module.Entity_Tag );
 
+		Log( "Creating entity of tag " & To_String( Module.Entity_Tag ) );
 		KOW_View.Entities_Helper.Insert(
 					My_Parameters,
 					"entity",
