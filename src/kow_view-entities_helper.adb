@@ -11,9 +11,10 @@ with Ada.Characters.Handling;
 with Ada.Strings.Unbounded;		use Ada.Strings.Unbounded;
 with Ada.Tags;
 
----------------
--- Ada Works --
----------------
+--------------------
+-- KOW Frameworks --
+--------------------
+with APQ;
 with KOW_Ent;
 with KOW_Ent.Properties;
 with KOW_Lib.Locales;
@@ -147,6 +148,8 @@ package body KOW_View.Entities_Helper is
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
 		return Templates_Parser.Assoc( Variable_Name, Labels_Tag );
+	exception
+		when APQ.NO_TUPLE => return Templates_Parser.Assoc( Variable_Name, Labels_Tag );
 	end Assoc_Resolved_Labels;
 
 
@@ -234,6 +237,8 @@ package body KOW_View.Entities_Helper is
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
 		return Templates_Parser.Assoc( Variable_Name, Values_Tag );
+	exception
+		when APQ.NO_TUPLE => return Templates_Parser.Assoc( Variable_Name, Values_Tag );
 	end Assoc_Resolved_Values;
 
 
