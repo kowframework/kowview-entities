@@ -398,6 +398,11 @@ package body KOW_View.Entities_Helper is
 				Ret := Ret & To_Unbounded_String(
 							""" value=""" & String_Value & """"
 						);
+				if P in KOW_Ent.Properties.UString_Property_Type'Class then
+					Ret := Ret & To_Unbounded_String( " maxlength=""" & Integer'Image(
+								KOW_Ent.Properties.UString_Property_Type(P).Length
+							) & """" );
+				end if;
 				Ret := Ret & T( Disabled_Enabled( P ) & "/>");
 			end if;
 
