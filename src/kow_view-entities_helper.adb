@@ -705,6 +705,12 @@ package body KOW_View.Entities_Helper is
 		end Tags_Iterator;
 
 	begin
+
+		KOW_Lib.UString_Vectors.Iterate(
+				Entity_Tags,
+				Tags_iterator'Access
+			);
+
 		Insert( Set, Assoc( P & "_tag",			Tags_Tag ) );
 		Insert( Set, Assoc( P & "_id",			Ids_Tag ) );
 		Insert( Set, Assoc( P & "_column_ids",		Column_Ids_Tag ) );
