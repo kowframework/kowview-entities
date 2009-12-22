@@ -114,6 +114,7 @@ package body KOW_View.Entities_Helper is
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 		) return Templates_Parser.Association is
 		-- create a Tag inside with all labels (ordered by the entity's registry) in formatted as string
+	begin
 		return Templates_Parser.Assoc( Variable_Name, Get_Labels_Tag( Entity, Locale ) );
 	end Assoc_Labels;
 
@@ -289,7 +290,7 @@ package body KOW_View.Entities_Helper is
 		return Values_Tag;
 	exception
 		when APQ.NO_TUPLE => return Values_Tag;
-	end Get_Resolved_Values;
+	end Get_Resolved_Values_Tag;
 
 
 
@@ -519,6 +520,7 @@ package body KOW_View.Entities_Helper is
 						Locale		=> Locale,
 						Name_Prefix	=> Name_Prefix,
 						Form_Mode	=> Form_Mode
+					)
 				);
 	end Assoc_Form_Elements;
 
@@ -539,7 +541,7 @@ package body KOW_View.Entities_Helper is
 		else
 			return KOW_Ent.To_String( Entity.Id );
 		end if;
-	end Entity_ID;
+	end Get_ID;
 
 
 
@@ -664,9 +666,6 @@ package body KOW_View.Entities_Helper is
 		-- for each entity listed in the Entity_Tags vector using 2 dimentional tag
 
 		P : String renames Variable_Prefix;
-		The_Tag : String := Ada.Characters.Handling.To_Lower(
-						Ada.Tags.Expanded_Name( Entity'Tag )
-					);
 		use Templates_Parser;
 
 
@@ -679,6 +678,7 @@ package body KOW_View.Entities_Helper is
 		Resolved_Labels_Tag	: Templates_Parser.Tag;
 		Values_Tag		: Templates_Parser.Tag;
 		Resolved_Values_Tag	: Templates_Parser.Tag;
+		Form_Elements_Tag	: Templates_Parser.Tag;
 
 		
 		procedure Tags_Iterator( C : in KOW_Lib.UString_Vectors.Cursor ) is
@@ -688,11 +688,12 @@ package body KOW_View.Entities_Helper is
 			The_Tag : String := Ada.Characters.Handling.To_Lower(
 						Ada.Tags.Expanded_Name( Entity'Tag )
 					);
+			The_Label : String := KOW_Ent.Get_Label( Entity, Locale );
 		begin
 			Tags_Tag		:= Tags_Tag		& The_Tag;
 			Ids_Tag			:= Ids_Tag		& Get_ID( Entity );
 			Column_Ids_Tag		:= Column_Ids_Tag	& Get_Column_Ids_Tag( Entity );
-			Label_Tag		:= Label_Tag		& KOW_Ent.Get_Label( Entity, Locale );
+			Label_Tag		:= Label_Tag		& The_Label;
 			Labels_Tag		:= Labels_Tag		& Get_Labels_Tag( Entity, Locale );
 			Resolved_Labels_Tag	:= Resolved_Labels_Tag	& Get_Resolved_Labels_Tag( Entity, Locale );
 			Values_Tag		:= Values_Tag		& Get_Values_Tag( Entity, Locale );
@@ -714,7 +715,7 @@ package body KOW_View.Entities_Helper is
 		Insert( Set, Assoc( P & "_resolved_values",	Resolved_Values_Tag ) );
 		
 		if Include_Form then
-			Insert( Set, Assoc( P & "_form_elements", Form_Elements_Tag );
+			Insert( Set, Assoc( P & "_form_elements", Form_Elements_Tag ) );
 		end if;
 	end Insert_All;
 
