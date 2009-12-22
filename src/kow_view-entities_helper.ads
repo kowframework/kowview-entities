@@ -7,7 +7,6 @@
 -- Ada 2005 --
 --------------
 
-
 ---------------
 -- Ada Works --
 ---------------
@@ -45,7 +44,8 @@ package KOW_View.Entities_Helper is
 	
 	function Get_Labels_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class;
-			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
+			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
+			Ignore_Relation	: in String := ""
 		) return Templates_Parser.Tag;
 
 	
@@ -64,7 +64,8 @@ package KOW_View.Entities_Helper is
 	
 	function Get_Resolved_Labels_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class;
-			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
+			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
+			Ignore_Relation	: in String := ""
 		) return Templates_Parser.Tag;
 
 
@@ -85,7 +86,8 @@ package KOW_View.Entities_Helper is
 
 	function Get_Values_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class;
-			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
+			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
+			Ignore_Relation	: in String := ""
 		) return Templates_Parser.Tag;
 	-- create a Tag inside with all values (ordered by the entity's registry) in formatted as string
 
@@ -106,7 +108,8 @@ package KOW_View.Entities_Helper is
 
 	function Get_Resolved_Values_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class;
-			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
+			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
+			Ignore_Relation	: in String := ""
 		) return Templates_Parser.Tag;
 	-- create a Tag inside with all values (ordered by the entity's registry) in formatted as string
 	-- if the type is a Foreign Key, get not the ID but the label for this single related entity
@@ -132,7 +135,8 @@ package KOW_View.Entities_Helper is
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
 			Name_Prefix	: in String := "entity";
-			Form_Mode	: in Form_Mode_Type 
+			Form_Mode	: in Form_Mode_Type;
+			Ignore_Relation	: in String := ""
 		) return Templates_Parser.Tag;
 	-- create a Tag inside with the corresponding Form element for each entity property.
 	-- currently it supports:
@@ -175,7 +179,8 @@ package KOW_View.Entities_Helper is
 	
 
 	function Get_column_ids_Tag(
-			Entity		: in KOW_Ent.Entity_Type'Class
+			Entity		: in KOW_Ent.Entity_Type'Class;
+			Ignore_Relation	: in String := ""
 		) return Templates_Parser.Tag;
 	-- create a Tag inside with all Ids (ordered by the entity's registry) as string
 
