@@ -221,7 +221,8 @@ package KOW_View.Entities_Helper is
 			Entity_Tags	: in     KOW_Lib.UString_Vectors.Vector;
 			Locale		: in     KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
 			Include_Form	: in     Boolean := False;
-			Form_Mode	: in     Form_Mode_Type
+			Form_Mode	: in     Form_Mode_Type;
+			Ignore_Relation	: in     String
 		);
 	-- call all Assoc_* functions inserting the results in the translated set.
 	-- create the associations :
@@ -233,6 +234,8 @@ package KOW_View.Entities_Helper is
 	-- Where [P] is the value for Variable_Prefix
 	--
 	-- for each entity listed in the Entity_Tags vector using 2 dimentional tag
+	--
+	-- also, ignore the relation with the tag with expanded name IGNORE_RELATION
 
 	
 

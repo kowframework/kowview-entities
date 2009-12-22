@@ -71,11 +71,11 @@ package body KOW_View.Entities_Helper is
 		use KOW_Ent.Properties;
 	begin
 		if P = null then
-			Log( "LKJLKJLKJLKLJLJLKJ");
 			return false;
 		elsif P.all not in Foreign_Key_Property_Type'Class then
 			return false;
 		else
+			Log( "Comparing " & Ada.Tags.Expanded_Name( Foreign_Key_Property_Type( P.all ).Related_Entity_Tag ) & " with " & Related_Entity_Tag);
 			return Ada.Tags.Expanded_Name( Foreign_Key_Property_Type( P.all ).Related_Entity_Tag ) = Related_Entity_Tag;
 		end if;
 	end SHould_Ignore;
@@ -113,8 +113,8 @@ package body KOW_View.Entities_Helper is
 			P 	: KOW_Ent.Entity_Property_Ptr;
 			Label	: Unbounded_String;
 		begin
+			P := KOW_Ent.Property_Lists.Element( C );
 			if not Should_Ignore( P, Ignore_Relation ) then
-				P := KOW_Ent.Property_Lists.Element( C );
 				Label := KOW_Ent.Get_Label( Entity, P.Column_Name, Locale );
 				Labels_Tag := Labels_Tag & Label;
 			end if;
@@ -692,7 +692,8 @@ package body KOW_View.Entities_Helper is
 			Entity_Tags	: in     KOW_Lib.UString_Vectors.Vector;
 			Locale		: in     KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
 			Include_Form	: in     Boolean := False;
-			Form_Mode	: in     Form_Mode_Type
+			Form_Mode	: in     Form_Mode_Type;
+			Ignore_Relation	: in     String
 		) is
 		-- call all Assoc_* functions inserting the results in the translated set.
 		-- create the associations :
@@ -726,21 +727,22 @@ package body KOW_View.Entities_Helper is
 							KOW_Lib.UString_Vectors.Element( C )
 						);
 
-			Ignore_Tag : String := Ada.Tags.Expanded_Name( Entity'Tag );
-			The_Tag : String := Ada.Characters.Handling.To_Lower( Ignore_Tag );
+			The_Tag : String := Ada.Characters.Handling.To_Lower(
+						Ada.Tags.Expanded_Name( Entity'Tag )
+					);
 			The_Label : String := KOW_Ent.Get_Label( Entity, Locale );
 		begin
 			Tags_Tag		:= Tags_Tag		& The_Tag;
 			Ids_Tag			:= Ids_Tag		& Get_ID( Entity );
-			Column_Ids_Tag		:= Column_Ids_Tag	& Get_Column_Ids_Tag( Entity, Ignore_Tag );
+			Column_Ids_Tag		:= Column_Ids_Tag	& Get_Column_Ids_Tag( Entity, Ignore_Relation );
 			Label_Tag		:= Label_Tag		& The_Label;
-			Labels_Tag		:= Labels_Tag		& Get_Labels_Tag( Entity, Locale, Ignore_Tag );
-			Resolved_Labels_Tag	:= Resolved_Labels_Tag	& Get_Resolved_Labels_Tag( Entity, Locale, Ignore_Tag );
-			Values_Tag		:= Values_Tag		& Get_Values_Tag( Entity, Locale, Ignore_Tag );
-			Resolved_Values_Tag	:= Resolved_Values_Tag	& Get_Resolved_Values_Tag( Entity, Locale, Ignore_Tag );
+			Labels_Tag		:= Labels_Tag		& Get_Labels_Tag( Entity, Locale, Ignore_Relation );
+			Resolved_Labels_Tag	:= Resolved_Labels_Tag	& Get_Resolved_Labels_Tag( Entity, Locale, Ignore_Relation );
+			Values_Tag		:= Values_Tag		& Get_Values_Tag( Entity, Locale, Ignore_Relation );
+			Resolved_Values_Tag	:= Resolved_Values_Tag	& Get_Resolved_Values_Tag( Entity, Locale, Ignore_Relation );
 
 			if Include_Form then
-				Form_Elements_Tag := Form_Elements_Tag & Get_Form_Elements_Tag( Entity, Locale, Form_Mode => Form_Mode, Ignore_Relation => Ignore_Tag );
+				Form_Elements_Tag := Form_Elements_Tag & Get_Form_Elements_Tag( Entity, Locale, Form_Mode => Form_Mode, Ignore_Relation => Ignore_Relation );
 			end if;
 		end Tags_Iterator;
 

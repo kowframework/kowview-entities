@@ -2,6 +2,7 @@
 -- Ada 2005 --
 --------------
 with Ada.Directories;
+with Ada.Tags;
 with Ada.Text_IO;	use Ada.Text_IO;
 
 -------------------
@@ -375,7 +376,8 @@ package body KOW_View.Entities is
 				"inlined_entity",
 				Module.Inlined_Entity_Tags,
 				Include_Form	=> True,
-				Form_Mode	=> KOW_View.Entities_Helper.Create
+				Form_Mode	=> KOW_View.Entities_Helper.Create,
+				Ignore_Relation	=> Ada.Tags.Expanded_Name( Entity'Tag )
 			);
 
 
