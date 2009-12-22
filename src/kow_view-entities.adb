@@ -90,11 +90,37 @@ package body KOW_View.Entities is
 			View_Entity.Id		:= KOW_Ent.To_ID( KOW_Config.Element( Config, "id" ) );
 			View_Entity.Template_Name	:= KOW_Config.Value( Config, "template_name", Default_View_ENtity_Template_Name );
 
+			declare
+				Inlined_Forms	: KOW_Config.Config_File_Array := KOW_Config.Elements_Array( Config, "inlined" );
+			begin
+				for i in Inlined_Forms'Range loop
+					KOW_Lib.UString_Vectors.Append(
+							View_Entity.Inlined_Entity_Tags,
+							KOW_Config.Element( Inlined_Forms(i), "entity_tag" )
+						);
+				end loop;
+			end;
+
+
+
 			return View_Entity;
 		elsif Module_Name = "edit_entity" then
 			Edit_Entity.Entity_Tag	:= KOW_Config.Element( Config, "entity_tag" );
 			Edit_Entity.Id		:= KOW_Ent.To_ID( KOW_Config.Element( Config, "id" ) );
 			Edit_Entity.Template_Name	:= KOW_Config.Value( Config, "template_name", Default_Edit_Entity_Template_Name );
+
+			declare
+				Inlined_Forms	: KOW_Config.Config_File_Array := KOW_Config.Elements_Array( Config, "inlined" );
+			begin
+				for i in Inlined_Forms'Range loop
+					KOW_Lib.UString_Vectors.Append(
+							Edit_Entity.Inlined_Entity_Tags,
+							KOW_Config.Element( Inlined_Forms(i), "entity_tag" )
+						);
+				end loop;
+			end;
+
+
 
 			return Edit_Entity;
 
@@ -107,6 +133,17 @@ package body KOW_View.Entities is
 			Create_Entity.Entity_Tag 	:= KOW_Config.Element( Config, "entity_tag" );
 			Create_Entity.Template_Name	:= KOW_Config.Value( Config, "template_name", Default_Create_Entity_Template_Name );
 
+			declare
+				Inlined_Forms	: KOW_Config.Config_File_Array := KOW_Config.Elements_Array( Config, "inlined" );
+			begin
+				for i in Inlined_Forms'Range loop
+					KOW_Lib.UString_Vectors.Append(
+							Create_Entity.Inlined_Entity_Tags,
+							KOW_Config.Element( Inlined_Forms(i), "entity_tag" )
+						);
+				end loop;
+			end;
+
 			return Create_Entity;
 		elsif Module_Name = "entity_browser" then
 			Entity_Browser.Entity_Tag := KOW_Config.Element( Config, "entity_tag" );
@@ -116,6 +153,19 @@ package body KOW_View.Entities is
 			Entity_Browser.Edit_Entity_Template_Name := KOW_Config.Value( Config, "edit_entity_template_name", Default_Edit_Entity_Template_Name );
 			Entity_Browser.Create_Entity_Template_Name := KOW_Config.Value( Config, "edit_entity_template_name", Default_Create_Entity_Template_Name );
 			Entity_Browser.List_Entities_Template_Name := KOW_Config.Value( Config, "list_entities_template_name", Default_List_Entities_Template_Name );
+
+
+
+			declare
+				Inlined_Forms	: KOW_Config.Config_File_Array := KOW_Config.Elements_Array( Config, "inlined" );
+			begin
+				for i in Inlined_Forms'Range loop
+					KOW_Lib.UString_Vectors.Append(
+							Entity_Browser.Inlined_Entity_Tags,
+							KOW_Config.Element( Inlined_Forms(i), "entity_tag" )
+						);
+				end loop;
+			end;
 
 
 			return Entity_Browser;
@@ -429,6 +479,7 @@ package body KOW_View.Entities is
 		begin
 			Create_Entity.Entity_Tag := Module.Entity_Tag;
 			Create_Entity.Template_Name := Module.Create_Entity_Template_Name;
+			Create_Entity.Inlined_Entity_Tags := Module.Inlined_Entity_Tags;
 
 			Process_Request(
 					Create_Entity,
@@ -446,6 +497,7 @@ package body KOW_View.Entities is
 			Edit_Entity.Entity_Tag := Module.Entity_Tag;
 			Edit_Entity.Id := KOW_Ent.To_Id( Natural'Value( ID ) );
 			Edit_Entity.Template_Name := Module.Edit_Entity_Template_Name;
+			Edit_Entity.Inlined_Entity_Tags := Module.Inlined_Entity_Tags;
 
 			Process_Request(
 					Edit_Entity,
@@ -462,6 +514,7 @@ package body KOW_View.Entities is
 			View_Entity.Entity_Tag := Module.Entity_Tag;
 			View_Entity.Id := KOW_Ent.To_Id( Natural'Value( ID ) );
 			View_Entity.Template_Name := Module.View_Entity_Template_Name;
+			View_Entity.Inlined_Entity_Tags := Module.Inlined_Entity_Tags;
 
 			Process_Request(
 					View_Entity,

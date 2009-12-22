@@ -12,6 +12,7 @@ with Ada.Tags;
 with KOW_Config;
 with KOW_Ent;
 with KOW_Lib.File_System;
+with KOW_Lib.UString_Vectors;
 with KOW_View.Components;
 
 ---------
@@ -246,6 +247,7 @@ private
 		Id			: KOW_Ent.ID_Type;
 		Entity_Tag		: Unbounded_String;
 		Template_Name		: Unbounded_String;
+		Inlined_Entity_Tags	: KOW_Lib.UString_Vectors.Vector;
 	end record;
 
 
@@ -253,6 +255,7 @@ private
 		Id			: KOW_Ent.ID_Type;
 		Entity_Tag		: Unbounded_String;
 		Template_Name		: Unbounded_String;
+		Inlined_Entity_Tags	: KOW_Lib.UString_Vectors.Vector;
 	end record;
 
 	type Edit_User_Entity_Module is new Edit_Entity_Module with null record;
@@ -266,6 +269,7 @@ private
 	type Create_Entity_Module is new KOW_View.Components.Module_Instance_Interface with record
 		Entity_Tag		: Unbounded_String;
 		Template_Name		: Unbounded_String;
+		Inlined_Entity_Tags	: KOW_Lib.UString_Vectors.Vector;
 	end record;
 
 
@@ -291,6 +295,9 @@ private
 
 		List_Entities_Template_Name	: Unbounded_String;
 		-- the template used when listing the entities
+		
+		
+		Inlined_Entity_Tags		: KOW_Lib.UString_Vectors.Vector;
 	end record;
 
 
