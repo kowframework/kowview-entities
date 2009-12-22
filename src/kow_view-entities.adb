@@ -370,6 +370,14 @@ package body KOW_View.Entities is
 					Form_Mode	=> KOW_View.Entities_Helper.Create
 				);
 
+		KOW_View.Entities_Helper.Insert_All(
+				My_Parameters,
+				"inlined_entity",
+				Module.Inlined_Entity_Tags,
+				Include_Form	=> True,
+				Form_Mode	=> KOW_View.Entities_Helper.Create
+			);
+
 
 		KOW_View.Security.Grant_Authorization(
 				Request,

@@ -527,6 +527,42 @@ package body KOW_View.Entities_Helper is
 	end Insert;
 
 
+
+
+
+
+
+
+
+
+
+
+
+	procedure Insert_All(
+			Set		: in out Templates_Parser.Translate_Set;
+			Variable_Prefix	: in     String;
+			Entity_Tags	: in     KOW_Lib.UString_Vectors.Vector;
+			Locale		: in     KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
+			Include_Form	: in     Boolean := False;
+			Form_Mode	: in     Form_Mode_Type
+		) is
+		-- call all Assoc_* functions inserting the results in the translated set.
+		-- create the associations :
+		-- 	[P]_has_form_element
+		-- 	[P]_values
+		-- 	[P]_labels
+		-- 	[P]_column_ids
+		-- 	[P]_form_element
+		-- Where [P] is the value for Variable_Prefix
+		--
+		-- for each entity listed in the Entity_Tags vector using 2 dimentional tag
+	begin
+		null;
+	end Insert_All;
+
+
+
+
 	procedure Load(
 			Data		: in     AWS.Status.Data;
 			Variable_Prefix	: in     String;

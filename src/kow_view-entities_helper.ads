@@ -13,6 +13,7 @@
 ---------------
 with KOW_Ent;
 with KOW_Lib.Locales;
+with KOW_Lib.UString_Vectors;
 
 
 ---------
@@ -118,6 +119,25 @@ package KOW_View.Entities_Helper is
 	-- 	[P]_form_element
 	-- Where [P] is the value for Variable_Prefix
 
+
+	procedure Insert_All(
+			Set		: in out Templates_Parser.Translate_Set;
+			Variable_Prefix	: in     String;
+			Entity_Tags	: in     KOW_Lib.UString_Vectors.Vector;
+			Locale		: in     KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
+			Include_Form	: in     Boolean := False;
+			Form_Mode	: in     Form_Mode_Type
+		);
+	-- call all Assoc_* functions inserting the results in the translated set.
+	-- create the associations :
+	-- 	[P]_has_form_element
+	-- 	[P]_values
+	-- 	[P]_labels
+	-- 	[P]_column_ids
+	-- 	[P]_form_element
+	-- Where [P] is the value for Variable_Prefix
+	--
+	-- for each entity listed in the Entity_Tags vector using 2 dimentional tag
 
 	
 
