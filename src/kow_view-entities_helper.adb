@@ -79,12 +79,15 @@ package body KOW_View.Entities_Helper is
 
 
 
-	function Assoc_Labels(
-			Variable_Name	: in String;
+	----------------
+	-- The Labels --
+	----------------
+
+
+	function Get_Labels_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
-		) return Templates_Parser.Association is
-		-- create a Tag inside with all labels (ordered by the entity's registry) in formatted as string
+			) return Templates_Parser.Tag is
 		Labels_Tag	: Templates_Parser.Tag;
 		Properties	: KOW_Ent.Property_Lists.List;
 
@@ -99,18 +102,32 @@ package body KOW_View.Entities_Helper is
 	begin
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
-		return Templates_Parser.Assoc( Variable_Name, Labels_Tag );
-	end Assoc_Labels;
+
+		return Labels_Tag;
+	end Get_Labels_Tag;
 
 
 
-	function Assoc_Resolved_Labels(
+	function Assoc_Labels(
 			Variable_Name	: in String;
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 		) return Templates_Parser.Association is
 		-- create a Tag inside with all labels (ordered by the entity's registry) in formatted as string
-		-- if the property is a foreign key, get the label for the related entity instead of the property's label
+		return Templates_Parser.Assoc( Variable_Name, Get_Labels_Tag( Entity, Locale ) );
+	end Assoc_Labels;
+
+
+
+
+	-------------------------
+	-- The resolved Labels --
+	-------------------------
+	
+	function Get_Resolved_Labels_Tag(
+			Entity		: in KOW_Ent.Entity_Type'Class;
+			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
+		) return Templates_Parser.Tag is
 		Labels_Tag	: Templates_Parser.Tag;
 		Properties	: KOW_Ent.Property_Lists.List;
 
@@ -147,20 +164,34 @@ package body KOW_View.Entities_Helper is
 	begin
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
-		return Templates_Parser.Assoc( Variable_Name, Labels_Tag );
+		return Labels_Tag;
 	exception
-		when APQ.NO_TUPLE => return Templates_Parser.Assoc( Variable_Name, Labels_Tag );
-	end Assoc_Resolved_Labels;
+		when APQ.NO_TUPLE => return Labels_Tag;
+	end Get_Resolved_Labels_Tag;
 
 
 
-
-
-	function Assoc_Values(
+	function Assoc_Resolved_Labels(
 			Variable_Name	: in String;
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 		) return Templates_Parser.Association is
+		-- create a Tag inside with all labels (ordered by the entity's registry) in formatted as string
+		-- if the property is a foreign key, get the label for the related entity instead of the property's label
+	begin
+		return Templates_Parser.Assoc( Variable_Name, Get_Resolved_Labels_Tag( Entity, Locale ) );
+	end Assoc_Resolved_Labels;
+
+
+
+	----------------
+	-- The Values --
+	----------------
+
+	function Get_Values_Tag(
+			Entity		: in KOW_Ent.Entity_Type'Class;
+			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
+		) return Templates_Parser.Tag is
 		-- create a Tag inside with all values (ordered by the entity's registry) in formatted as string
 		Values_Tag	: Templates_Parser.Tag;
 		Properties	: KOW_Ent.Property_Lists.List;
@@ -174,16 +205,35 @@ package body KOW_View.Entities_Helper is
 	begin
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
-		return Templates_Parser.Assoc( Variable_Name, Values_Tag );
-	end Assoc_Values;
+		return Values_Tag;
+	end Get_Values_Tag;
 
 
-	function Assoc_Resolved_Values(
+
+
+	function Assoc_Values(
 			Variable_Name	: in String;
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 		) return Templates_Parser.Association is
 		-- create a Tag inside with all values (ordered by the entity's registry) in formatted as string
+	begin
+		return Templates_Parser.Assoc( Variable_Name, Get_Values_Tag( Entity, Locale ) );
+	end Assoc_Values;
+
+
+
+
+	-------------------------
+	-- The Resolved Values --
+	-------------------------
+
+	function Get_Resolved_Values_Tag(
+			Entity		: in KOW_Ent.Entity_Type'Class;
+			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
+		) return Templates_Parser.Tag is
+		-- create a Tag inside with all values (ordered by the entity's registry) in formatted as string
+		-- if the type is a Foreign Key, get not the ID but the label for this single related entity
 		Values_Tag	: Templates_Parser.Tag;
 		Properties	: KOW_Ent.Property_Lists.List;
 
@@ -236,27 +286,41 @@ package body KOW_View.Entities_Helper is
 	begin
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
-		return Templates_Parser.Assoc( Variable_Name, Values_Tag );
+		return Values_Tag;
 	exception
-		when APQ.NO_TUPLE => return Templates_Parser.Assoc( Variable_Name, Values_Tag );
+		when APQ.NO_TUPLE => return Values_Tag;
+	end Get_Resolved_Values;
+
+
+
+
+	function Assoc_Resolved_Values(
+			Variable_Name	: in String;
+			Entity		: in KOW_Ent.Entity_Type'Class;
+			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
+		) return Templates_Parser.Association is
+		-- create a Tag inside with all values (ordered by the entity's registry) in formatted as string
+	begin
+		return Templates_Parser.Assoc( Variable_Name, Get_Resolved_Values_Tag( Entity, Locale ) );
 	end Assoc_Resolved_Values;
 
 
-
-
-
-	function Assoc_Form_Elements(
-			Variable_Name	: in String;
+	-----------------------
+	-- The Form Elements --
+	-----------------------
+	
+	
+	function Get_Form_Elements_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
 			Name_Prefix	: in String := "entity";
-			Form_Mode	: in Form_Mode_Type
-		) return Templates_Parser.Association is
+			Form_Mode	: in Form_Mode_Type 
+		) return Templates_Parser.Tag is
 		-- create a Tag inside with the corresponding Form element for each entity property.
 		-- currently it supports:
 		-- 	string (default)
 		-- 	locale
-	
+
 		Elements_Tag	: Templates_Parser.Tag;
 		Properties	: KOW_Ent.Property_Lists.List;
 		Pref		: constant Unbounded_String := To_Unbounded_String( Name_Prefix & '_' );
@@ -429,13 +493,53 @@ package body KOW_View.Entities_Helper is
 	begin
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
-		return Templates_Parser.Assoc( Variable_Name, Elements_Tag );
 
+		return Elements_Tag;
+	end Get_Form_Elements_Tag;
+
+
+
+
+	function Assoc_Form_Elements(
+			Variable_Name	: in String;
+			Entity		: in KOW_Ent.Entity_Type'Class;
+			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
+			Name_Prefix	: in String := "entity";
+			Form_Mode	: in Form_Mode_Type
+		) return Templates_Parser.Association is
+		-- create a Tag inside with the corresponding Form element for each entity property.
+		-- currently it supports:
+		-- 	string (default)
+		-- 	locale
+	begin	
+		return Templates_Parser.Assoc(
+					Variable_Name,
+					Get_Form_Elements_Tag(
+						Entity		=> Entity,
+						Locale		=> Locale,
+						Name_Prefix	=> Name_Prefix,
+						Form_Mode	=> Form_Mode
+				);
 	end Assoc_Form_Elements;
 
 
 
+	---------------------------
+	-- The current entity ID --
+	---------------------------
 
+
+	function Get_ID( Entity : in KOW_Ent.Entity_Type'Class ) return String is
+		use Ada.Tags;
+		The_Tag : String := Ada.Tags.Expanded_Name( Entity'Tag );
+	begin
+		The_Tag := Ada.Characters.Handling.To_Lower( The_Tag );
+		if Entity.Id.My_Tag = No_Tag then
+			return "";
+		else
+			return KOW_Ent.To_String( Entity.Id );
+		end if;
+	end Entity_ID;
 
 
 
@@ -445,25 +549,19 @@ package body KOW_View.Entities_Helper is
 		) return Templates_Parser.Association is
 		-- associate the ID for this entity as string.
 
-		function Entity_ID return String is
-			use Ada.Tags;
-			The_Tag : String := Ada.Tags.Expanded_Name( Entity'Tag );
-		begin
-			The_Tag := Ada.Characters.Handling.To_Lower( The_Tag );
-			if Entity.Id.My_Tag = No_Tag then
-				return "";
-			else
-				return KOW_Ent.To_String( Entity.Id );
-			end if;
-		end Entity_ID;
 	begin
-		return Templates_Parser.Assoc( Variable_Name, Entity_ID );
+		return Templates_Parser.Assoc( Variable_Name, Get_ID( Entity ) );
 	end Assoc_Id;
 
-	function Assoc_column_ids(
-			Variable_Name	: in String;
+
+	--------------------
+	-- The Column IDs --
+	--------------------
+	
+
+	function Get_column_ids_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class
-		) return Templates_Parser.Association is
+		) return Templates_Parser.Tag is
 		-- create a Tag inside with all Ids (ordered by the entity's registry) as string
 		Ids_Tag	: Templates_Parser.Tag;
 		Properties	: KOW_Ent.Property_Lists.List;
@@ -484,7 +582,19 @@ package body KOW_View.Entities_Helper is
 	begin
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
-		return Templates_Parser.Assoc( Variable_Name, Ids_Tag );
+
+		return IDs_Tag;
+	end Get_column_ids_Tag;
+
+
+
+	function Assoc_column_ids(
+			Variable_Name	: in String;
+			Entity		: in KOW_Ent.Entity_Type'Class
+		) return Templates_Parser.Association is
+		-- create a Tag inside with all Ids (ordered by the entity's registry) as string
+	begin
+		return Templates_Parser.Assoc( Variable_Name, Get_Column_Ids_Tag( Entity ) );
 	end Assoc_column_ids;
 
 
@@ -534,10 +644,6 @@ package body KOW_View.Entities_Helper is
 
 
 
-
-
-
-
 	procedure Insert_All(
 			Set		: in out Templates_Parser.Translate_Set;
 			Variable_Prefix	: in     String;
@@ -556,8 +662,60 @@ package body KOW_View.Entities_Helper is
 		-- Where [P] is the value for Variable_Prefix
 		--
 		-- for each entity listed in the Entity_Tags vector using 2 dimentional tag
+
+		P : String renames Variable_Prefix;
+		The_Tag : String := Ada.Characters.Handling.To_Lower(
+						Ada.Tags.Expanded_Name( Entity'Tag )
+					);
+		use Templates_Parser;
+
+
+
+		Tags_Tag		: Templates_Parser.Tag;
+		Ids_Tag			: Templates_Parser.Tag;
+		Column_Ids_Tag		: Templates_Parser.Tag;
+		Label_Tag		: Templates_Parser.Tag;
+		Labels_Tag		: Templates_Parser.Tag;
+		Resolved_Labels_Tag	: Templates_Parser.Tag;
+		Values_Tag		: Templates_Parser.Tag;
+		Resolved_Values_Tag	: Templates_Parser.Tag;
+
+		
+		procedure Tags_Iterator( C : in KOW_Lib.UString_Vectors.Cursor ) is
+			Entity : KOW_Ent.Entity_Type'Class := KOW_Ent.New_Entity(
+							KOW_Lib.UString_Vectors.Element( C )
+						);
+			The_Tag : String := Ada.Characters.Handling.To_Lower(
+						Ada.Tags.Expanded_Name( Entity'Tag )
+					);
+		begin
+			Tags_Tag		:= Tags_Tag		& The_Tag;
+			Ids_Tag			:= Ids_Tag		& Get_ID( Entity );
+			Column_Ids_Tag		:= Column_Ids_Tag	& Get_Column_Ids_Tag( Entity );
+			Label_Tag		:= Label_Tag		& KOW_Ent.Get_Label( Entity, Locale );
+			Labels_Tag		:= Labels_Tag		& Get_Labels_Tag( Entity, Locale );
+			Resolved_Labels_Tag	:= Resolved_Labels_Tag	& Get_Resolved_Labels_Tag( Entity, Locale );
+			Values_Tag		:= Values_Tag		& Get_Values_Tag( Entity, Locale );
+			Resolved_Values_Tag	:= Resolved_Values_Tag	& Get_Resolved_Values_Tag( Entity, Locale );
+
+			if Include_Form then
+				Form_Elements_Tag := Form_Elements_Tag & Get_Form_Elements_Tag( Entity, Locale, Form_Mode => Form_Mode );
+			end if;
+		end Tags_Iterator;
+
 	begin
-		null;
+		Insert( Set, Assoc( P & "_tag",			Tags_Tag ) );
+		Insert( Set, Assoc( P & "_id",			Ids_Tag ) );
+		Insert( Set, Assoc( P & "_column_ids",		Column_Ids_Tag ) );
+		Insert( Set, Assoc( P & "_label",		Label_Tag ) );
+		Insert( Set, Assoc( P & "_labels",		Labels_Tag ) );
+		Insert( Set, Assoc( P & "_resolved_labels",	Resolved_Labels_Tag ) );
+		Insert( Set, Assoc( P & "_values",		Values_Tag ) );
+		Insert( Set, Assoc( P & "_resolved_values",	Resolved_Values_Tag ) );
+		
+		if Include_Form then
+			Insert( Set, Assoc( P & "_form_elements", Form_Elements_Tag );
+		end if;
 	end Insert_All;
 
 
