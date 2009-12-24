@@ -596,6 +596,7 @@ package body KOW_View.Entities is
 
 
 		for N in 1 .. AWS.Parameters.Count( Params, Service.Inlined_Variable_Prefix & "_tag" ) loop
+			Log( "loading entity" );
 			declare
 				Inlined_Entity : KOW_Ent.Entity_Type'Class :=
 								KOW_View.Entities_Helper.Load(
@@ -604,12 +605,12 @@ package body KOW_View.Entities is
 										N
 									);
 			begin
-				null;
+				Log( "entity loaded" );
 				-- TODO :: deal with security for inlined entities...
 				-- NOTE :: there is a problem where I create more than one entity... how do I control that?
 				-- NOTE :: it's simple, as long as I have a map of granted authorizations for this request
-	--			KOW_Ent.Set_Foreign_Key( Entity => Inlined_Entity, Related_Entity => Entity );
-	--			Store( Entity );
+				KOW_Ent.Set_Foreign_Key( Entity => Inlined_Entity, Related_Entity => Entity );
+				Store( Inlined_Entity );
 			end;
 		end loop;
 

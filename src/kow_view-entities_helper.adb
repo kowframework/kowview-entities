@@ -345,7 +345,7 @@ package body KOW_View.Entities_Helper is
 	function Get_Form_Elements_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
-			Name_Prefix	: in String := "entity";
+			Name_Prefix	: in String;
 			Form_Mode	: in Form_Mode_Type;
 			Ignore_Relation	: in String := ""
 		) return Templates_Parser.Tag is
@@ -542,7 +542,7 @@ package body KOW_View.Entities_Helper is
 			Variable_Name	: in String;
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
-			Name_Prefix	: in String := "entity";
+			Name_Prefix	: in String;
 			Form_Mode	: in Form_Mode_Type
 		) return Templates_Parser.Association is
 		-- create a Tag inside with the corresponding Form element for each entity property.
@@ -674,7 +674,14 @@ package body KOW_View.Entities_Helper is
 		Insert( Set, Assoc_Resolved_Values( P & "_resolved_values", Entity, Locale ) );
 		
 		if Include_Form then
-			Insert( Set, Assoc_Form_Elements( P & "_form_elements", Entity, Locale, Form_Mode => Form_Mode ) );
+			Insert( Set, Assoc_Form_Elements(
+						Variable_Name	=> P & "_form_elements",
+						Entity		=> Entity,
+						Locale		=> Locale,
+						Name_Prefix	=> P,
+						Form_Mode	=> Form_Mode
+					)
+				);
 		end if;
 	end Insert;
 
@@ -745,7 +752,13 @@ package body KOW_View.Entities_Helper is
 			Resolved_Values_Tag	:= Resolved_Values_Tag	& Get_Resolved_Values_Tag( Entity, Locale, Ignore_Relation );
 
 			if Include_Form then
-				Form_Elements_Tag := Form_Elements_Tag & Get_Form_Elements_Tag( Entity, Locale, Form_Mode => Form_Mode, Ignore_Relation => Ignore_Relation );
+				Form_Elements_Tag := Form_Elements_Tag & Get_Form_Elements_Tag(
+									Entity		=> Entity,
+									Locale		=> Locale,
+									Name_Prefix	=> Variable_Prefix,
+									Form_Mode	=> Form_Mode,
+									Ignore_Relation => Ignore_Relation
+								);
 			end if;
 		end Tags_Iterator;
 
@@ -814,9 +827,13 @@ package body KOW_View.Entities_Helper is
 				return P & To_String( Prop.Column_Name );
 			end Param_ID;
 
+			use KOW_Ent;
 		begin
-			Prop := KOW_Ent.Property_Lists.Element( C );
-			KOW_Ent.Set_Property( Prop.all, Entity, AWS.Parameters.Get( Params, Param_ID, N ) );
+			if Prop /= null then
+				Log( "Iterating over " & Param_ID );
+				Prop := KOW_Ent.Property_Lists.Element( C );
+				KOW_Ent.Set_Property( Prop.all, Entity, AWS.Parameters.Get( Params, Param_ID, N ) );
+			end if;
 		end Iterator;
 	begin
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );

@@ -134,7 +134,7 @@ package KOW_View.Entities_Helper is
 	function Get_Form_Elements_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
-			Name_Prefix	: in String := "entity";
+			Name_Prefix	: in String;
 			Form_Mode	: in Form_Mode_Type;
 			Ignore_Relation	: in String := ""
 		) return Templates_Parser.Tag;
@@ -149,7 +149,7 @@ package KOW_View.Entities_Helper is
 			Variable_Name	: in String;
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
-			Name_Prefix	: in String := "entity";
+			Name_Prefix	: in String; 
 			Form_Mode	: in Form_Mode_Type 
 		) return Templates_Parser.Association;
 	-- create a Tag inside with the corresponding Form element for each entity property.
