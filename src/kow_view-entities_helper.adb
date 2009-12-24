@@ -710,6 +710,7 @@ package body KOW_View.Entities_Helper is
 		use Templates_Parser;
 
 
+		Form_Ids		: Templates_Parser.Tag;
 
 		Tags_Tag		: Templates_Parser.Tag;
 		Ids_Tag			: Templates_Parser.Tag;
@@ -730,8 +731,10 @@ package body KOW_View.Entities_Helper is
 			The_Tag : String := Ada.Characters.Handling.To_Lower(
 						Ada.Tags.Expanded_Name( Entity'Tag )
 					);
+			Form_ID	: String := P & '_' & The_Tag;
 			The_Label : String := KOW_Ent.Get_Label( Entity, Locale );
 		begin
+			Form_IDs		:= Form_IDs		& Form_ID;
 			Tags_Tag		:= Tags_Tag		& The_Tag;
 			Ids_Tag			:= Ids_Tag		& Get_ID( Entity );
 			Column_Ids_Tag		:= Column_Ids_Tag	& Get_Column_Ids_Tag( Entity, Ignore_Relation );
@@ -753,6 +756,7 @@ package body KOW_View.Entities_Helper is
 				Tags_iterator'Access
 			);
 
+		Insert( Set, Assoc( P & "_form_ids",		Form_IDs ) );
 		Insert( Set, Assoc( P & "_tag",			Tags_Tag ) );
 		Insert( Set, Assoc( P & "_id",			Ids_Tag ) );
 		Insert( Set, Assoc( P & "_column_ids",		Column_Ids_Tag ) );
