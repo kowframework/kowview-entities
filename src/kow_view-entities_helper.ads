@@ -242,7 +242,8 @@ package KOW_View.Entities_Helper is
 	procedure Load(
 			Data		: in     AWS.Status.Data;
 			Variable_Prefix	: in     String;
-			Entity		: in out KOW_Ent.Entity_Type'Class
+			Entity		: in out KOW_Ent.Entity_Type'Class;
+			N		: in     Positive		-- parameter N of AWS.Parameters.Get() method
 		);
 	-- read the data from a FORM returning a new entity to be stored/loaded/whateveroaded
 	-- 	[P_][TAG]__id		=> the ID for this entity (if available)
@@ -256,7 +257,8 @@ package KOW_View.Entities_Helper is
 
 	function Load(
 			Data		: in AWS.Status.Data;
-			Variable_Prefix	: in String
+			Variable_Prefix	: in String;
+			N		: in Positive			-- parameter N of AWS.Parameters.Get() method
 		) return KOW_Ent.Entity_Type'Class;
 	-- The same as the Load procedure, but create and load the entity from the database if it's set
 	-- read the data from:

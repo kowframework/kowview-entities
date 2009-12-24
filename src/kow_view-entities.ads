@@ -306,8 +306,9 @@ private
 	---------------------------------------
 
 	type Store_Entity_Service is new KOW_View.Components.Service_Instance_Interface with record
-		Variable_Prefix : String( 1 .. 6 ) := "entity";
+		Variable_Prefix 	: String( 1 .. 6  ) := "entity";
 		-- the prefix for every variable to be processed by this service
+		Inlined_Variable_Prefix	: String( 1 .. 14 ) := "inlined_entity";
 	end record;
 
 

@@ -553,6 +553,10 @@ package body KOW_View.Entities is
 	---------------------------------------
 	-- Services for the Entity component --
 	---------------------------------------
+	
+	
+	
+	
 	overriding
 	procedure Process_Request(
 			Service		: in out Store_Entity_Service;
@@ -562,10 +566,13 @@ package body KOW_View.Entities is
 		-- read the entity from the form and process it.
 		-- save it back to the database backend afterwards
 
-		Entity: KOW_Ent.Entity_Type'Class := KOW_View.Entities_Helper.Load(
+		Entity	: KOW_Ent.Entity_Type'Class := KOW_View.Entities_Helper.Load(
 							Request,
-							Service.Variable_Prefix
+							Service.Variable_Prefix,
+							1
 						);
+		Params	: AWS.Parameters.List := AWS.Status.Parameters( Request );
+
 
 		use KOW_Ent;
 		use Ada.Tags;
@@ -586,6 +593,26 @@ package body KOW_View.Entities is
 		end if;
 		
 		KOW_Ent.Store( Entity );
+
+
+		for N in 1 .. AWS.Parameters.Count( Params, Service.Inlined_Variable_Prefix & "_tag" ) loop
+			declare
+				Inlined_Entity : KOW_Ent.Entity_Type'Class :=
+								KOW_View.Entities_Helper.Load(
+										Request,
+										Service.Inlined_Variable_Prefix,
+										N
+									);
+			begin
+				null;
+				-- TODO :: deal with security for inlined entities...
+				-- NOTE :: there is a problem where I create more than one entity... how do I control that?
+				-- NOTE :: it's simple, as long as I have a map of granted authorizations for this request
+	--			KOW_Ent.Set_Foreign_Key( Entity => Inlined_Entity, Related_Entity => Entity );
+	--			Store( Entity );
+			end;
+		end loop;
+
 		Response := AWS.Response.URL( AWS.Status.Referer( Request ) );
 	end Process_Request;
 

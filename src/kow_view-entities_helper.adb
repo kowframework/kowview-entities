@@ -777,7 +777,8 @@ package body KOW_View.Entities_Helper is
 	procedure Load(
 			Data		: in     AWS.Status.Data;
 			Variable_Prefix	: in     String;
-			Entity		: in out KOW_Ent.Entity_Type'Class
+			Entity		: in out KOW_Ent.Entity_Type'Class;
+			N		: in     Positive
 		) is
 	-- read the data from a FORM returning a new entity to be stored/loaded/whateveroaded
 	-- 	[P_][TAG]__id		=> the ID for this entity (if available)
@@ -815,7 +816,7 @@ package body KOW_View.Entities_Helper is
 
 		begin
 			Prop := KOW_Ent.Property_Lists.Element( C );
-			KOW_Ent.Set_Property( Prop.all, Entity, AWS.Parameters.Get( Params, Param_ID ) );
+			KOW_Ent.Set_Property( Prop.all, Entity, AWS.Parameters.Get( Params, Param_ID, N ) );
 		end Iterator;
 	begin
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );
@@ -826,7 +827,8 @@ package body KOW_View.Entities_Helper is
 
 	function Do_Load(
 			Data		: in AWS.Status.Data;
-			Variable_Prefix	: in String
+			Variable_Prefix	: in String;
+			N		: in Positive
 		) return KOW_Ent.Entity_Type'Class is
 		-- The same as the Load procedure, but create and load the entity from the database if it's set
 		-- read the data from:
@@ -846,25 +848,26 @@ package body KOW_View.Entities_Helper is
 		P	: String := Set_Prefix;
 		Params	: AWS.Parameters.List := AWS.Status.Parameters( Data );
 		
-		The_Tag : String := AWS.Parameters.Get( Params, P & "tag" );
+		The_Tag : String := AWS.Parameters.Get( Params, P & "tag", N );
 		Entity	: KOW_Ent.Entity_Type'Class := KOW_Ent.New_Entity( To_Unbounded_String( The_Tag ) );
-		Id	: String := AWS.Parameters.Get( Params, P & The_Tag & "__id" );
+		Id	: String := AWS.Parameters.Get( Params, P & The_Tag & "__id", N );
 	begin
 		if Id /= "" then
 		 	KOW_Ent.Load( Entity, KOW_Ent.To_Id( Natural'Value( Id ), Entity'Tag  ) );
 		end if;
 
-		Load( Data, Variable_Prefix, Entity );
+		Load( Data, Variable_Prefix, Entity, N );
 		return Entity;
 	end Do_Load;
 
 	function Load(
 			Data		: in AWS.Status.Data;
-			Variable_Prefix	: in String
+			Variable_Prefix	: in String;
+			N		: in Positive			-- parameter N of AWS.Parameters.Get() method
 		) return KOW_Ent.Entity_Type'Class is
 	begin
 		--Dump_Params( Data );
-		return Do_Load( Data, Variable_Prefix );
+		return Do_Load( Data, Variable_Prefix, N );
 	end Load;
 
 
