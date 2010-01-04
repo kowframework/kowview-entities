@@ -730,7 +730,7 @@ package body KOW_View.Entities_Helper is
 		Form_Elements_Tag	: Templates_Parser.Tag;
 
 		
-		procedure Tags_Iterator( C : in KOW_Lib.UString_Vectors.Cursor ) is
+		procedure Create_Tags_Iterator( C : in KOW_Lib.UString_Vectors.Cursor ) is
 			Entity : KOW_Ent.Entity_Type'Class := KOW_Ent.New_Entity(
 							KOW_Lib.UString_Vectors.Element( C )
 						);
@@ -760,14 +760,56 @@ package body KOW_View.Entities_Helper is
 									Ignore_Relation => Ignore_Relation
 								);
 			end if;
-		end Tags_Iterator;
+		end Create_Tags_Iterator;
+
+
+	
+		procedure Edit_Tags_Iterator( C : in KOW_Lib.UString_Vectors.Cursor ) is
+			Entity : KOW_Ent.Entity_Type'Class := KOW_Ent.New_Entity(
+							KOW_Lib.UString_Vectors.Element( C )
+						);
+
+			The_Tag : String := Ada.Characters.Handling.To_Lower(
+						Ada.Tags.Expanded_Name( Entity'Tag )
+					);
+			Form_ID	: String := P & '_' & The_Tag;
+			The_Label : String := KOW_Ent.Get_Label( Entity, Locale );
+
+		begin
+			Form_IDs		:= Form_IDs		& Form_ID;
+			Tags_Tag		:= Tags_Tag		& The_Tag;
+			Ids_Tag			:= Ids_Tag		& Get_ID( Entity );
+			Column_Ids_Tag		:= Column_Ids_Tag	& Get_Column_Ids_Tag( Entity, Ignore_Relation );
+			Label_Tag		:= Label_Tag		& The_Label;
+			Labels_Tag		:= Labels_Tag		& Get_Labels_Tag( Entity, Locale, Ignore_Relation );
+			Resolved_Labels_Tag	:= Resolved_Labels_Tag	& Get_Resolved_Labels_Tag( Entity, Locale, Ignore_Relation );
+			Values_Tag		:= Values_Tag		& Get_Values_Tag( Entity, Locale, Ignore_Relation );
+			Resolved_Values_Tag	:= Resolved_Values_Tag	& Get_Resolved_Values_Tag( Entity, Locale, Ignore_Relation );
+
+			if Include_Form then
+				Form_Elements_Tag := Form_Elements_Tag & Get_Form_Elements_Tag(
+									Entity		=> Entity,
+									Locale		=> Locale,
+									Name_Prefix	=> Variable_Prefix,
+									Form_Mode	=> Form_Mode,
+									Ignore_Relation => Ignore_Relation
+								);
+			end if;
+		end Edit_Tags_Iterator;
 
 	begin
-
-		KOW_Lib.UString_Vectors.Iterate(
-				Entity_Tags,
-				Tags_iterator'Access
-			);
+		case Form_Mode is
+			when Create =>
+				KOW_Lib.UString_Vectors.Iterate(
+						Entity_Tags,
+						Create_Tags_iterator'Access
+					);
+			when Edit =>
+				KOW_Lib.UString_Vectors.Iterate(
+						Entity_Tags,
+						Edit_Tags_iterator'Access
+					);
+		end case;
 
 		Insert( Set, Assoc( P & "_form_ids",		Form_IDs ) );
 		Insert( Set, Assoc( P & "_tag",			Tags_Tag ) );
@@ -819,7 +861,7 @@ package body KOW_View.Entities_Helper is
 		Properties	: KOW_Ent.Property_Lists.List;
 
 		procedure Iterator( C : KOW_Ent.Property_Lists.Cursor ) is
-			Prop : KOW_Ent.Entity_Property_Ptr;
+			Prop : KOW_Ent.Entity_Property_Ptr := KOW_Ent.Property_Lists.Element( C );
 
 
 			function Param_ID return String is
@@ -829,11 +871,13 @@ package body KOW_View.Entities_Helper is
 
 			use KOW_Ent;
 		begin
+			Log( "Getting property.." );
 			if Prop /= null then
 				Log( "Iterating over " & Param_ID );
-				Prop := KOW_Ent.Property_Lists.Element( C );
 				KOW_Ent.Set_Property( Prop.all, Entity, AWS.Parameters.Get( Params, Param_ID, N ) );
 			end if;
+		exception
+			when constraint_error => null;
 		end Iterator;
 	begin
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );

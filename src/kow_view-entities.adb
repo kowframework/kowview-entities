@@ -268,6 +268,17 @@ package body KOW_View.Entities is
 				);
 
 
+		KOW_View.Entities_Helper.Insert_All(
+				My_Parameters,
+				"inlined_entity",
+				Module.Inlined_Entity_Tags,
+				Include_Form	=> True,
+				Form_Mode	=> KOW_View.Entities_Helper.Edit,
+				Ignore_Relation	=> Ada.Tags.Expanded_Name( Entity'Tag )
+			);
+
+
+
 		KOW_View.Security.Grant_Authorization(
 				Request,
 				Ada.Tags.Expanded_Name( Entity'Tag ) & "::" & KOW_Ent.To_String( Entity.Id ),
@@ -574,6 +585,9 @@ package body KOW_View.Entities is
 		Params	: AWS.Parameters.List := AWS.Status.Parameters( Request );
 
 
+		Inlined_Tag	: Unbounded_String;
+		Inlined_Count	: Positive := 1;
+
 		use KOW_Ent;
 		use Ada.Tags;
 	begin
@@ -598,14 +612,36 @@ package body KOW_View.Entities is
 		for N in 1 .. AWS.Parameters.Count( Params, Service.Inlined_Variable_Prefix & "_tag" ) loop
 			Log( "loading entity" );
 			declare
+				Current_Inlined_Tag : Unbounded_String := 
+							To_Unbounded_String(
+								AWS.Parameters.Get(
+										Params,
+										Service.inlined_Variable_Prefix & "_tag"
+									)
+							);
+
 				Inlined_Entity : KOW_Ent.Entity_Type'Class :=
-								KOW_View.Entities_Helper.Load(
-										Request,
-										Service.Inlined_Variable_Prefix,
-										N
+								KOW_Ent.Entity_Registry.New_Entity(
+										Current_Inlined_Tag
 									);
 			begin
-				Log( "entity loaded" );
+				if Inlined_Tag /= Current_Inlined_Tag then
+					Inlined_Tag := Current_Inlined_Tag;
+					Inlined_Count := 1;
+				else
+					Inlined_Count := Inlined_Count + 1;
+				end if;
+				KOW_View.Entities_Helper.Load(
+							Data		=> Request,
+							Variable_Prefix	=> Service.Inlined_Variable_Prefix,
+							Entity		=> Inlined_Entity,
+							N		=> Inlined_Count
+						);
+
+				Log( "entity loaded :: " & To_String( Inlined_Tag ) & " :: " & Positive'Image( Inlined_Count ) );
+
+
+
 				-- TODO :: deal with security for inlined entities...
 				-- NOTE :: there is a problem where I create more than one entity... how do I control that?
 				-- NOTE :: it's simple, as long as I have a map of granted authorizations for this request
