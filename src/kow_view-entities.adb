@@ -274,7 +274,7 @@ package body KOW_View.Entities is
 				Module.Inlined_Entity_Tags,
 				Include_Form	=> True,
 				Form_Mode	=> KOW_View.Entities_Helper.Edit,
-				Ignore_Relation	=> Ada.Tags.Expanded_Name( Entity'Tag )
+				Related_Entity	=> Entity
 			);
 
 
@@ -388,7 +388,7 @@ package body KOW_View.Entities is
 				Module.Inlined_Entity_Tags,
 				Include_Form	=> True,
 				Form_Mode	=> KOW_View.Entities_Helper.Create,
-				Ignore_Relation	=> Ada.Tags.Expanded_Name( Entity'Tag )
+				Related_Entity	=> Entity
 			);
 
 

@@ -700,7 +700,7 @@ package body KOW_View.Entities_Helper is
 			Locale		: in     KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
 			Include_Form	: in     Boolean := False;
 			Form_Mode	: in     Form_Mode_Type;
-			Ignore_Relation	: in     String
+			Related_Entity	: in     KOW_Ent.Entity_Type'Class
 		) is
 		-- call all Assoc_* functions inserting the results in the translated set.
 		-- create the associations :
@@ -714,6 +714,7 @@ package body KOW_View.Entities_Helper is
 		-- for each entity listed in the Entity_Tags vector using 2 dimentional tag
 
 		P : String renames Variable_Prefix;
+		Ignore_Relation	: constant String := Ada.Tags.Expanded_Name( Related_Entity'Tag );
 		use Templates_Parser;
 
 
@@ -775,10 +776,19 @@ package body KOW_View.Entities_Helper is
 			Form_ID	: String := P & '_' & The_Tag;
 			The_Label : String := KOW_Ent.Get_Label( Entity, Locale );
 
+
+			All_Ids	: KOW_Ent.Id_Array_Type := KOW_Ent.Get_Related_IDs(
+								Related_To	=> Related_Entity,
+								Entity_Tag	=> Ada.Tags.Expanded_Name( Entity'Tag )
+							);
+
+			L_IDs_Tag		: Templates_Parser.Tag;
+			L_Form_Elements_Tag	: Templates_Parser.Tag;
+		
+
 		begin
 			Form_IDs		:= Form_IDs		& Form_ID;
 			Tags_Tag		:= Tags_Tag		& The_Tag;
-			Ids_Tag			:= Ids_Tag		& Get_ID( Entity );
 			Column_Ids_Tag		:= Column_Ids_Tag	& Get_Column_Ids_Tag( Entity, Ignore_Relation );
 			Label_Tag		:= Label_Tag		& The_Label;
 			Labels_Tag		:= Labels_Tag		& Get_Labels_Tag( Entity, Locale, Ignore_Relation );
@@ -786,14 +796,24 @@ package body KOW_View.Entities_Helper is
 			Values_Tag		:= Values_Tag		& Get_Values_Tag( Entity, Locale, Ignore_Relation );
 			Resolved_Values_Tag	:= Resolved_Values_Tag	& Get_Resolved_Values_Tag( Entity, Locale, Ignore_Relation );
 
+
+
+			for i in All_Ids'Range loop
+				KOW_Ent.Load( Entity, All_Ids( i ) );
+				L_IDs_Tag := L_IDs_Tag & Get_ID( Entity );
+				if Include_Form then
+					L_Form_Elements_Tag := L_Form_Elements_Tag & Get_Form_Elements_Tag(
+										Entity		=> Entity,
+										Locale		=> Locale,
+										Name_Prefix	=> Variable_Prefix,
+										Form_Mode	=> Form_Mode,
+										Ignore_Relation => Ignore_Relation
+									);
+				end if;
+			end loop;
+			Ids_Tag			:= Ids_Tag		& L_IDs_Tag;
 			if Include_Form then
-				Form_Elements_Tag := Form_Elements_Tag & Get_Form_Elements_Tag(
-									Entity		=> Entity,
-									Locale		=> Locale,
-									Name_Prefix	=> Variable_Prefix,
-									Form_Mode	=> Form_Mode,
-									Ignore_Relation => Ignore_Relation
-								);
+				Form_Elements_Tag := Form_Elements_Tag & L_Form_Elements_Tag;
 			end if;
 		end Edit_Tags_Iterator;
 
