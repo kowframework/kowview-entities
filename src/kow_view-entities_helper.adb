@@ -784,6 +784,9 @@ package body KOW_View.Entities_Helper is
 
 			L_IDs_Tag		: Templates_Parser.Tag;
 			L_Form_Elements_Tag	: Templates_Parser.Tag;
+
+			L_Resolved_Values_Tag	: Templates_Parser.Tag;
+			L_Values_Tag		: Templates_Parser.Tag;
 		
 
 		begin
@@ -793,14 +796,15 @@ package body KOW_View.Entities_Helper is
 			Label_Tag		:= Label_Tag		& The_Label;
 			Labels_Tag		:= Labels_Tag		& Get_Labels_Tag( Entity, Locale, Ignore_Relation );
 			Resolved_Labels_Tag	:= Resolved_Labels_Tag	& Get_Resolved_Labels_Tag( Entity, Locale, Ignore_Relation );
-			Values_Tag		:= Values_Tag		& Get_Values_Tag( Entity, Locale, Ignore_Relation );
-			Resolved_Values_Tag	:= Resolved_Values_Tag	& Get_Resolved_Values_Tag( Entity, Locale, Ignore_Relation );
 
 
 
 			for i in All_Ids'Range loop
 				KOW_Ent.Load( Entity, All_Ids( i ) );
 				L_IDs_Tag := L_IDs_Tag & Get_ID( Entity );
+
+				L_Values_Tag		:= L_Values_Tag			& Get_Values_Tag( Entity, Locale, Ignore_Relation );
+				L_Resolved_Values_Tag	:= L_Resolved_Values_Tag	& Get_Resolved_Values_Tag( Entity, Locale, Ignore_Relation );
 				if Include_Form then
 					L_Form_Elements_Tag := L_Form_Elements_Tag & Get_Form_Elements_Tag(
 										Entity		=> Entity,
@@ -812,6 +816,8 @@ package body KOW_View.Entities_Helper is
 				end if;
 			end loop;
 			Ids_Tag			:= Ids_Tag		& L_IDs_Tag;
+			Values_Tag		:= Values_Tag		& L_Values_Tag;
+			Resolved_Values_Tag	:= Resolved_Values_Tag	& L_Resolved_Values_Tag;
 			if Include_Form then
 				Form_Elements_Tag := Form_Elements_Tag & L_Form_Elements_Tag;
 			end if;

@@ -226,6 +226,18 @@ package body KOW_View.Entities is
 					Form_Mode => KOW_View.Entities_Helper.Edit
 				);
 
+
+
+		KOW_View.Entities_Helper.Insert_All(
+				My_Parameters,
+				"inlined_entity",
+				Module.Inlined_Entity_Tags,
+				Include_Form	=> True,
+				Form_Mode	=> KOW_View.Entities_Helper.Edit,
+				Related_Entity	=> Entity
+			);
+
+
 		Response := Response &
 			To_Unbounded_String(
 				Templates_Parser.Parse(
