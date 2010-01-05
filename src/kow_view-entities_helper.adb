@@ -730,6 +730,8 @@ package body KOW_View.Entities_Helper is
 		Resolved_Values_Tag	: Templates_Parser.Tag;
 		Form_Elements_Tag	: Templates_Parser.Tag;
 
+		Template_Form_Elements_Tag	: Templates_Parser.Tag;
+
 		
 		procedure Create_Tags_Iterator( C : in KOW_Lib.UString_Vectors.Cursor ) is
 			Entity : KOW_Ent.Entity_Type'Class := KOW_Ent.New_Entity(
@@ -761,12 +763,18 @@ package body KOW_View.Entities_Helper is
 									Ignore_Relation => Ignore_Relation
 								);
 			end if;
+
+			Template_Form_Elements_Tag := Form_elements_Tag;
 		end Create_Tags_Iterator;
 
 
 	
 		procedure Edit_Tags_Iterator( C : in KOW_Lib.UString_Vectors.Cursor ) is
 			Entity : KOW_Ent.Entity_Type'Class := KOW_Ent.New_Entity(
+							KOW_Lib.UString_Vectors.Element( C )
+						);
+
+			Empty_Entity : KOW_Ent.Entity_Type'Class := KOW_Ent.New_Entity(
 							KOW_Lib.UString_Vectors.Element( C )
 						);
 
@@ -821,6 +829,16 @@ package body KOW_View.Entities_Helper is
 			if Include_Form then
 				Form_Elements_Tag := Form_Elements_Tag & L_Form_Elements_Tag;
 			end if;
+
+
+			Template_Form_Elements_Tag := Template_Form_Elements_Tag & Get_Form_Elements_Tag(
+									Entity		=> Empty_Entity,
+									Locale		=> Locale,
+									Name_Prefix	=> Variable_Prefix,
+									Form_Mode	=> Create,
+									Ignore_Relation => Ignore_Relation
+								);
+
 		end Edit_Tags_Iterator;
 
 	begin
@@ -849,6 +867,7 @@ package body KOW_View.Entities_Helper is
 		
 		if Include_Form then
 			Insert( Set, Assoc( P & "_form_elements", Form_Elements_Tag ) );
+			Insert( Set, Assoc( P & "_template_form_elements", Template_Form_Elements_Tag ) );
 		end if;
 	end Insert_All;
 
