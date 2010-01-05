@@ -721,6 +721,7 @@ package body KOW_View.Entities_Helper is
 		Form_Ids		: Templates_Parser.Tag;
 
 		Tags_Tag		: Templates_Parser.Tag;
+		Template_Tags_Tag	: Templates_Parser.Tag;
 		Ids_Tag			: Templates_Parser.Tag;
 		Column_Ids_Tag		: Templates_Parser.Tag;
 		Label_Tag		: Templates_Parser.Tag;
@@ -746,6 +747,7 @@ package body KOW_View.Entities_Helper is
 		begin
 			Form_IDs		:= Form_IDs		& Form_ID;
 			Tags_Tag		:= Tags_Tag		& The_Tag;
+			Template_Tags_Tag	:= Template_Tags_Tag	& The_Tag;
 			Ids_Tag			:= Ids_Tag		& Get_ID( Entity );
 			Column_Ids_Tag		:= Column_Ids_Tag	& Get_Column_Ids_Tag( Entity, Ignore_Relation );
 			Label_Tag		:= Label_Tag		& The_Label;
@@ -795,11 +797,13 @@ package body KOW_View.Entities_Helper is
 
 			L_Resolved_Values_Tag	: Templates_Parser.Tag;
 			L_Values_Tag		: Templates_Parser.Tag;
+
+			L_Tags_Tag		: Templates_Parser.Tag;
 		
 
 		begin
 			Form_IDs		:= Form_IDs		& Form_ID;
-			Tags_Tag		:= Tags_Tag		& The_Tag;
+			Template_Tags_Tag	:= Template_Tags_Tag	& The_Tag;
 			Column_Ids_Tag		:= Column_Ids_Tag	& Get_Column_Ids_Tag( Entity, Ignore_Relation );
 			Label_Tag		:= Label_Tag		& The_Label;
 			Labels_Tag		:= Labels_Tag		& Get_Labels_Tag( Entity, Locale, Ignore_Relation );
@@ -810,6 +814,7 @@ package body KOW_View.Entities_Helper is
 			for i in All_Ids'Range loop
 				KOW_Ent.Load( Entity, All_Ids( i ) );
 				L_IDs_Tag := L_IDs_Tag & Get_ID( Entity );
+				L_Tags_Tag := L_Tags_Tag & The_Tag;
 
 				L_Values_Tag		:= L_Values_Tag			& Get_Values_Tag( Entity, Locale, Ignore_Relation );
 				L_Resolved_Values_Tag	:= L_Resolved_Values_Tag	& Get_Resolved_Values_Tag( Entity, Locale, Ignore_Relation );
@@ -826,6 +831,7 @@ package body KOW_View.Entities_Helper is
 			Ids_Tag			:= Ids_Tag		& L_IDs_Tag;
 			Values_Tag		:= Values_Tag		& L_Values_Tag;
 			Resolved_Values_Tag	:= Resolved_Values_Tag	& L_Resolved_Values_Tag;
+			Tags_Tag		:= Tags_Tag		& L_Tags_Tag;
 			if Include_Form then
 				Form_Elements_Tag := Form_Elements_Tag & L_Form_Elements_Tag;
 			end if;
@@ -857,6 +863,7 @@ package body KOW_View.Entities_Helper is
 
 		Insert( Set, Assoc( P & "_form_ids",		Form_IDs ) );
 		Insert( Set, Assoc( P & "_tag",			Tags_Tag ) );
+		Insert( Set, Assoc( P & "_template_tag",	Template_Tags_Tag ) );
 		Insert( Set, Assoc( P & "_id",			Ids_Tag ) );
 		Insert( Set, Assoc( P & "_column_ids",		Column_Ids_Tag ) );
 		Insert( Set, Assoc( P & "_label",		Label_Tag ) );
@@ -918,13 +925,20 @@ package body KOW_View.Entities_Helper is
 		begin
 			Log( "Getting property.." );
 			if Prop /= null then
-				Log( "Iterating over " & Param_ID );
+				Log( "Iterating over " & Param_ID & " :: " & Positive'Image( N ) );
+				Log( "Value for this property :: " & AWS.Parameters.Get( Params, Param_ID, N ) );
 				KOW_Ent.Set_Property( Prop.all, Entity, AWS.Parameters.Get( Params, Param_ID, N ) );
 			end if;
 		exception
 			when constraint_error => null;
 		end Iterator;
+		Id	: String := AWS.Parameters.Get( Params, P & "id", N );
 	begin
+		if Id /= "" AND Id /= "x" then
+			Log("loading previously saved entity with id " & ID );
+		 	KOW_Ent.Load( Entity, KOW_Ent.To_Id( Natural'Value( Id ), Entity'Tag  ) );
+		end if;
+
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
 	end Load;
@@ -956,12 +970,7 @@ package body KOW_View.Entities_Helper is
 		
 		The_Tag : String := AWS.Parameters.Get( Params, P & "tag", N );
 		Entity	: KOW_Ent.Entity_Type'Class := KOW_Ent.New_Entity( To_Unbounded_String( The_Tag ) );
-		Id	: String := AWS.Parameters.Get( Params, P & The_Tag & "__id", N );
-	begin
-		if Id /= "" then
-		 	KOW_Ent.Load( Entity, KOW_Ent.To_Id( Natural'Value( Id ), Entity'Tag  ) );
-		end if;
-
+	begin	
 		Load( Data, Variable_Prefix, Entity, N );
 		return Entity;
 	end Do_Load;
