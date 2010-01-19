@@ -665,16 +665,6 @@ package body KOW_View.Entities is
 		Response := AWS.Response.URL( AWS.Status.Referer( Request ) );
 	end Process_Request;
 
-begin
-
-	
-	KOW_View.Components_Registry.Register(
-		"entities",
-		new KOW_View.Entities.Component_Type,
-		false
-	);
-
-
 
 
 end KOW_View.Entities;
