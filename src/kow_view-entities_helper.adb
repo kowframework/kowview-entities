@@ -489,17 +489,34 @@ package body KOW_View.Entities_Helper is
 
 				Ret := Ret & T( Disabled_Enabled( P ) & "/>");
 
+			elsif P in KOW_Ent.Properties.UString_Property_Type'Class then
+
+				if KOW_Ent.Properties.UString_Property_Type(p).Length > 255 then
+					Ret := To_Unbounded_String( "<textarea name=""" );
+					Ret := Ret & Name;
+					Ret := Ret & To_Unbounded_String( """ maxlength=""" & 
+								Integer'Image(
+									KOW_Ent.Properties.UString_Property_Type(P).Length
+							) & """" & Disabled_Enabled( P ) & ">" );
+					Ret := Ret & To_Unbounded_String( String_Value );
+					Ret := Ret & To_Unbounded_String( "</textarea>" );
+				else
+					Ret := To_Unbounded_String( "<input type=""text"" name=""" );
+					Ret := Ret & Name;
+					Ret := Ret & To_Unbounded_String(
+								""" value=""" & String_Value & """"
+							);
+					Ret := Ret & To_Unbounded_String( " maxlength=""" & Integer'Image(
+								KOW_Ent.Properties.UString_Property_Type(P).Length
+							) & """" );
+					Ret := Ret & T( Disabled_Enabled( P ) & "/>");
+				end if;
 			else
 				Ret := To_Unbounded_String( "<input type=""text"" name=""" );
 				Ret := Ret & Name;
 				Ret := Ret & To_Unbounded_String(
-							""" value=""" & String_Value & """"
+						""" value=""" & String_Value & """"
 						);
-				if P in KOW_Ent.Properties.UString_Property_Type'Class then
-					Ret := Ret & To_Unbounded_String( " maxlength=""" & Integer'Image(
-								KOW_Ent.Properties.UString_Property_Type(P).Length
-							) & """" );
-				end if;
 				Ret := Ret & T( Disabled_Enabled( P ) & "/>");
 			end if;
 
