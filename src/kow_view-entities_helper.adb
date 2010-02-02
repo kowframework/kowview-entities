@@ -19,6 +19,7 @@ with KOW_Ent;
 with KOW_Ent.Properties;
 with KOW_Lib.Locales;
 with KOW_Lib.Log;
+with KOW_View.Entity_Property_Renderers;	use KOW_View.Entity_Property_Renderers;
 
 
 ---------
@@ -224,9 +225,24 @@ package body KOW_View.Entities_Helper is
 		procedure Iterator( C : KOW_Ent.Property_Lists.Cursor ) is
 			P : KOW_Ent.Entity_Property_Ptr;
 		begin
+
 			if not Should_Ignore( P, Ignore_Relation ) then
 				P := KOW_Ent.Property_Lists.Element( C );
-				Values_Tag := Values_Tag & KOW_Ent.Get_Property( P.all, Entity );
+				declare
+					R : KOW_View.Entity_Property_Renderers.Property_Renderer_Type'Class
+							:= KOW_View.Entity_Property_Renderers.Registry.Get_Renderer(
+									P.all'Tag
+								);
+					Result	: Unbounded_String;
+				begin
+					KOW_View.Entity_Property_Renderers.Render_View(
+							Renderer	=> R,
+							Entity		=> Entity,
+							Property	=> P.all,
+							Result		=> Result
+						);
+					Values_Tag := Values_Tag & Result;
+				end;
 			end if;
 		end Iterator;
 	begin
@@ -373,19 +389,6 @@ package body KOW_View.Entities_Helper is
 
 			function T( Str : in String ) return Unbounded_String renames To_Unbounded_String;
 
-
-			function Disabled_Enabled( Entity : in KOW_Ent.Entity_Property_Type'CLass ) return String is
-			begin
-				if Form_Mode = Edit AND THEN P.Immutable then
-					Log( "Field as disabled.." );
-					return " disabled ";
-				else
-					Log( "Field as enabled.." );
-					return "";
-				end if;
-			end Disabled_Enabled;
-
-
 			procedure Foreign_Key_Iterator( Entity : in KOW_Ent.Entity_Type'Class ) is
 				use KOW_Ent;
 				
@@ -451,7 +454,7 @@ package body KOW_View.Entities_Helper is
 			elsif P in KOW_Ent.Properties.Foreign_Key_Property_Type'Class then
 				Ret := T( "<select dojoType=""dijit.form.FilteringSelect"" name=""" );
 				Ret := Ret & Name & """";
-				Ret := Ret & T( Disabled_Enabled( P ) );
+				Ret := Ret & T( Disabled_Enabled( P,Form_Mode ) );
 				Ret := Ret & T( ">" );
 
 				declare
@@ -470,7 +473,7 @@ package body KOW_View.Entities_Helper is
 			elsif P in KOW_Ent.Properties.Locale_property_type'Class then
 				Ret := T( "<select dojoType=""dijit.form.FilteringSelect"" name=""" );
 				Ret := Ret & Name & """";
-				Ret := Ret & T( Disabled_Enabled( P ) );
+				Ret := Ret & T( Disabled_Enabled( P,Form_mode ) );
 				Ret := Ret & T( ">" );
 
 				KOW_Lib.Locales.Locale_Tables.Iterate(
@@ -487,7 +490,7 @@ package body KOW_View.Entities_Helper is
 							""" value=""" & String_Value & """"
 						);
 
-				Ret := Ret & T( Disabled_Enabled( P ) & "/>");
+				Ret := Ret & T( Disabled_Enabled( P,Form_Mode ) & "/>");
 
 			elsif P in KOW_Ent.Properties.UString_Property_Type'Class then
 
@@ -497,7 +500,7 @@ package body KOW_View.Entities_Helper is
 					Ret := Ret & To_Unbounded_String( """ maxlength=""" & 
 								Integer'Image(
 									KOW_Ent.Properties.UString_Property_Type(P).Length
-							) & """" & Disabled_Enabled( P ) & ">" );
+							) & """" & Disabled_Enabled( P,Form_Mode ) & ">" );
 					Ret := Ret & To_Unbounded_String( String_Value );
 					Ret := Ret & To_Unbounded_String( "</textarea>" );
 				else
@@ -509,15 +512,9 @@ package body KOW_View.Entities_Helper is
 					Ret := Ret & To_Unbounded_String( " maxlength=""" & Integer'Image(
 								KOW_Ent.Properties.UString_Property_Type(P).Length
 							) & """" );
-					Ret := Ret & T( Disabled_Enabled( P ) & "/>");
+					Ret := Ret & T( Disabled_Enabled( P, Form_Mode ) & "/>");
 				end if;
-			else
-				Ret := To_Unbounded_String( "<input type=""text"" name=""" );
-				Ret := Ret & Name;
-				Ret := Ret & To_Unbounded_String(
-						""" value=""" & String_Value & """"
-						);
-				Ret := Ret & T( Disabled_Enabled( P ) & "/>");
+				null;
 			end if;
 
 			return Ret;
@@ -540,10 +537,26 @@ package body KOW_View.Entities_Helper is
 
 			Name	:= Pref & T & "__" & P.Column_Name;
 
-			
+			declare
+				R : KOW_View.Entity_Property_Renderers.Property_Renderer_Type'Class
+						:= KOW_View.Entity_Property_Renderers.Registry.Get_Renderer(
+								P.all'Tag
+							);
+				Result	: Unbounded_String;
+			begin
+				KOW_View.Entity_Property_Renderers.Render_Form(
+						Renderer	=> R,
+						Entity		=> Entity,
+						Property	=> P.all,
+						Name		=> Name,
+						Form_Mode	=> Form_Mode,
+						Result		=> Result
+					);
+				Elements_Tag := Elements_Tag & Result;
+				-- Form_Element( Name, P.all );
+			end;
 
 
-			Elements_Tag := Elements_Tag & Form_Element( Name, P.all );
 		end Iterator;
 	begin
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );

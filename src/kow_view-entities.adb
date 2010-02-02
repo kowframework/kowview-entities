@@ -14,6 +14,7 @@ with KOW_Sec.Authentication.Entities;
 with KOW_View;
 with KOW_View.Components_Registry;
 with KOW_View.Entities_Helper;
+with KOW_View.Entity_Property_Renderers;
 with KOW_View.Security;
 
 
@@ -223,7 +224,7 @@ package body KOW_View.Entities is
 					My_Parameters,
 					"entity",
 					Entity,
-					Form_Mode => KOW_View.Entities_Helper.Edit
+					Form_Mode => KOW_View.Entity_Property_Renderers.Edit
 				);
 
 
@@ -233,7 +234,7 @@ package body KOW_View.Entities is
 				"inlined_entity",
 				Module.Inlined_Entity_Tags,
 				Include_Form	=> True,
-				Form_Mode	=> KOW_View.Entities_Helper.Edit,
+				Form_Mode	=> KOW_View.Entity_Property_Renderers.Edit,
 				Related_Entity	=> Entity
 			);
 
@@ -276,7 +277,7 @@ package body KOW_View.Entities is
 					"entity",
 					Entity,
 					Include_Form	=> True,
-					Form_Mode	=> KOW_View.Entities_Helper.Edit
+					Form_Mode	=> KOW_View.Entity_Property_Renderers.Edit
 				);
 
 
@@ -285,7 +286,7 @@ package body KOW_View.Entities is
 				"inlined_entity",
 				Module.Inlined_Entity_Tags,
 				Include_Form	=> True,
-				Form_Mode	=> KOW_View.Entities_Helper.Edit,
+				Form_Mode	=> KOW_View.Entity_Property_Renderers.Edit,
 				Related_Entity	=> Entity
 			);
 
@@ -391,7 +392,7 @@ package body KOW_View.Entities is
 					"entity",
 					Entity,
 					Include_Form	=> True,
-					Form_Mode	=> KOW_View.Entities_Helper.Create
+					Form_Mode	=> KOW_View.Entity_Property_Renderers.Create
 				);
 
 		KOW_View.Entities_Helper.Insert_All(
@@ -399,7 +400,7 @@ package body KOW_View.Entities is
 				"inlined_entity",
 				Module.Inlined_Entity_Tags,
 				Include_Form	=> True,
-				Form_Mode	=> KOW_View.Entities_Helper.Create,
+				Form_Mode	=> KOW_View.Entity_Property_Renderers.Create,
 				Related_Entity	=> Entity
 			);
 

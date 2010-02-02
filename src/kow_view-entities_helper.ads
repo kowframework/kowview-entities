@@ -13,6 +13,7 @@
 with KOW_Ent;
 with KOW_Lib.Locales;
 with KOW_Lib.UString_Vectors;
+with KOW_View.Entity_Property_Renderers;	use KOW_View.Entity_Property_Renderers;
 
 
 ---------
@@ -24,8 +25,6 @@ with Templates_Parser;
 
 package KOW_View.Entities_Helper is
 
-	type Form_Mode_Type is ( Edit, Create );
-	-- instructs if it's the form for creating or editing the entity
 
 
 
