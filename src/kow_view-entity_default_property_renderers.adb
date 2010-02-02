@@ -179,7 +179,7 @@ package body KOW_View.Entity_Default_Property_Renderers is
 
 		for i in All_Ids'First .. All_Ids'Last loop
 			KOW_Ent.Load( Ent, All_Ids( i ) );
-			Foreign_Key_Iterator( Entity );
+			Foreign_Key_Iterator( Ent );
 		end loop;
 		Ret := Ret & T("</select>" );
 
@@ -291,9 +291,9 @@ package body KOW_View.Entity_Default_Property_Renderers is
 	package P renames KOW_Ent.Properties;
 
 begin
-		R( P.UString_Property_Type'Tag,  UString_Factory'Access );
-		R( P.Boolean_Property_Type'Tag, Boolean_Factory'Access );
-		R( P.Foreign_Key_Property_Type'Tag, Foreign_Key_Factory'Access );
-		R( P.Locale_Property_Type'Tag, Locale_Factory'Access );
-		R( P.Password_Property_Type'Tag, Password_Factory'Access );
+	R( P.UString_Property_Type'Tag,  UString_Factory'Access );
+	R( P.Boolean_Property_Type'Tag, Boolean_Factory'Access );
+	R( P.Foreign_Key_Property_Type'Tag, Foreign_Key_Factory'Access );
+	R( P.Locale_Property_Type'Tag, Locale_Factory'Access );
+	R( P.Password_Property_Type'Tag, Password_Factory'Access );
 end KOW_View.Entity_Default_Property_Renderers;
