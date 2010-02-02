@@ -25,6 +25,26 @@ with Templates_Parser;
 package KOW_View.Entities is
 
 
+
+
+	type Service_Triggering_Entity_Type is interface;
+	-- entity type called by the store_entity_service (that can be use to retrieve username, for instance)
+
+	procedure Before_Service(
+			Entity		: in out Service_Triggering_Entity_Type;
+			Service		: in out KOW_View.Components.Service_Instance_Interface'Class;
+			Request		: in     AWS.Status.Data
+		) is abstract;
+
+	procedure After_Service(
+			Entity		: in out Service_Triggering_Entity_Type;
+			Service		: in out KOW_View.Components.Service_Instance_Interface'Class;
+			Request		: in     AWS.Status.Data;
+			Response	: in out AWS.Response.Data
+		) is abstract;
+
+
+
 	--------------------------
 	-- The Entity Component --
 	--------------------------

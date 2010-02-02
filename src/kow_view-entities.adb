@@ -609,6 +609,14 @@ package body KOW_View.Entities is
 		use Ada.Tags;
 	begin
 
+		if Entity in Service_Triggering_Entity_Type'Class then
+			Before_Service(
+					Entity		=> Service_Triggering_Entity_Type'Class( Entity ),
+					Service		=> Service,
+					Request		=> Request
+				);
+		end if;
+
 		if Entity.Id.My_Tag = Ada.Tags.No_Tag then
 			KOW_View.Security.Request_Authorization(
 					Request,
@@ -667,7 +675,19 @@ package body KOW_View.Entities is
 			end;
 		end loop;
 
+
+
 		Response := AWS.Response.URL( AWS.Status.Referer( Request ) );
+
+		if Entity in Service_Triggering_Entity_Type'Class then
+			After_Service(
+					Entity		=> Service_Triggering_Entity_Type'Class( Entity ),
+					Service		=> Service,
+					Request		=> Request,
+					Response	=> Response
+				);
+		end if;
+
 	end Process_Request;
 
 
