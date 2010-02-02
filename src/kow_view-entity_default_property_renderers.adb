@@ -303,7 +303,7 @@ package body KOW_View.Entity_Default_Property_Renderers is
 		Ret := Ret & To_Unbounded_String( """ value=""" & String_Value & """" );
 		Ret := Ret & To_Unbounded_String( Disabled_Enabled( Property, Form_Mode ) & "/>");
 		
-		Result := Ret;
+		Result := Ret & String_Value;
 	end Render_Form;
 
 
