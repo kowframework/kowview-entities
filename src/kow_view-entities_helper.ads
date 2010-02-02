@@ -44,12 +44,14 @@ package KOW_View.Entities_Helper is
 	function Get_Labels_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
-			Ignore_Relation	: in String := ""
+			Ignore_Relation	: in String := "";
+			Form_Pref	: in String := ""
 		) return Templates_Parser.Tag;
 
 	
 	function Assoc_Labels(
 			Variable_Name	: in String;
+			Form_Pref	: in String;
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 		) return Templates_Parser.Association;

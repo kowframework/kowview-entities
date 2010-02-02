@@ -105,7 +105,8 @@ package body KOW_View.Entities_Helper is
 	function Get_Labels_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
-			Ignore_Relation	: in String := ""
+			Ignore_Relation	: in String := "";
+			Form_Pref	: in String := ""
 			) return Templates_Parser.Tag is
 		Labels_Tag	: Templates_Parser.Tag;
 		Properties	: KOW_Ent.Property_Lists.List;
@@ -116,8 +117,22 @@ package body KOW_View.Entities_Helper is
 		begin
 			P := KOW_Ent.Property_Lists.Element( C );
 			if not Should_Ignore( P, Ignore_Relation ) then
-				Label := KOW_Ent.Get_Label( Entity, P.Column_Name, Locale );
-				Labels_Tag := Labels_Tag & Label;
+				declare
+					T	: constant String := Ada.Characters.Handling.To_Lower(
+								Ada.Tags.Expanded_Name( Entity'Tag )
+							);
+
+					Name : String := Form_Pref & "_" & T & "__" & To_String( P.Column_Name );
+				begin
+					if Form_Pref /= "" then
+						Label := To_Unbounded_String( "<label for=""" & Name & """>" );
+						Label := Label & To_Unbounded_String( KOW_Ent.Get_Label( Entity, P.Column_Name, Locale ) );
+						Label := Label & To_Unbounded_String( "</label>" );
+					else
+						Label := KOW_Ent.Get_Label( Entity, P.Column_Name, Locale );
+					end if;
+					Labels_Tag := Labels_Tag & Label;
+				end;
 			end if;
 		end Iterator;
 	begin
@@ -131,12 +146,13 @@ package body KOW_View.Entities_Helper is
 
 	function Assoc_Labels(
 			Variable_Name	: in String;
+			Form_Pref	: in String;
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
 		) return Templates_Parser.Association is
 		-- create a Tag inside with all labels (ordered by the entity's registry) in formatted as string
 	begin
-		return Templates_Parser.Assoc( Variable_Name, Get_Labels_Tag( Entity, Locale ) );
+		return Templates_Parser.Assoc( Variable_Name, Get_Labels_Tag( Entity, Locale, Form_Pref => Form_Pref ) );
 	end Assoc_Labels;
 
 
@@ -556,7 +572,7 @@ package body KOW_View.Entities_Helper is
 		Insert( Set, Assoc_Id( P & "_id", Entity ) );
 		Insert( Set, Assoc_column_ids( P & "_column_ids", Entity ) );
 		Insert( Set, Assoc_Label( P & "_label", Entity, Locale ) );
-		Insert( Set, Assoc_Labels( P & "_labels", Entity, Locale ) );
+		Insert( Set, Assoc_Labels( P & "_labels", P, Entity, Locale ) );
 		Insert( Set, Assoc_Resolved_Labels( P & "_resolved_labels", Entity, Locale ) );
 		Insert( Set, Assoc_Values( P & "_values", Entity, Locale ) );
 		Insert( Set, Assoc_Resolved_Values( P & "_resolved_values", Entity, Locale ) );
