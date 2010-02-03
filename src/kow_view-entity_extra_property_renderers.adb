@@ -22,9 +22,9 @@ package body KOW_View.Entity_Extra_Property_Renderers is
 
 
 
-	-------------------------------
-	-- Unbounded String Property --
-	-------------------------------
+	--------------------------
+	-- Date String Property --
+	--------------------------
 
 	overriding
 	procedure Render_Form(
@@ -52,7 +52,45 @@ package body KOW_View.Entity_Extra_Property_Renderers is
 
 
 
+
+
+
+
+	-------------------------------
+	-- Timestamp String Property --
+	-------------------------------
+
+	overriding
+	procedure Render_Form(
+				Renderer	: in out Timestamp_Renderer_Type;
+				Entity		: in     Entity_Type'Class;
+				Property	: in     Entity_Property_Type'Class;
+				Name		: in     Unbounded_String;
+				Form_Mode	: in     Form_Mode_Type;
+				Result		:    out Unbounded_String
+			) is
+		Ret : Unbounded_String;
+		String_Value : String := KOW_Ent.Get_Property( Property, Entity );
+	begin
+		Ret := To_Unbounded_String( "<input type=""text"" dojoType=""dijit.form.DateTextBox"" name=""" );
+		Ret := Ret & Name;
+		Ret := Ret & To_Unbounded_String( """ value=""" & String_Value & """" );
+		Ret := Ret & To_Unbounded_String( Disabled_Enabled( Property, Form_Mode ) & "/>");
+		
+		Result := Ret;
+	end Render_Form;
+
+
+
+
+
+
+
+
+
+
 	function Date_Factory is new KOW_View.Entity_Default_Property_Renderers.Generic_Factory( Renderer_Type => Date_Renderer_Type );
+	function Timestamp_Factory is new KOW_View.Entity_Default_Property_Renderers.Generic_Factory( Renderer_Type => Timestamp_Renderer_Type );
 
 
 
@@ -68,5 +106,6 @@ package body KOW_View.Entity_Extra_Property_Renderers is
 
 begin
 	R( P.Date_Properties.Property_Type'Tag,  Date_Factory'Access );
+	R( P.Timestamp_Properties.Property_Type'Tag,  Timestamp_Factory'Access );
 
 end KOW_View.Entity_Extra_Property_Renderers;

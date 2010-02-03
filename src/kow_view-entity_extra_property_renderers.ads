@@ -18,9 +18,9 @@ package KOW_View.Entity_Extra_Property_Renderers is
 
 
 
-	-------------------------------
-	-- Unbounded String Property --
-	-------------------------------
+	--------------------------
+	-- Date String Property --
+	--------------------------
 	type Date_Renderer_Type is new Property_Renderer_Type with null record;
 
 	overriding
@@ -32,6 +32,23 @@ package KOW_View.Entity_Extra_Property_Renderers is
 				Form_Mode	: in     Form_Mode_Type;
 				Result		:    out Unbounded_String
 			);
+
+
+	-------------------------------
+	-- Timestamp String Property --
+	-------------------------------
+	type Timestamp_Renderer_Type is new Property_Renderer_Type with null record;
+
+	overriding
+	procedure Render_Form(
+				Renderer	: in out Timestamp_Renderer_Type;
+				Entity		: in     Entity_Type'Class;
+				Property	: in     Entity_Property_Type'Class;
+				Name		: in     Unbounded_String;
+				Form_Mode	: in     Form_Mode_Type;
+				Result		:    out Unbounded_String
+			);
+
 
 
 end KOW_View.Entity_Extra_Property_Renderers;
