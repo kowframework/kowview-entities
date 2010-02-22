@@ -649,7 +649,7 @@ package body KOW_View.Entities is
 				);
 		end if;
 		
-		KOW_Ent.Store( Entity, True );
+		KOW_Ent.Store( Entity );
 
 
 		for N in 1 .. AWS.Parameters.Count( Params, Service.Inlined_Variable_Prefix & "_tag" ) loop
