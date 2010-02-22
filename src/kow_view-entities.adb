@@ -61,6 +61,19 @@ package body KOW_View.Entities is
 
 
 
+
+	function Load( The_Tag : in Unbounded_String; ID : in KOW_Ent.ID_Type; Narrow : in Boolean ) return KOW_Ent.Entity_Type'Class is
+		Entity : KOW_Ent.Entity_Type'Class := KOW_Ent.Entity_Registry.New_Entity( The_Tag );
+	begin
+		KOW_Ent.Load( Entity, ID );
+		if Narrow then
+			return KOW_Ent.Narrow( Entity );
+		else
+			return Entity;
+		end if;
+	end Load;
+
+
 	--------------------------
 	-- The Entity Component --
 	--------------------------
@@ -98,6 +111,7 @@ package body KOW_View.Entities is
 			View_Entity.Entity_Tag	:= KOW_Config.Element( Config, "entity_tag" );
 			View_Entity.Id		:= KOW_Ent.To_ID( KOW_Config.Element( Config, "id" ) );
 			View_Entity.Template_Name	:= KOW_Config.Value( Config, "template_name", Default_View_ENtity_Template_Name );
+			View_Entity.Narrow	:= KOW_Config.Value( Config, "narrow", True );
 
 			declare
 				Inlined_Forms	: KOW_Config.Config_File_Array := KOW_Config.Elements_Array( Config, "inlined" );
@@ -117,6 +131,7 @@ package body KOW_View.Entities is
 			Edit_Entity.Entity_Tag	:= KOW_Config.Element( Config, "entity_tag" );
 			Edit_Entity.Id		:= KOW_Ent.To_ID( KOW_Config.Element( Config, "id" ) );
 			Edit_Entity.Template_Name	:= KOW_Config.Value( Config, "template_name", Default_Edit_Entity_Template_Name );
+			Edit_Entity.Narrow	:= KOW_Config.Value( Config, "narrow", True );
 
 			declare
 				Inlined_Forms	: KOW_Config.Config_File_Array := KOW_Config.Elements_Array( Config, "inlined" );
@@ -162,6 +177,7 @@ package body KOW_View.Entities is
 			Entity_Browser.Edit_Entity_Template_Name := KOW_Config.Value( Config, "edit_entity_template_name", Default_Edit_Entity_Template_Name );
 			Entity_Browser.Create_Entity_Template_Name := KOW_Config.Value( Config, "edit_entity_template_name", Default_Create_Entity_Template_Name );
 			Entity_Browser.List_Entities_Template_Name := KOW_Config.Value( Config, "list_entities_template_name", Default_List_Entities_Template_Name );
+			Entity_Browser.Narrow := KOW_Config.Value( Config, "narrow", True );
 
 
 
@@ -219,12 +235,11 @@ package body KOW_View.Entities is
 
 
 		Properties	: KOW_Ent.Property_Lists.List;
-		Entity		: KOW_Ent.Entity_Type'Class := KOW_Ent.New_Entity( Module.Entity_Tag );
+		Entity		: KOW_Ent.Entity_Type'Class := Load( Module.Entity_Tag, Module.Id, Module.Narrow );
 
 		My_Parameters : Templates_Parser.Translate_Set;
 
 	begin
-		KOW_Ent.Load( Entity, Module.Id );
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Module.Entity_Tag );
 
 		KOW_View.Entities_Helper.Insert(
@@ -270,13 +285,11 @@ package body KOW_View.Entities is
 
 
 		Properties	: KOW_Ent.Property_Lists.List;
-		Entity		: KOW_Ent.Entity_Type'Class := KOW_Ent.New_Entity( Module.Entity_Tag );
+		Entity		: KOW_Ent.Entity_Type'Class := Load( Module.Entity_Tag, Module.Id, Module.Narrow );
 
 		My_Parameters : Templates_Parser.Translate_Set;
 
 	begin
-		Log( "Editing entity of tag " & To_String( Module.Entity_Tag ) );
-		KOW_Ent.Load( Entity, Module.Id );
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Module.Entity_Tag );
 
 		KOW_View.Entities_Helper.Insert(
@@ -451,7 +464,6 @@ package body KOW_View.Entities is
 
 
 		procedure Process_Listing_Request is
-			Entity  : KOW_Ent.Entity_Type'Class := KOW_Ent.New_Entity( Module.Entity_Tag );
 			All_Ids : KOW_Ent.Id_Array_Type := KOW_Ent.Get_All_Ids( Module.Entity_Tag );
 
 			Ids_Tag		: Templates_Parser.Tag;
@@ -466,12 +478,15 @@ package body KOW_View.Entities is
 			use Templates_Parser;
 		begin
 			for i in All_Ids'First .. All_Ids'Last loop
-				KOW_Ent.Load( Entity, All_Ids( i ) );
+				declare
+					Entity : KOW_Ent.Entity_Type'Class := Load( Module.Entity_Tag, All_Ids( i ), Module.Narrow );
+				begin
 
-				Ids_Tag := Ids_Tag & KOW_Ent.To_String( Entity.Id );
-				Labels_Tag := Labels_Tag & KOW_Ent.To_String( Entity );
-				Descriptions_Tag := Descriptions_Tag & KOW_Ent.Describe( Entity );
-				Image_URLs_Tag := Image_URLs_Tag & KOW_Ent.Image_URL( Entity );
+					Ids_Tag := Ids_Tag & KOW_Ent.To_String( Entity.Id );
+					Labels_Tag := Labels_Tag & KOW_Ent.To_String( Entity );
+					Descriptions_Tag := Descriptions_Tag & KOW_Ent.Describe( Entity );
+					Image_URLs_Tag := Image_URLs_Tag & KOW_Ent.Image_URL( Entity );
+				end;
 			end loop;
 
 

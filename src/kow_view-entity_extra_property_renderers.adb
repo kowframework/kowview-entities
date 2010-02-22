@@ -97,7 +97,7 @@ package body KOW_View.Entity_Extra_Property_Renderers is
 				"theTime = dijit.byId(""" & element_thetime & """).attr('value');" &
 				"theInput = dojo.byId( """ & element_input & """ );" &
 				"theInput.theDate = dojo.date.stamp.toISOString(theDate, {selector: 'date'});" &
-				"theInput.theTime = dojo.date.stamp.toISOString(theTime,{selector: 'time'}).substring(1,6);" &
+				"theInput.theTime = dojo.date.stamp.toISOString(theTime,{selector: 'time'}).substring(1,9);" &
 				"theInput.value = theInput.theDate + ' ' + theInput.theTime;}"  &
 			"</script>" );
 

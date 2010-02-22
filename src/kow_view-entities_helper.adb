@@ -136,7 +136,7 @@ package body KOW_View.Entities_Helper is
 			end if;
 		end Iterator;
 	begin
-		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );
+		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag, True );
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
 
 		return Labels_Tag;
@@ -203,7 +203,7 @@ package body KOW_View.Entities_Helper is
 			end if;
 		end Iterator;
 	begin
-		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );
+		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag, True );
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
 		return Labels_Tag;
 	exception
@@ -262,7 +262,7 @@ package body KOW_View.Entities_Helper is
 			end if;
 		end Iterator;
 	begin
-		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );
+		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag, True );
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
 		return Values_Tag;
 	end Get_Values_Tag;
@@ -348,7 +348,7 @@ package body KOW_View.Entities_Helper is
 			end if;
 		end Iterator;
 	begin
-		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );
+		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag, True );
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
 		return Values_Tag;
 	exception
@@ -433,7 +433,7 @@ package body KOW_View.Entities_Helper is
 
 		end Iterator;
 	begin
-		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );
+		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag, True );
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
 
 		return Elements_Tag;
@@ -526,7 +526,7 @@ package body KOW_View.Entities_Helper is
 			end if;
 		end Iterator;
 	begin
-		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );
+		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag, True );
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
 
 		return IDs_Tag;
@@ -843,7 +843,7 @@ package body KOW_View.Entities_Helper is
 		 	KOW_Ent.Load( Entity, KOW_Ent.To_Id( Natural'Value( Id ), Entity'Tag  ) );
 		end if;
 
-		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag );
+		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag, True );
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
 	end Load;
 

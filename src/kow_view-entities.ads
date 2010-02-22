@@ -268,6 +268,7 @@ private
 		Entity_Tag		: Unbounded_String;
 		Template_Name		: Unbounded_String;
 		Inlined_Entity_Tags	: KOW_Lib.UString_Vectors.Vector;
+		Narrow			: Boolean;
 	end record;
 
 
@@ -276,6 +277,7 @@ private
 		Entity_Tag		: Unbounded_String;
 		Template_Name		: Unbounded_String;
 		Inlined_Entity_Tags	: KOW_Lib.UString_Vectors.Vector;
+		Narrow			: Boolean;
 	end record;
 
 	type Edit_User_Entity_Module is new Edit_Entity_Module with null record;
@@ -318,6 +320,8 @@ private
 		
 		
 		Inlined_Entity_Tags		: KOW_Lib.UString_Vectors.Vector;
+
+		Narrow				: Boolean;
 	end record;
 
 
