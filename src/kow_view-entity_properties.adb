@@ -46,5 +46,29 @@ package body KOW_View.Entity_Properties is
 	end New_Hidden_UString_Property;
 
 
+	function New_File_Upload_Property(
+				Column_Name	: in     String;
+				Getter		: not null access function( Entity : in Entity_Type'Class ) return Unbounded_String;
+				Setter		: not null access procedure( Entity : in out Entity_Type'Class; Value : in Unbounded_String );
+				Upload_Path	: in     String;
+				Default_Value	: in     String := "N/A";
+				Immutable	: in     Boolean := False;
+				Length		: in     Positive := 150
+			) return Entity_Property_Ptr is
+	-- used to assist the creation of UString properties.
+	-- default_value represents the value to be set when the one retoner from database is NULL
+		UStr : File_Upload_Property_Type;
+	begin
+		UStr.Column_Name	:= To_Unbounded_String( Column_Name );
+		UStr.Getter		:= Getter;
+		UStr.Setter		:= Setter;
+		UStr.Upload_Path	:= To_Unbounded_String( Upload_Path );
+		UStr.Default_Value	:= To_Unbounded_String( Default_Value );
+		UStr.Immutable		:= Immutable;
+		UStr.Length		:= Length;
+		return new File_Upload_Property_Type'( UStr );
+	end New_File_Upload_Property;
+
+
 
 end KOW_View.Entity_Properties;
