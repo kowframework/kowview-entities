@@ -25,16 +25,6 @@ package body KOW_View.Entity_Default_Property_Renderers is
 
 
 
-
-	function Generic_Factory return Property_Renderer_Type'Class is
-		R : Renderer_Type;
-	begin
-		return R;
-	end Generic_Factory;
-
-
-
-
 	-------------------------------
 	-- Unbounded String Property --
 	-------------------------------
@@ -280,32 +270,6 @@ package body KOW_View.Entity_Default_Property_Renderers is
 
 
 
-	---------------------------------------------
-	-- Some types declared within this library --
-	---------------------------------------------
-
-	-------------------------------
-	-- Unbounded String Property --
-	-------------------------------
-	procedure Render_Form(
-				Renderer	: in out Hidden_UString_Renderer_Type;
-				Entity		: in     Entity_Type'Class;
-				Property	: in     Entity_Property_Type'Class;
-				Name		: in     Unbounded_String;
-				Form_Mode	: in     Form_Mode_Type;
-				Result		:    out Unbounded_String
-			) is
-		Ret : Unbounded_String;
-		String_Value : String := KOW_Ent.Get_Property( Property, Entity );
-	begin
-		Ret := To_Unbounded_String( "<input type=""hidden"" name=""" );
-		Ret := Ret & Name;
-		Ret := Ret & To_Unbounded_String( """ value=""" & String_Value & """" );
-		Ret := Ret & To_Unbounded_String( Disabled_Enabled( Property, Form_Mode ) & "/>");
-		
-		Result := Ret & String_Value;
-	end Render_Form;
-
 
 	-- The stuff we need for bootstraping the packages..
 
@@ -315,7 +279,6 @@ package body KOW_View.Entity_Default_Property_Renderers is
 	function Foreign_Key_Factory is new Generic_Factory( Renderer_Type => Foreign_Key_Renderer_Type );
 	function Locale_Factory is new Generic_Factory( Renderer_Type => Locale_Renderer_Type );
 	function Password_Factory is new Generic_Factory( Renderer_Type => Password_Renderer_Type );
-	function Hidden_UString_Factory is new Generic_Factory( Renderer_Type => Hidden_UString_Renderer_Type );
 
 
 
@@ -324,16 +287,10 @@ package body KOW_View.Entity_Default_Property_Renderers is
 
 	package P renames KOW_Ent.Properties;
 
-
-	package KVP renames KOW_View.Entity_Properties;
-
-
-
 begin
 	R( P.UString_Property_Type'Tag,  UString_Factory'Access );
 	R( P.Boolean_Property_Type'Tag, Boolean_Factory'Access );
 	R( P.Foreign_Key_Property_Type'Tag, Foreign_Key_Factory'Access );
 	R( P.Locale_Property_Type'Tag, Locale_Factory'Access );
 	R( P.Password_Property_Type'Tag, Password_Factory'Access );
-	R( KVP.Hidden_UString_Property_Type'Tag, Hidden_UString_Factory'Access );
 end KOW_View.Entity_Default_Property_Renderers;

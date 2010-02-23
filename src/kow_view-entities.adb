@@ -20,6 +20,8 @@ with KOW_View.Entity_Default_Property_Renderers;
 pragma Elaborate(KOW_View.Entity_Default_Property_Renderers);
 with KOW_View.Entity_Extra_Property_Renderers;
 pragma Elaborate( KOW_View.Entity_Extra_Property_Renderers );
+with KOW_View.Entity_KVE_Property_Renderers;
+pragma Elaborate(KOW_View.Entity_KVE_Property_Renderers);
 -- this pkg need elaboration so the renderers are properly registered
 
 with KOW_View.Security;

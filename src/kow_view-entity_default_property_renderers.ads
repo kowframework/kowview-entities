@@ -14,10 +14,6 @@ with KOW_View.Entity_Property_Renderers;	use KOW_View.Entity_Property_Renderers;
 
 package KOW_View.Entity_Default_Property_Renderers is
 
-	generic
-		type Renderer_Type is new Property_Renderer_Type with private; 
-	function Generic_Factory return Property_Renderer_Type'Class;
-
 
 
 
@@ -117,23 +113,5 @@ package KOW_View.Entity_Default_Property_Renderers is
 
 
 
-	---------------------------------------------
-	-- Some types declared within this library --
-	---------------------------------------------
-
-	-------------------------------
-	-- Unbounded String Property --
-	-------------------------------
-	type Hidden_UString_Renderer_Type is new Property_Renderer_Type with null record;
-
-	overriding
-	procedure Render_Form(
-				Renderer	: in out Hidden_UString_Renderer_Type;
-				Entity		: in     Entity_Type'Class;
-				Property	: in     Entity_Property_Type'Class;
-				Name		: in     Unbounded_String;
-				Form_Mode	: in     Form_Mode_Type;
-				Result		:    out Unbounded_String
-			);
 
 end KOW_View.Entity_Default_Property_Renderers;

@@ -79,5 +79,10 @@ package KOW_View.Entity_Property_Renderers is
 	end Registry;
 
 
+	generic
+		type Renderer_Type is new Property_Renderer_Type with private; 
+	function Generic_Factory return Property_Renderer_Type'Class;
+
+
 
 end KOW_View.Entity_Property_Renderers;

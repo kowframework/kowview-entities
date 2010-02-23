@@ -135,8 +135,8 @@ package body KOW_View.Entity_Extra_Property_Renderers is
 
 
 
-	function Date_Factory is new KOW_View.Entity_Default_Property_Renderers.Generic_Factory( Renderer_Type => Date_Renderer_Type );
-	function Timestamp_Factory is new KOW_View.Entity_Default_Property_Renderers.Generic_Factory( Renderer_Type => Timestamp_Renderer_Type );
+	function Date_Factory is new KOW_View.Entity_Property_Renderers.Generic_Factory( Renderer_Type => Date_Renderer_Type );
+	function Timestamp_Factory is new KOW_View.Entity_Property_Renderers.Generic_Factory( Renderer_Type => Timestamp_Renderer_Type );
 
 
 

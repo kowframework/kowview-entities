@@ -120,4 +120,15 @@ package body KOW_View.Entity_Property_Renderers is
 	end Registry;
 
 
+
+
+	function Generic_Factory return Property_Renderer_Type'Class is
+		R : Renderer_Type;
+	begin
+		return R;
+	end Generic_Factory;
+
+
+
+
 end KOW_View.Entity_Property_Renderers;
