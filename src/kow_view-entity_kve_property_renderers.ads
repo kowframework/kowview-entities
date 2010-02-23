@@ -29,4 +29,22 @@ package KOW_View.Entity_KVE_Property_Renderers is
 				Result		:    out Unbounded_String
 			);
 
+
+
+	--------------------------
+	-- File Upload Property --
+	--------------------------
+	type File_Upload_Renderer_Type is new Property_Renderer_Type with null record;
+
+	overriding
+	procedure Render_Form(
+				Renderer	: in out File_Upload_Renderer_Type;
+				Entity		: in     Entity_Type'Class;
+				Property	: in     Entity_Property_Type'Class;
+				Name		: in     Unbounded_String;
+				Form_Mode	: in     Form_Mode_Type;
+				Result		:    out Unbounded_String
+			);
+
+
 end KOW_View.Entity_KVE_Property_Renderers;
