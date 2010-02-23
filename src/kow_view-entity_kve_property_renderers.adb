@@ -126,4 +126,5 @@ package body KOW_View.Entity_KVE_Property_Renderers is
 begin
 	R( KVP.Hidden_UString_Property_Type'Tag, Hidden_UString_Factory'Access );
 	R( KVP.File_Upload_Property_Type'Tag, File_Upload_Factory'Access );
+	R( KVP.Image_Upload_Property_Type'Tag, File_Upload_Factory'Access );
 end KOW_View.Entity_KVE_Property_Renderers;
