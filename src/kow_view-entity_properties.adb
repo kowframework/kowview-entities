@@ -118,10 +118,16 @@ package body KOW_View.Entity_Properties is
 
 		declare
 			Destination_Path : constant String := The_Destination_Path;
+			Old_Path	 : constant String := To_String( Property.Getter.all( Entity ) );
 		begin
 			if Ada.Directories.Exists( Destination_Path ) then
 				Ada.Directories.Delete_File( Destination_Path );
 			end if;
+
+			if Old_Path /= "" and then Ada.Directories.Exists( Old_Path ) then
+				Ada.Directories.Delete_File( Old_Path );
+			end if;
+
 			Ada.Directories.Copy_File( Source_Name => Value, Target_Name => Destination_Path );
 			Property.Setter.all( Entity, To_Unbounded_String( Destination_Path ) );
 		end;
