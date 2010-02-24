@@ -302,50 +302,26 @@ package body KOW_View.Entities_Helper is
 		begin
 			P := KOW_Ent.Property_Lists.Element( C );
 
-			if Should_Ignore( P, Ignore_Relation ) then
-				return;
+
+
+			if not Should_Ignore( P, Ignore_Relation ) then
+				declare
+					R : KOW_View.Entity_Property_Renderers.Property_Renderer_Type'Class
+							:= KOW_View.Entity_Property_Renderers.Registry.Get_Renderer(
+									P.all'Tag
+								);
+					Result	: Unbounded_String;
+				begin
+					KOW_View.Entity_Property_Renderers.Render_View(
+							Renderer	=> R,
+							Entity		=> Entity,
+							Property	=> P.all,
+							Result		=> Result
+						);
+					Values_Tag := Values_Tag & Result;
+				end;
 			end if;
 
-			if P.all in KOW_Ent.Properties.Boolean_Property_Type'Class then
-				declare
-					PP : KOW_Ent.Properties.Boolean_Property_Type'Class :=
-							KOW_Ent.Properties.Boolean_Property_Type'Class( P.all );
-				begin
-					if PP.Getter( Entity ) then
-						Values_Tag := Values_Tag & "<img src=""/themes/true.png"" alt=""true""/>";
-					else
-						Values_Tag := Values_Tag & "<img src=""/themes/false.png"" alt=""false""/>";
-					end if;
-				end;
-			elsif P.all in KOW_Ent.Properties.Foreign_Key_Property_Type'Class then
-				declare
-					PP : KOW_Ent.Properties.Foreign_Key_Property_Type'Class :=
-							KOW_Ent.Properties.Foreign_Key_Property_Type'Class( P.all );
-					Related_Entity: KOW_Ent.Entity_Type'Class := KOW_Ent.New_Entity(
-										PP.Related_Entity_Tag
-									);
-				begin
-					KOW_Ent.Load(
-							Related_Entity,
-							KOW_Ent.To_ID(
-								Natural'Value(
-									KOW_Ent.Get_Property( P.all, Entity )
-								)
-							)
-						);
-					Values_Tag := Values_Tag & KOW_Ent.To_String( Related_Entity );
-				end;
-			elsif P.all in KOW_Ent.Properties.Locale_Property_Type'Class then
-				declare
-					PP : KOW_Ent.Properties.Locale_property_Type'Class :=
-							KOW_Ent.Properties.Locale_Property_Type'Class( P.all );
-					Locale : KOW_Lib.Locales.Locale := PP.Getter.all( Entity );
-				begin
-					Values_Tag := Values_Tag & Locale.Name;
-				end;
-			else
-				Values_Tag := Values_Tag & KOW_Ent.Get_Property( P.all, Entity );
-			end if;
 		end Iterator;
 	begin
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag, True );
