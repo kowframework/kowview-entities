@@ -35,6 +35,17 @@ with KOW_Lib.String_Util;
 package body KOW_View.Entity_Properties is
 
 
+
+	----------------------
+	-- Helper Functions --
+	----------------------
+
+	function Thumb_Name( Orig : in String ) return String is
+	begin
+		return Orig & "_thumb." & Ada.Directories.Extension( Orig );
+	end Thumb_Name;
+
+
 	----------------------------------
 	-- Hidden UString Property Type --
 	----------------------------------
@@ -124,7 +135,7 @@ package body KOW_View.Entity_Properties is
 
 		-- now we check the allowed extensions
 		declare
-			Ext : String := Ada.Directories.Extension( Value );
+			Ext : String := Ada.Characters.Handling.To_Lower( Ada.Directories.Extension( Value ) );
 
 			Is_OK : Boolean := False;
 			procedure Iterator( C : in KOW_Lib.UString_Vectors.Cursor ) is
@@ -256,6 +267,9 @@ package body KOW_View.Entity_Properties is
 				Value		: in     String					-- the String representation of this value
 			) is
 		Old_Name : String := Get_Property( Property, Entity );
+
+
+
 	begin
 		Set_Property(
 				File_Upload_Property_Type( Property ),
@@ -263,8 +277,8 @@ package body KOW_View.Entity_Properties is
 				Value
 			);
 		if Old_Name /= "" then
-			if Ada.Directories.Exists( "thumbnail_" & Old_Name ) then
-				Ada.Directories.Delete_File( "thumbnail_" & Old_Name );
+			if Ada.Directories.Exists( Thumb_Name( Old_name ) ) then
+				Ada.Directories.Delete_File( Thumb_Name( Old_Name ) );
 			end if;
 		end if;
 		
@@ -274,7 +288,7 @@ package body KOW_View.Entity_Properties is
 							01 => new String'( "-thumbnail" ),
 							02 => new String'( To_String( Property.Thumbnail ) ),
 							03 => new String'( Get_Property( Property, Entity ) ),
-							04 => new String'( "thumbnail_" & Get_Property( Property, Entity ) )
+							04 => new String'( Thumb_Name( Get_Property( Property, Entity ) ) )
 						);
 		
 			Out_Status      : aliased Integer;
