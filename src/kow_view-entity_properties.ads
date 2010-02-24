@@ -91,7 +91,17 @@ package KOW_View.Entity_Properties is
 	--------------------------------
 
 
-	type Image_Upload_Property_Type is new File_Upload_Property_Type with null record;
+	type Image_Upload_Property_Type is new File_Upload_Property_Type with record
+		thumbnail	: unbounded_string;
+		-- geometry of the thumbnails
+	end record;
+
+	overriding
+	procedure Set_Property(
+				Property	: in     Image_Upload_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;			-- the entity
+				Value		: in     String					-- the String representation of this value
+			);
 
 
 	function New_Image_Upload_Property(
@@ -101,7 +111,8 @@ package KOW_View.Entity_Properties is
 				Upload_Path	: in     String;
 				Default_Value	: in     String := "N/A";
 				Immutable	: in     Boolean := False;
-				Length		: in     Positive := 150
+				Length		: in     Positive := 150;
+				Thumbnail	: in     String := "150x150"
 			) return Entity_Property_Ptr;
 	-- used to assist the creation of UString properties.
 	-- default_value represents the value to be set when the one retoner from database is NULL

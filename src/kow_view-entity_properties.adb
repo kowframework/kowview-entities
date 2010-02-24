@@ -14,6 +14,10 @@ with Ada.Strings.Unbounded;	use Ada.Strings.Unbounded;
 with Ada.Tags;
 
 
+
+with GNAT.Expect;
+with GNAT.OS_Lib;
+
 -------------------
 -- KOW Framework --
 -------------------
@@ -184,7 +188,8 @@ package body KOW_View.Entity_Properties is
 				Upload_Path	: in     String;
 				Default_Value	: in     String := "N/A";
 				Immutable	: in     Boolean := False;
-				Length		: in     Positive := 150
+				Length		: in     Positive := 150;
+				Thumbnail	: in     String := "150x150"
 			) return Entity_Property_Ptr is
 	-- used to assist the creation of UString properties.
 	-- default_value represents the value to be set when the one retoner from database is NULL
@@ -208,9 +213,52 @@ package body KOW_View.Entity_Properties is
 		UStr.Immutable		:= Immutable;
 		UStr.Length		:= Length;
 		UStr.File_Types		:= To_Unbounded_String( "jpg,jpeg,gif,png" );
+		UStr.Thumbnail		:= To_Unbounded_String( thumbnail );
 		return new Image_Upload_Property_Type'( UStr );
 	end New_Image_Upload_Property;
 
+
+	overriding
+	procedure Set_Property(
+				Property	: in     Image_Upload_Property_Type;		-- the property worker
+				Entity		: in out Entity_Type'Class;			-- the entity
+				Value		: in     String					-- the String representation of this value
+			) is
+		Old_Name : String := Get_Property( Property, Entity );
+	begin
+		Set_Property(
+				File_Upload_Property_Type( Property ),
+				Entity,
+				Value
+			);
+		if Old_Name /= "" then
+			Ada.Directories.Delete_File( "thumbnail_" & Old_Name );
+		end if;
+		
+		
+		declare
+			Arguments       : GNAT.OS_Lib.Argument_List := (
+							01 => new String'( "-thumbnail" ),
+							02 => new String'( To_String( Property.Thumbnail ) ),
+							03 => new String'( Get_Property( Property, Entity ) ),
+							04 => new String'( "thumbnail_" & Get_Property( Property, Entity ) )
+						);
+		
+			Out_Status      : aliased Integer;
+			Output          : String := GNAT.Expect.Get_Command_Output(
+						Command         => "convert",
+						Arguments       => Arguments,
+						Input           => "",
+						Status          => Out_Status'Access,
+						Err_To_Out      => True
+					);
+		begin
+			null;
+		end;
+		
+
+		
+	end Set_Property;
 
 
 
