@@ -17,6 +17,7 @@ with KOW_View;
 with KOW_View.Components_Registry;
 with KOW_View.Entities_Helper;
 with KOW_View.Entity_Property_Renderers;
+with KOW_View.Entity_Properties;
 
 with KOW_View.Entity_Default_Property_Renderers;
 pragma Elaborate(KOW_View.Entity_Default_Property_Renderers);
@@ -727,6 +728,41 @@ package body KOW_View.Entities is
 	-- File Download Service --
 	---------------------------
 
+	function Get_Filename( Request : in AWS.Status.Data ) return String is
+		Request_Info	: constant KOW_Lib.UString_Vectors.Vector := KOW_Lib.String_Util.Explode( '/', AWS.Status.URI( Request ) );
+
+		Entity_Tag	: constant Unbounded_String := KOW_Lib.UString_Vectors.Element( Request_Info, 2 );
+		Entity_Id	: constant Natural := Natural'Value( To_String( KOW_Lib.UString_Vectors.Element( Request_Info, 3 ) ) );
+		Column_Name	: constant Unbounded_String := KOW_Lib.UString_Vectors.Element( Request_Info, 4 );
+
+		Filename	: Unbounded_String;
+	begin
+		Log( "Getting file for entity of tag " & To_String( Entity_Tag ) & " and ID " & Natural'Image( Entity_ID ) );
+
+		
+		declare
+			package P renames KOW_Ent.Property_Lists;
+			Entity		: KOW_Ent.Entity_Type'Class := Load( Entity_Tag, KOW_Ent.To_ID( Entity_ID ), True );
+			Properties	: P.List := KOW_Ent.Entity_Registry.Get_Properties( Entity_Tag, True );
+
+			procedure Iterator( C : in P.Cursor ) is
+				Property : KOW_Ent.Entity_Property_Ptr := P.Element( C );
+			begin
+				if Property.Column_Name = Column_Name then
+					Filename := To_Unbounded_String( KOW_Ent.Get_Property( Property.all, Entity ) );
+				end if;
+			end Iterator;
+		begin
+			P.Iterate( Properties, Iterator'Access );
+		end;
+
+		return To_String( Filename );
+	end Get_Filename;
+		
+
+
+
+
 	overriding
 	procedure Process_Request(
 			Service		: in out File_Download_Service;
@@ -737,43 +773,48 @@ package body KOW_View.Entities is
 		-- 	/service_mapping/[entity_tag]/[entity_id]/[column_name]
 		-- serve the file using the name used in the storage
 
-
-		Request_Info	: constant KOW_Lib.UString_Vectors.Vector := KOW_Lib.String_Util.Explode( '/', AWS.Status.URI( Request ) );
-
-		Entity_Tag	: constant Unbounded_String := KOW_Lib.UString_Vectors.Element( Request_Info, 2 );
-		Entity_Id	: constant Natural := Natural'Value( To_String( KOW_Lib.UString_Vectors.Element( Request_Info, 3 ) ) );
-		Column_Name	: constant Unbounded_String := KOW_Lib.UString_Vectors.Element( Request_Info, 4 );
+		Filename : String := Get_Filename( Request );
 	begin
-		Log( "Getting file for entity of tag " & To_String( Entity_Tag ) & " and ID " & Natural'Image( Entity_ID ) );
-
-		
-		declare
-			package P renames KOW_Ent.Property_Lists;
-			Entity		: KOW_Ent.Entity_Type'Class := Load( Entity_Tag, KOW_Ent.To_ID( Entity_ID ), True );
-			Properties	: P.List := KOW_Ent.Entity_Registry.Get_Properties( Entity_Tag, True );
+		Response := AWS.Response.File(
+				Content_Type	=> AWS.MIME.Content_Type( Filename ),
+				Filename	=> Filename
+			);
+	end Process_Request;
 
 
-			procedure Serve( Filename : in String ) is
+	----------------------------
+	-- Image Download Service --
+	----------------------------
+
+
+	overriding
+	procedure Process_Request(
+			Service		: in out Image_Download_Service;
+			Request		: in     AWS.Status.Data;
+			Response	: in out AWS.Response.Data
+		) is
+		-- same as the file download service, but with the option of showing the thumbnail..
+		Filename : String := Get_Filename( Request );
+		Params	: AWS.Parameters.List := AWS.Status.Parameters( Request );
+		Mode	: String := AWS.Parameters.Get( Params, "mode" );
+	begin
+		if mode = "thumbnail" then
+			declare
+				thumb : string := KOW_View.Entity_Properties.Thumb_name( Filename );
 			begin
 				Response := AWS.Response.File(
-						Content_Type	=> AWS.MIME.Content_Type( Filename ),
-						Filename	=> Filename
+						Content_Type	=> AWS.MIME.Content_Type( Thumb ),
+						Filename	=> Thumb
 					);
-			end Serve;
-
-			procedure Iterator( C : in P.Cursor ) is
-				Property : KOW_Ent.Entity_Property_Ptr := P.Element( C );
-			begin
-				if Property.Column_Name = Column_Name then
-					Serve( KOW_Ent.Get_Property( Property.all, Entity ) );
-				end if;
-			end Iterator;
-		begin
-			P.Iterate( Properties, Iterator'Access );
-		end;
-		
-
+			end;
+		else
+			Response := AWS.Response.File(
+					Content_Type	=> AWS.MIME.Content_Type( Filename ),
+					Filename	=> Filename
+				);
+		end if;
 	end Process_Request;
+
 
 
 end KOW_View.Entities;

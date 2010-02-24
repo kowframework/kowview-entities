@@ -23,6 +23,14 @@ with KOW_Lib.UString_Vectors;
 
 package KOW_View.Entity_Properties is
 
+	----------------------
+	-- Helper Functions --
+	----------------------
+
+	function Thumb_Name( Orig : in String ) return String;
+
+
+
 
 	----------------------------------
 	-- Hidden UString Property Type --

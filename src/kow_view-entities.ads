@@ -253,7 +253,7 @@ package KOW_View.Entities is
 	---------------------------
 
 
-	type File_Download_Service is new KOW_View.Components.Service_Instance_Interface with private;
+	type File_Download_Service is new KOW_View.Components.Service_Instance_Interface with null record;
 
 	overriding
 	procedure Process_Request(
@@ -264,6 +264,21 @@ package KOW_View.Entities is
 	-- get an uploaded file, respecting the URL:
 	-- 	/service_mapping/[entity_tag]/[entity_id]/[column_name]
 	-- serve the file using the name used in the storage
+
+
+	----------------------------
+	-- Image Download Service --
+	----------------------------
+
+	type Image_Download_Service is new File_Download_Service with null record;
+
+	overriding
+	procedure Process_Request(
+			Service		: in out Image_Download_Service;
+			Request		: in     AWS.Status.Data;
+			Response	: in out AWS.Response.Data
+		);
+	-- same as the file download service, but with the option of showing the thumbnail..
 
 
 private
@@ -353,7 +368,6 @@ private
 
 
 
-	type File_Download_Service is new KOW_View.Components.Service_Instance_Interface with null record;
 
 
 end KOW_View.Entities;
