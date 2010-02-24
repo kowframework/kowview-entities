@@ -231,9 +231,9 @@ package KOW_View.Entities is
 		);
 	-- the entire cycle for this module is inside this single procedure.
 
-	---------------------------------------
-	-- Services for the Entity component --
-	---------------------------------------
+	--------------------------
+	-- Store Entity Service --
+	--------------------------
 
 	type Store_Entity_Service is new KOW_View.Components.Service_Instance_Interface with private;
 
@@ -248,6 +248,22 @@ package KOW_View.Entities is
 	-- save it back to the database backend afterwards
 
 
+	---------------------------
+	-- File Download Service --
+	---------------------------
+
+
+	type File_Download_Service is new KOW_View.Components.Service_Instance_Interface with private;
+
+	overriding
+	procedure Process_Request(
+			Service		: in out File_Download_Service;
+			Request		: in     AWS.Status.Data;
+			Response	: in out AWS.Response.Data
+		);
+	-- get an uploaded file, respecting the URL:
+	-- 	/service_mapping/[entity_tag]/[entity_id]/[column_name]
+	-- serve the file using the name used in the storage
 
 
 private
@@ -336,6 +352,8 @@ private
 	end record;
 
 
+
+	type File_Download_Service is new KOW_View.Components.Service_Instance_Interface with null record;
 
 
 end KOW_View.Entities;

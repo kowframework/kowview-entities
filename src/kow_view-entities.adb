@@ -9,6 +9,8 @@ with Ada.Text_IO;	use Ada.Text_IO;
 -- KOW Framework --
 -------------------
 with KOW_Lib.Log;
+with KOW_Lib.String_Util;
+with KOW_Lib.UString_Vectors;
 with KOW_Sec;
 with KOW_Sec.Authentication.Entities;
 with KOW_View;
@@ -30,6 +32,7 @@ with KOW_View.Security;
 ---------
 -- AWS --
 ---------
+with AWS.MIME;
 with AWS.Parameters;
 with AWS.Status;
 with Templates_Parser;
@@ -210,9 +213,16 @@ package body KOW_View.Entities is
 			Service_Name	: in String;
 			Service_Mapping	: in String
 		) return KOW_View.Components.Service_Instance_Interface'Class is
-		Store : Store_Entity_Service;
+		Store		: Store_Entity_Service;
+		File_Download	: File_Download_Service;
 	begin
-		return Store;
+		if Service_Name = "store" then
+			return Store;
+		elsif Service_Name = "file_download" then
+			return File_Download;
+		else
+			raise KOW_View.Components.Service_Error with "unknown service " & service_name;
+		end if;
 	end Create_Instance;
 
 
@@ -598,10 +608,9 @@ package body KOW_View.Entities is
 	end Process_Request;
 
 
-	---------------------------------------
-	-- Services for the Entity component --
-	---------------------------------------
-	
+	--------------------------
+	-- Store Entity Service --
+	--------------------------
 	
 	
 	
@@ -710,6 +719,61 @@ package body KOW_View.Entities is
 
 	end Process_Request;
 
+
+
+
+
+	---------------------------
+	-- File Download Service --
+	---------------------------
+
+	overriding
+	procedure Process_Request(
+			Service		: in out File_Download_Service;
+			Request		: in     AWS.Status.Data;
+			Response	: in out AWS.Response.Data
+		) is
+		-- get an uploaded file, respecting the URL:
+		-- 	/service_mapping/[entity_tag]/[entity_id]/[column_name]
+		-- serve the file using the name used in the storage
+
+
+		Request_Info	: constant KOW_Lib.UString_Vectors.Vector := KOW_Lib.String_Util.Explode( '/', AWS.Status.URI( Request ) );
+
+		Entity_Tag	: constant Unbounded_String := KOW_Lib.UString_Vectors.Element( Request_Info, 2 );
+		Entity_Id	: constant Natural := Natural'Value( To_String( KOW_Lib.UString_Vectors.Element( Request_Info, 3 ) ) );
+		Column_Name	: constant Unbounded_String := KOW_Lib.UString_Vectors.Element( Request_Info, 4 );
+	begin
+		Log( "Getting file for entity of tag " & To_String( Entity_Tag ) & " and ID " & Natural'Image( Entity_ID ) );
+
+		
+		declare
+			package P renames KOW_Ent.Property_Lists;
+			Entity		: KOW_Ent.Entity_Type'Class := Load( Entity_Tag, KOW_Ent.To_ID( Entity_ID ), True );
+			Properties	: P.List := KOW_Ent.Entity_Registry.Get_Properties( Entity_Tag, True );
+
+
+			procedure Serve( Filename : in String ) is
+			begin
+				Response := AWS.Response.File(
+						Content_Type	=> AWS.MIME.Content_Type( Filename ),
+						Filename	=> Filename
+					);
+			end Serve;
+
+			procedure Iterator( C : in P.Cursor ) is
+				Property : KOW_Ent.Entity_Property_Ptr := P.Element( C );
+			begin
+				if Property.Column_Name = Column_Name then
+					Serve( KOW_Ent.Get_Property( Property.all, Entity ) );
+				end if;
+			end Iterator;
+		begin
+			P.Iterate( Properties, Iterator'Access );
+		end;
+		
+
+	end Process_Request;
 
 
 end KOW_View.Entities;
