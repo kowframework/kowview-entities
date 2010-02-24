@@ -24,6 +24,7 @@ with GNAT.OS_Lib;
 with KOW_Ent;			use KOW_Ent;
 with KOW_Ent.Properties;
 with KOW_Lib.File_System;
+with KOW_Lib.String_Util;
 
 --------------------------------------------
 -- package with some useful properties... --
@@ -114,11 +115,41 @@ package body KOW_View.Entity_Properties is
 
 		end The_Destination_Path;
 
+
 	begin
 		if Value = "" then
 			return;
 		end if;
 
+
+		-- now we check the allowed extensions
+		declare
+			Ext : String := Ada.Directories.Extension( Value );
+
+			Is_OK : Boolean := False;
+			procedure Iterator( C : in KOW_Lib.UString_Vectors.Cursor ) is
+			begin
+				if IS_OK then
+					return;
+				end if;
+
+				if Ext = KOW_Lib.UString_Vectors.Element( C ) then
+					IS_OK := True;
+				end if;
+			end Iterator;
+		begin
+			KOW_Lib.UString_Vectors.Iterate(
+						Property.File_Types,
+						Iterator'Access
+					);
+
+			if not IS_OK then
+				raise KOW_Ent.Data_Validation_Error with "invalid file type.. please submit one of the following: " & 
+							KOW_Lib.String_Util.Implode( ',', Property.File_Types );
+			end if;
+		end;
+
+		
 
 		declare
 			Destination_Path : constant String := The_Destination_Path;
@@ -170,7 +201,7 @@ package body KOW_View.Entity_Properties is
 		UStr.Default_Value	:= To_Unbounded_String( Default_Value );
 		UStr.Immutable		:= Immutable;
 		UStr.Length		:= Length;
-		UStr.File_Types		:= To_Unbounded_String( Ada.Characters.Handling.To_Lower( File_Types ) );
+		UStr.File_Types		:= KOW_Lib.String_Util.Explode( ',', Ada.Characters.Handling.To_Lower( File_Types ) );
 		return new File_Upload_Property_Type'( UStr );
 	end New_File_Upload_Property;
 
@@ -232,7 +263,9 @@ package body KOW_View.Entity_Properties is
 				Value
 			);
 		if Old_Name /= "" then
-			Ada.Directories.Delete_File( "thumbnail_" & Old_Name );
+			if Ada.Directories.Exists( "thumbnail_" & Old_Name ) then
+				Ada.Directories.Delete_File( "thumbnail_" & Old_Name );
+			end if;
 		end if;
 		
 		

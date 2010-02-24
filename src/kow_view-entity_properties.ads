@@ -13,6 +13,7 @@ with Ada.Strings.Unbounded;	use Ada.Strings.Unbounded;
 -------------------
 with KOW_Ent;			use KOW_Ent;
 with KOW_Ent.Properties;
+with KOW_Lib.UString_Vectors;
 
 --------------------------------------------
 -- package with some useful properties... --
@@ -50,7 +51,7 @@ package KOW_View.Entity_Properties is
 
 	type File_Upload_Property_Type is new KOW_Ent.Properties.UString_Property_Type with record
 		Upload_Path	: Unbounded_String;
-		File_Types	: Unbounded_String;
+		File_Types	: KOW_Lib.UString_Vectors.Vector;
 	end record;
 
 	overriding
