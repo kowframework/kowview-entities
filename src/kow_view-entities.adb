@@ -216,11 +216,14 @@ package body KOW_View.Entities is
 		) return KOW_View.Components.Service_Instance_Interface'Class is
 		Store		: Store_Entity_Service;
 		File_Download	: File_Download_Service;
+		Image_Download	: Image_Download_Service;
 	begin
 		if Service_Name = "store" then
 			return Store;
 		elsif Service_Name = "file_download" then
 			return File_Download;
+		elsif Service_Name = "image_download" then
+			return Image_Download;
 		else
 			raise KOW_View.Components.Service_Error with "unknown service " & service_name;
 		end if;
