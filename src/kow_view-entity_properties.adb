@@ -243,7 +243,7 @@ package body KOW_View.Entity_Properties is
 		UStr.Default_Value	:= To_Unbounded_String( Default_Value );
 		UStr.Immutable		:= Immutable;
 		UStr.Length		:= Length;
-		UStr.File_Types		:= To_Unbounded_String( "jpg,jpeg,gif,png" );
+		UStr.File_Types		:= KOW_Lib.String_Util.Explode( ',',  "jpg,jpeg,gif,png" );
 		UStr.Thumbnail		:= To_Unbounded_String( thumbnail );
 		return new Image_Upload_Property_Type'( UStr );
 	end New_Image_Upload_Property;

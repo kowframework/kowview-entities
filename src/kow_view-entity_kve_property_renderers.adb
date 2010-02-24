@@ -71,17 +71,12 @@ package body KOW_View.Entity_KVE_Property_Renderers is
 				Result		:    out Unbounded_String
 			) is
 		Ret : Unbounded_String;
-		FTypes : Unbounded_String := KOW_View.Entity_Properties.File_Upload_Property_Type( Property ).File_Types;
 	begin
 		Ret := To_Unbounded_String( "<input type=""file"" name=""" );
 		Ret := Ret & Name;
 		Ret := Ret & To_Unbounded_String( """ " );
-		if FTYpes /= "" then
-			Ret := Ret & To_Unbounded_String( "accept=""" ) & FTypes & To_Unbounded_String( """ " );
-		end if;
 
 		Ret := Ret & To_Unbounded_String( Disabled_Enabled( Property, Form_Mode ) & "/>");
-		-- pra filtrar por tipo de arquivo use accept="image/gif,image/jpeg"
 
 		Result := Ret;
 	end Render_Form;
