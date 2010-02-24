@@ -85,14 +85,61 @@ package body KOW_View.Entity_KVE_Property_Renderers is
 
 
 
+	---------------------------
+	-- Image Upload Property --
+	---------------------------
+
+	overriding
+	procedure Render_Form(
+				Renderer	: in out Image_Upload_Renderer_Type;
+				Entity		: in     Entity_Type'Class;
+				Property	: in     Entity_Property_Type'Class;
+				Name		: in     Unbounded_String;
+				Form_Mode	: in     Form_Mode_Type;
+				Result		:    out Unbounded_String
+			) is
+		Ret1, Ret2 : Unbounded_String;
+
+
+		use Ada.Tags;
+	begin
+
+		if Entity.ID.My_Tag = Entity'Tag then
+			Ret1 := To_Unbounded_String( "<a href=""/image/" & Expanded_Name( Entity'Tag ) & "/" & KOW_Ent.To_String( Entity.ID ) & "/" & To_String( Property.Column_Name ) & """>" );
+			Ret1 := Ret1 & To_Unbounded_String( "<img src=""" & KOW_Ent.Image_URL( Entity ) & """/>" );
+			Ret1 := Ret1 & To_Unbounded_String( "</a>" );
+		end if;
+
+		Render_Form(
+				Renderer	=> File_Upload_Renderer_Type( Renderer ),
+				Entity		=> Entity,
+				Property	=> property,
+				Name		=> Name,
+				Form_Mode	=> Form_Mode,
+				Result		=> Ret2
+			);
+		
+
+		Result := Ret1 & Ret2;
+	end Render_Form;
 
 
 
-
-
-
-
-
+	overriding
+	procedure Render_View(
+				Renderer	: in out Image_Upload_Renderer_Type;
+				Entity		: in     Entity_Type'Class;
+				Property	: in     Entity_Property_Type'Class;
+				Result		:    out Unbounded_String
+			) is
+		use Ada.Tags;
+		Ret1 : Unbounded_String;
+	begin
+		Ret1 := To_Unbounded_String( "<a href=""/image/" & Expanded_Name( Entity'Tag ) & "/" & KOW_Ent.To_String( Entity.ID ) & "/" & To_String( Property.Column_Name ) & """>" );
+		Ret1 := Ret1 & To_Unbounded_String( "<img src=""" & KOW_Ent.Image_URL( Entity ) & """/>" );
+		Ret1 := Ret1 & To_Unbounded_String( "</a>" );
+		Result := Ret1;
+	end Render_View;
 
 
 
@@ -105,6 +152,7 @@ package body KOW_View.Entity_KVE_Property_Renderers is
 
 	function Hidden_UString_Factory is new Generic_Factory( Renderer_Type => Hidden_UString_Renderer_Type );
 	function File_Upload_Factory is new Generic_Factory( Renderer_Type => File_Upload_Renderer_Type );
+	function Image_Upload_Factory is new Generic_Factory( Renderer_Type => Image_Upload_Renderer_Type );
 
 
 
@@ -121,5 +169,5 @@ package body KOW_View.Entity_KVE_Property_Renderers is
 begin
 	R( KVP.Hidden_UString_Property_Type'Tag, Hidden_UString_Factory'Access );
 	R( KVP.File_Upload_Property_Type'Tag, File_Upload_Factory'Access );
-	R( KVP.Image_Upload_Property_Type'Tag, File_Upload_Factory'Access );
+	R( KVP.Image_Upload_Property_Type'Tag, Image_Upload_Factory'Access );
 end KOW_View.Entity_KVE_Property_Renderers;

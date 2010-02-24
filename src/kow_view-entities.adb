@@ -704,7 +704,24 @@ package body KOW_View.Entities is
 				-- NOTE :: there is a problem where I create more than one entity... how do I control that?
 				-- NOTE :: it's simple, as long as I have a map of granted authorizations for this request
 				KOW_Ent.Set_Foreign_Key( Entity => Inlined_Entity, Related_Entity => Entity );
-				Store( Inlined_Entity );
+
+				if Entity in Service_Triggering_Entity_Type'Class then
+					Before_Service(
+							Entity	=> Service_Triggering_Entity_type'Class( Inlined_Entity ),
+							Service	=> Service,
+							Request	=> Request
+						);
+					Store( Inlined_Entity );
+
+					After_Service(
+							Entity		=> Service_Triggering_Entity_Type'Class( Inlined_Entity ),
+							Service		=> Service,
+							Request		=> Request,
+							Response	=> Response
+						);
+				else
+					Store( Inlined_Entity );
+				end if;
 			end;
 		end loop;
 
