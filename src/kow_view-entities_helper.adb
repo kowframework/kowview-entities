@@ -552,6 +552,7 @@ package body KOW_View.Entities_Helper is
 		Insert( Set, Assoc_Resolved_Labels( P & "_resolved_labels", Entity, Locale ) );
 		Insert( Set, Assoc_Values( P & "_values", Entity, Locale ) );
 		Insert( Set, Assoc_Resolved_Values( P & "_resolved_values", Entity, Locale ) );
+		Insert( Set, Assoc( "filter_tags", Entity.Filter_Tags ) );
 		
 		if Include_Form then
 			Insert( Set, Assoc_Form_Elements(
@@ -821,6 +822,7 @@ package body KOW_View.Entities_Helper is
 
 		Properties := KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag, True );
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
+		Entity.Filter_Tags := To_Unbounded_String( AWS.Parameters.Get( Params, "filter_tags" ) );
 	end Load;
 
 

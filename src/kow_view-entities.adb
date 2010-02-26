@@ -8,6 +8,7 @@ with Ada.Text_IO;	use Ada.Text_IO;
 -------------------
 -- KOW Framework --
 -------------------
+with KOW_Ent.ID_Query_Builders;
 with KOW_Lib.Log;
 with KOW_Lib.String_Util;
 with KOW_Lib.UString_Vectors;
@@ -78,6 +79,56 @@ package body KOW_View.Entities is
 			return Entity;
 		end if;
 	end Load;
+
+
+
+	function Get_IDs(
+				Module	: in Entity_Browser_Module;
+				Filter	: in String
+			) return KOW_Ent.Id_Array_type is
+		use KOW_Ent.ID_Query_Builders;
+		use KOW_Ent.Property_Lists;
+		use KOW_Ent;
+
+		package V renames KOW_Lib.UString_Vectors;
+
+
+		Filter_Values	: V.Vector := KOW_Lib.String_Util.Explode( ' ', Filter );
+		Treated_Filter	: Unbounded_String;
+		Query		: Query_Type;
+		Properties	: KOW_Ent.Property_Lists.List := KOW_Ent.Entity_Registry.Get_Properties( Entity_Tag => Module.Entity_Tag, Force_all => False );
+		-- todo :: change force_all to true once we have reimplemented the query builder to use joins
+
+
+
+
+		procedure Filter_Iterator( C : in V.Cursor ) is
+		begin
+			Treated_Filter := To_Unbounded_String( "%" );
+			Append( Treated_Filter, V.Element( C ) );
+			Append( Treated_Filter, '%' );
+			Append(
+					Q		=> Query,
+					Column		=> "filter_tags",
+					Value		=> Treated_Filter,
+					Appender	=> Appender_And,
+					Operator	=> Operator_Like
+				);
+		end Filter_Iterator;
+
+
+
+
+	begin
+		Prepare( Query, Module.Entity_Tag );
+
+		V.Iterate( Filter_Values, Filter_Iterator'Access );
+		
+		return Get_All( Query );
+	end Get_IDs;
+
+
+
 
 
 	--------------------------
@@ -461,6 +512,9 @@ package body KOW_View.Entities is
 
 
 
+
+
+
 	--
 	-- Entity Browser
 	--
@@ -476,11 +530,12 @@ package body KOW_View.Entities is
 		Params	: AWS.Parameters.List := AWS.Status.Parameters( Request );
 		Action	: String := AWS.Parameters.Get( Params, "entity_browser_action" );
 		ID	: String := AWS.Parameters.Get( Params, "entity_browser_id" );
+		Filter	: String := AWS.Parameters.Get( Params, "filter" );
 
 
 
 		procedure Process_Listing_Request is
-			All_Ids : KOW_Ent.Id_Array_Type := KOW_Ent.Get_All_Ids( Module.Entity_Tag );
+			All_Ids : KOW_Ent.Id_Array_Type := Get_IDs( Module, Filter );
 
 			Ids_Tag		: Templates_Parser.Tag;
 			Labels_Tag	: Templates_Parser.Tag;
@@ -505,6 +560,10 @@ package body KOW_View.Entities is
 				end;
 			end loop;
 
+			Templates_Parser.Insert(
+					My_Parameters,
+					Templates_Parser.Assoc( "filter", Filter )
+				);
 
 			Templates_Parser.Insert(
 					My_Parameters,
