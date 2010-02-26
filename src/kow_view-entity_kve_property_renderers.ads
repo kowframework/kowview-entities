@@ -30,6 +30,21 @@ package KOW_View.Entity_KVE_Property_Renderers is
 			);
 
 
+	-------------------------------
+	-- Rich Text String Property --
+	-------------------------------
+	type Rich_Text_Renderer_Type is new Property_Renderer_Type with null record;
+
+	overriding
+	procedure Render_Form(
+				Renderer	: in out Rich_Text_Renderer_Type;
+				Entity		: in     Entity_Type'Class;
+				Property	: in     Entity_Property_Type'Class;
+				Name		: in     Unbounded_String;
+				Form_Mode	: in     Form_Mode_Type;
+				Result		:    out Unbounded_String
+			);
+
 
 	--------------------------
 	-- File Upload Property --

@@ -72,6 +72,35 @@ package body KOW_View.Entity_Properties is
 	end New_Hidden_UString_Property;
 
 
+	-----------------------------
+	-- Rich Text Property Type --
+	-----------------------------
+
+
+	function New_Rich_Text_Property(
+				Column_Name	: in     String;
+				Getter		: not null access function( Entity : in Entity_Type'Class ) return Unbounded_String;
+				Setter		: not null access procedure( Entity : in out Entity_Type'Class; Value : in Unbounded_String );
+				Default_Value	: in     String := "N/A";
+				Immutable	: in     Boolean := False;
+				Length		: in     Positive := 150
+			) return Entity_Property_Ptr is
+		-- used to assist the creation of UString properties.
+		-- default_value represents the value to be set when the one retoner from database is NULL
+		UStr : Rich_Text_Property_Type;
+	begin
+		UStr.Column_Name	:= To_Unbounded_String( Column_Name );
+		UStr.Getter		:= Getter;
+		UStr.Setter		:= Setter;
+		UStr.Default_Value	:= To_Unbounded_String( Default_Value );
+		UStr.Immutable		:= Immutable;
+		UStr.Length		:= Length;
+		return new Rich_Text_Property_Type'( UStr );
+	end New_Rich_Text_Property;
+
+
+
+
 
 	-------------------------------
 	-- File Upload Property Type --

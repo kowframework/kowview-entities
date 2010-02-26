@@ -53,6 +53,38 @@ package body KOW_View.Entity_KVE_Property_Renderers is
 	end Render_Form;
 
 
+	-------------------------------
+	-- Rich Text String Property --
+	-------------------------------
+
+	overriding
+	procedure Render_Form(
+				Renderer	: in out Rich_Text_Renderer_Type;
+				Entity		: in     Entity_Type'Class;
+				Property	: in     Entity_Property_Type'Class;
+				Name		: in     Unbounded_String;
+				Form_Mode	: in     Form_Mode_Type;
+				Result		:    out Unbounded_String
+			) is
+		P : KOW_View.Entity_Properties.Rich_Text_Property_Type'Class := KOW_View.Entity_Properties.Rich_Text_Property_Type'Class( Property );
+		String_Value : String := KOW_Ent.Get_Property( Property, Entity );
+		Ret : Unbounded_String;
+	begin
+		Ret := To_Unbounded_String( "<textarea name=""" );
+		Ret := Ret & Name;
+		Ret := Ret & To_Unbounded_String( """ id=""" );
+		Ret := Ret & Name;
+		Ret := Ret & To_Unbounded_String( """ maxlength=""" & 
+				Integer'Image(
+					P.Length
+			) & """" & Disabled_Enabled( Property,Form_Mode ) & ">" );
+		Ret := Ret & To_Unbounded_String( String_Value );
+		Ret := Ret & To_Unbounded_String( "</textarea>" );
+		Ret := Ret & To_Unbounded_String( "<script type=""text/javascript"">tinyMCE.execCommand(""mceAddControl"", true, """ );
+		Ret := Ret & Name;
+		Ret := Ret & To_Unbounded_String(""")</script>" );
+		Result := Ret;
+	end Render_Form;
 
 
 
@@ -151,6 +183,7 @@ package body KOW_View.Entity_KVE_Property_Renderers is
 
 
 	function Hidden_UString_Factory is new Generic_Factory( Renderer_Type => Hidden_UString_Renderer_Type );
+	function Rich_Text_Factory is new Generic_Factory( Renderer_Type => Rich_Text_Renderer_Type );
 	function File_Upload_Factory is new Generic_Factory( Renderer_Type => File_Upload_Renderer_Type );
 	function Image_Upload_Factory is new Generic_Factory( Renderer_Type => Image_Upload_Renderer_Type );
 
@@ -168,6 +201,7 @@ package body KOW_View.Entity_KVE_Property_Renderers is
 
 begin
 	R( KVP.Hidden_UString_Property_Type'Tag, Hidden_UString_Factory'Access );
+	R( KVP.Rich_Text_Property_Type'Tag, Rich_Text_Factory'Access );
 	R( KVP.File_Upload_Property_Type'Tag, File_Upload_Factory'Access );
 	R( KVP.Image_Upload_Property_Type'Tag, Image_Upload_Factory'Access );
 end KOW_View.Entity_KVE_Property_Renderers;
