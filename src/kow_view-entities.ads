@@ -353,6 +353,10 @@ private
 		Inlined_Entity_Tags		: KOW_Lib.UString_Vectors.Vector;
 
 		Narrow				: Boolean;
+
+
+		User_Data_Only			: Boolean;
+		User_Identity_Column		: Unbounded_String;
 	end record;
 
 

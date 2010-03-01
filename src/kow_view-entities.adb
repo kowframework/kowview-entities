@@ -19,6 +19,7 @@ with KOW_View.Components_Registry;
 with KOW_View.Entities_Helper;
 with KOW_View.Entity_Property_Renderers;
 with KOW_View.Entity_Properties;
+with KOW_View.Security;
 
 with KOW_View.Entity_Default_Property_Renderers;
 pragma Elaborate(KOW_View.Entity_Default_Property_Renderers);
@@ -84,7 +85,8 @@ package body KOW_View.Entities is
 
 	function Get_IDs(
 				Module	: in Entity_Browser_Module;
-				Filter	: in String
+				Filter	: in String;
+				Request	: in AWS.Status.Data
 			) return KOW_Ent.Id_Array_type is
 		use KOW_Ent.ID_Query_Builders;
 		use KOW_Ent.Property_Lists;
@@ -96,6 +98,7 @@ package body KOW_View.Entities is
 		Filter_Values	: V.Vector := KOW_Lib.String_Util.Explode( ' ', Filter );
 		Treated_Filter	: Unbounded_String;
 		Query		: Query_Type;
+		Main_Query	: Query_Type;
 		Properties	: KOW_Ent.Property_Lists.List := KOW_Ent.Entity_Registry.Get_Properties( Entity_Tag => Module.Entity_Tag, Force_all => False );
 		-- todo :: change force_all to true once we have reimplemented the query builder to use joins
 
@@ -123,8 +126,38 @@ package body KOW_View.Entities is
 		Prepare( Query, Module.Entity_Tag );
 
 		V.Iterate( Filter_Values, Filter_Iterator'Access );
+
+
+		if Module.User_Data_Only then
+			Prepare( Main_Query, Module.Entity_Tag );
+			declare
+				use KOW_sec;
+				User : User_Access := KOW_View.Security.Get_user( Request );
+				UIdentity : Unbounded_String;
+			begin
+				if User = null then
+					UIdentity := TO_Unbounded_String( "anonymous" );
+				else
+					UIdentity := To_Unbounded_String( Identity( User.all ) );
+				end if;
+				Append(
+						Q		=> Main_Query,
+						Column		=> Module.User_Identity_Column,
+						Value		=> UIdentity,
+						Appender	=> Appender_And,
+						Operator	=> Operator_Equals
+					);
+				Append(
+						Q		=> Main_Query,
+						Child_Q		=> Query,
+						Appender	=> Appender_And
+					);
+			end;
+		else
+			Main_Query := Query;
+		end if;
 		
-		return Get_All( Query );
+		return Get_All( Main_Query );
 	end Get_IDs;
 
 
@@ -235,6 +268,10 @@ package body KOW_View.Entities is
 			Entity_Browser.Create_Entity_Template_Name := KOW_Config.Value( Config, "edit_entity_template_name", Default_Create_Entity_Template_Name );
 			Entity_Browser.List_Entities_Template_Name := KOW_Config.Value( Config, "list_entities_template_name", Default_List_Entities_Template_Name );
 			Entity_Browser.Narrow := KOW_Config.Value( Config, "narrow", True );
+			Entity_Browser.User_Data_Only := KOW_Config.Value( Config, "user_data_only", False );
+			if Entity_Browser.User_Data_Only then
+				Entity_Browser.User_Identity_Column := KOW_Config.Element( Config, "user_identity_column" );
+			end if;
 
 
 
@@ -535,7 +572,7 @@ package body KOW_View.Entities is
 
 
 		procedure Process_Listing_Request is
-			All_Ids : KOW_Ent.Id_Array_Type := Get_IDs( Module, Filter );
+			All_Ids : KOW_Ent.Id_Array_Type := Get_IDs( Module, Filter, Request );
 
 			Ids_Tag		: Templates_Parser.Tag;
 			Labels_Tag	: Templates_Parser.Tag;
