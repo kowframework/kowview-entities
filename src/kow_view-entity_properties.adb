@@ -313,11 +313,16 @@ package body KOW_View.Entity_Properties is
 		
 		
 		declare
+			P_Thumbnail	: aliased String := "-thumbnail";
+			P_Thumbpath	: aliased String := To_String( Property.Thumbnail );
+			P_Property	: aliased String := Get_Property( Property, Entity );
+			P_Thumbname	: aliased String := Thumb_Name( Get_Property( Property, Entity ) );
+
 			Arguments       : GNAT.OS_Lib.Argument_List := (
-							01 => new String'( "-thumbnail" ),
-							02 => new String'( To_String( Property.Thumbnail ) ),
-							03 => new String'( Get_Property( Property, Entity ) ),
-							04 => new String'( Thumb_Name( Get_Property( Property, Entity ) ) )
+							01 => P_Thumbnail'Unchecked_Access,	-- new String'( "-thumbnail" ),
+							02 => P_Thumbpath'Unchecked_Access,	-- new String'( To_String( Property.Thumbnail ) ),
+							03 => P_Property'Unchecked_Access,	-- new String'( Get_Property( Property, Entity ) ),
+							04 => P_Thumbname'Unchecked_Access	-- new String'( Thumb_Name( Get_Property( Property, Entity ) ) )
 						);
 		
 			Out_Status      : aliased Integer;
