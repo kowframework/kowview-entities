@@ -122,6 +122,10 @@ package KOW_View.Entity_Properties is
 	type Image_Upload_Property_Type is new File_Upload_Property_Type with record
 		thumbnail	: unbounded_string;
 		-- geometry of the thumbnails
+
+
+		convert		: unbounded_string;
+		-- if set, contains the extension to convert the image in the server..
 	end record;
 
 	overriding
@@ -140,7 +144,8 @@ package KOW_View.Entity_Properties is
 				Default_Value	: in     String := "N/A";
 				Immutable	: in     Boolean := False;
 				Length		: in     Positive := 150;
-				Thumbnail	: in     String := "150x150"
+				Thumbnail	: in     String := "150x150";
+				Convert		: in     String := ""		-- default: do not convert image after upload... should be the destination extension
 			) return Entity_Property_Ptr;
 	-- used to assist the creation of UString properties.
 	-- default_value represents the value to be set when the one retoner from database is NULL

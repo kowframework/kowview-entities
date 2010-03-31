@@ -260,7 +260,8 @@ package body KOW_View.Entity_Properties is
 				Default_Value	: in     String := "N/A";
 				Immutable	: in     Boolean := False;
 				Length		: in     Positive := 150;
-				Thumbnail	: in     String := "150x150"
+				Thumbnail	: in     String := "150x150";
+				Convert		: in     String := ""		-- default: do not convert image after upload... should be the destination extension
 			) return Entity_Property_Ptr is
 	-- used to assist the creation of UString properties.
 	-- default_value represents the value to be set when the one retoner from database is NULL
@@ -285,6 +286,7 @@ package body KOW_View.Entity_Properties is
 		UStr.Length		:= Length;
 		UStr.File_Types		:= KOW_Lib.String_Util.Explode( ',',  "jpg,jpeg,gif,png" );
 		UStr.Thumbnail		:= To_Unbounded_String( thumbnail );
+		UStr.Convert		:= To_Unbounded_String( Convert );
 		return new Image_Upload_Property_Type'( UStr );
 	end New_Image_Upload_Property;
 
@@ -311,7 +313,37 @@ package body KOW_View.Entity_Properties is
 			end if;
 		end if;
 		
-		
+
+		--
+		-- convert the file, if needed
+		--
+		if Property.Convert /= "" then
+			declare
+				P_From		: aliased String := Get_Property( Property, Entity );
+				Ext		:         String := Ada.Directories.Extension( P_From );
+				P_To		: aliased String := P_From( P_From'First .. P_From'Last - Ext'Length + 1 ) & To_String( Property.Convert );
+				Arguments	: GNAT.OS_Lib.Argument_List := (
+							01	=> P_From'Unchecked_Access,
+							02	=> P_To'Unchecked_Access
+						);
+				Out_Status	: aliased Integer;
+				Output          : String := GNAT.Expect.Get_Command_Output(
+							Command         => "convert",
+							Arguments       => Arguments,
+							Input           => "",
+							Status          => Out_Status'Access,
+							Err_To_Out      => True
+						);
+			begin
+				Property.Setter.all( Entity, To_Unbounded_String( P_To ) );
+			end;
+
+		end if;
+
+		--
+		-- generate thumbnail..
+		--
+
 		declare
 			P_Thumbnail	: aliased String := "-thumbnail";
 			P_Thumbpath	: aliased String := To_String( Property.Thumbnail );
