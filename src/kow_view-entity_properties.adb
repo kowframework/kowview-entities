@@ -321,7 +321,7 @@ package body KOW_View.Entity_Properties is
 			declare
 				P_From		: aliased String := Get_Property( Property, Entity );
 				Ext		:         String := Ada.Directories.Extension( P_From );
-				P_To		: aliased String := P_From( P_From'First .. P_From'Last - Ext'Length + 1 ) & To_String( Property.Convert );
+				P_To		: aliased String := P_From( P_From'First .. P_From'Last - Ext'Length ) & To_String( Property.Convert );
 				Arguments	: GNAT.OS_Lib.Argument_List := (
 							01	=> P_From'Unchecked_Access,
 							02	=> P_To'Unchecked_Access
@@ -335,6 +335,9 @@ package body KOW_View.Entity_Properties is
 							Err_To_Out      => True
 						);
 			begin
+				if P_From /= P_To then
+					Ada.Directories.Delete_File( P_From );
+				end if;
 				Property.Setter.all( Entity, To_Unbounded_String( P_To ) );
 			end;
 
