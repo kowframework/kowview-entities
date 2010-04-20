@@ -73,17 +73,14 @@ package body KOW_View.Entities_Helper is
 	begin
 		if P = null then
 			return false;
-		elsif P.all not in Foreign_Key_Property_Type'Class then
-			return false;
-		else
+		elsif P.all in Foreign_Key_Property_Type'Class then
 			Log( "Comparing " & Ada.Tags.Expanded_Name( Foreign_Key_Property_Type( P.all ).Related_Entity_Tag ) & " with " & Related_Entity_Tag);
 			if Ada.Tags.Expanded_Name( Foreign_Key_Property_Type( P.all ).Related_Entity_Tag ) = Related_Entity_Tag then
 				return true;
-			else
-				return KOW_Lib.UString_Vectors.Contains( Ignore, P.Column_Name );
 			end if;
 		end if;
-	end SHould_Ignore;
+		return KOW_Lib.UString_Vectors.Contains( Ignore, P.Column_Name );
+	end Should_Ignore;
 
 
 
@@ -251,8 +248,8 @@ package body KOW_View.Entities_Helper is
 			P : KOW_Ent.Entity_Property_Ptr;
 		begin
 
+			P := KOW_Ent.Property_Lists.Element( C );
 			if not Should_Ignore( P, Ignore_Relation, Ignore ) then
-				P := KOW_Ent.Property_Lists.Element( C );
 				declare
 					R : KOW_View.Entity_Property_Renderers.Property_Renderer_Type'Class
 							:= KOW_View.Entity_Property_Renderers.Registry.Get_Renderer(
@@ -503,7 +500,7 @@ package body KOW_View.Entities_Helper is
 		Properties	: KOW_Ent.Property_Lists.List;
 
 		procedure Iterator( C : KOW_Ent.Property_Lists.Cursor ) is
-			P 	: KOW_Ent.Entity_Property_Ptr;
+			P 	: KOW_Ent.Entity_Property_Ptr := KOW_Ent.Property_Lists.Element( C );
 			T	: constant Unbounded_String := To_Unbounded_String(
 						Ada.Characters.Handling.To_Lower(
 							Ada.Tags.Expanded_Name( Entity'Tag )
@@ -511,7 +508,7 @@ package body KOW_View.Entities_Helper is
 					);
 			Key	: Unbounded_String;
 		begin
-			if Should_Ignore( P, Ignore_Relation, Ignore ) then
+			if not Should_Ignore( P, Ignore_Relation, Ignore ) then
 				P := KOW_Ent.Property_Lists.Element( C );
 				Key := T & "__" & P.Column_Name;
 				Ids_Tag := Ids_Tag & Key;
