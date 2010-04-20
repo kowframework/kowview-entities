@@ -217,7 +217,8 @@ package KOW_View.Entities_Helper is
 			Entity		: in     KOW_Ent.Entity_Type'Class;
 			Locale		: in     KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
 			Include_Form	: in     Boolean := False;
-			Form_Mode	: in     Form_Mode_Type
+			Form_Mode	: in     Form_Mode_Type;
+			Ignore		: in     KOW_Lib.UString_Vectors.Vector
 		);
 	-- call all Assoc_* functions inserting the results in the translated set.
 	-- create the associations :

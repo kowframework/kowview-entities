@@ -72,10 +72,11 @@ package KOW_View.Entities is
 			Config		: in KOW_Config.Config_File
 		) return KOW_View.Components.Module_Instance_Interface'Class;
 	-- create a module instance by given name
-	-- Available module:
+	-- Available modules:
 	-- 	view_entity
-	-- 	TODO :: edit_entity
-	-- 	TODO :: create_entity
+	-- 	edit_entity
+	-- 	create_entity
+	-- 	entity_browser
 	
 
 
@@ -300,6 +301,7 @@ private
 		Template_Name		: Unbounded_String;
 		Inlined_Entity_Tags	: KOW_Lib.UString_Vectors.Vector;
 		Narrow			: Boolean;
+		Ignore			: KOW_Lib.UString_Vectors.Vector;
 	end record;
 
 
@@ -309,6 +311,7 @@ private
 		Template_Name		: Unbounded_String;
 		Inlined_Entity_Tags	: KOW_Lib.UString_Vectors.Vector;
 		Narrow			: Boolean;
+		Ignore			: KOW_Lib.UString_Vectors.Vector;
 	end record;
 
 	type Edit_User_Entity_Module is new Edit_Entity_Module with null record;
@@ -323,6 +326,7 @@ private
 		Entity_Tag		: Unbounded_String;
 		Template_Name		: Unbounded_String;
 		Inlined_Entity_Tags	: KOW_Lib.UString_Vectors.Vector;
+		Ignore			: KOW_Lib.UString_Vectors.Vector;
 	end record;
 
 
@@ -353,6 +357,8 @@ private
 		Inlined_Entity_Tags		: KOW_Lib.UString_Vectors.Vector;
 
 		Narrow				: Boolean;
+
+		Ignore			: KOW_Lib.UString_Vectors.Vector;
 
 
 		User_Data_Only			: Boolean;

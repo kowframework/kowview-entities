@@ -544,7 +544,8 @@ package body KOW_View.Entities_Helper is
 			Entity		: in     KOW_Ent.Entity_Type'Class;
 			Locale		: in     KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
 			Include_Form	: in     Boolean := False;
-			Form_Mode	: in     Form_Mode_Type 
+			Form_Mode	: in     Form_Mode_Type;
+			Ignore		: in     KOW_Lib.UString_Vectors.Vector
 		) is
 		-- call all Assoc_* functions inserting the results in the translated set.
 		-- create the associations :
@@ -560,8 +561,6 @@ package body KOW_View.Entities_Helper is
 						Ada.Tags.Expanded_Name( Entity'Tag )
 					);
 
-		Ignore : KOW_Lib.UString_Vectors.Vector;
-		-- TODO :: enable de ignore stuff
 		use Templates_Parser;
 	begin
 		Insert( Set, Templates_Parser.Assoc( P & "_tag", The_Tag ) );

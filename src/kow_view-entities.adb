@@ -202,6 +202,7 @@ package body KOW_View.Entities is
 			View_Entity.Id		:= KOW_Ent.To_ID( KOW_Config.Element( Config, "id" ) );
 			View_Entity.Template_Name	:= KOW_Config.Value( Config, "template_name", Default_View_ENtity_Template_Name );
 			View_Entity.Narrow	:= KOW_Config.Value( Config, "narrow", True );
+			View_Entity.Ignore	:= KOW_Lib.String_Util.Explode( ',', To_Unbounded_String( KOW_Config.Value( Config, "ignore", "" ) ) );
 
 			declare
 				Inlined_Forms	: KOW_Config.Config_File_Array := KOW_Config.Elements_Array( Config, "inlined" );
@@ -222,6 +223,7 @@ package body KOW_View.Entities is
 			Edit_Entity.Id		:= KOW_Ent.To_ID( KOW_Config.Element( Config, "id" ) );
 			Edit_Entity.Template_Name	:= KOW_Config.Value( Config, "template_name", Default_Edit_Entity_Template_Name );
 			Edit_Entity.Narrow	:= KOW_Config.Value( Config, "narrow", True );
+			Edit_Entity.Ignore	:= KOW_Lib.String_Util.Explode( ',', To_Unbounded_String( KOW_Config.Value( Config, "ignore", "" ) ) );
 
 			declare
 				Inlined_Forms	: KOW_Config.Config_File_Array := KOW_Config.Elements_Array( Config, "inlined" );
@@ -246,6 +248,7 @@ package body KOW_View.Entities is
 		elsif Module_Name = "create_entity" then
 			Create_Entity.Entity_Tag 	:= KOW_Config.Element( Config, "entity_tag" );
 			Create_Entity.Template_Name	:= KOW_Config.Value( Config, "template_name", Default_Create_Entity_Template_Name );
+			Create_Entity.Ignore		:= KOW_Lib.String_Util.Explode( ',', To_Unbounded_String( KOW_Config.Value( Config, "ignore", "" ) ) );
 
 			declare
 				Inlined_Forms	: KOW_Config.Config_File_Array := KOW_Config.Elements_Array( Config, "inlined" );
@@ -268,6 +271,7 @@ package body KOW_View.Entities is
 			Entity_Browser.Create_Entity_Template_Name := KOW_Config.Value( Config, "edit_entity_template_name", Default_Create_Entity_Template_Name );
 			Entity_Browser.List_Entities_Template_Name := KOW_Config.Value( Config, "list_entities_template_name", Default_List_Entities_Template_Name );
 			Entity_Browser.Narrow := KOW_Config.Value( Config, "narrow", True );
+			Entity_Browser.Ignore := KOW_Lib.String_Util.Explode( ',', TO_Unbounded_String( KOW_Config.Value( Config, "ignore", "" ) ) );
 			Entity_Browser.User_Data_Only := KOW_Config.Value( Config, "user_data_only", False );
 			if Entity_Browser.User_Data_Only then
 				Entity_Browser.User_Identity_Column := KOW_Config.Element( Config, "user_identity_column" );
@@ -350,7 +354,8 @@ package body KOW_View.Entities is
 					My_Parameters,
 					"entity",
 					Entity,
-					Form_Mode => KOW_View.Entity_Property_Renderers.Edit
+					Form_Mode => KOW_View.Entity_Property_Renderers.Edit,
+					Ignore => Module.Ignore
 				);
 
 
@@ -401,7 +406,8 @@ package body KOW_View.Entities is
 					"entity",
 					Entity,
 					Include_Form	=> True,
-					Form_Mode	=> KOW_View.Entity_Property_Renderers.Edit
+					Form_Mode	=> KOW_View.Entity_Property_Renderers.Edit,
+					Ignore		=> Module.Ignore
 				);
 
 
@@ -516,7 +522,8 @@ package body KOW_View.Entities is
 					"entity",
 					Entity,
 					Include_Form	=> True,
-					Form_Mode	=> KOW_View.Entity_Property_Renderers.Create
+					Form_Mode	=> KOW_View.Entity_Property_Renderers.Create,
+					Ignore		=> Module.Ignore
 				);
 
 		KOW_View.Entities_Helper.Insert_All(
@@ -648,6 +655,7 @@ package body KOW_View.Entities is
 			Create_Entity.Entity_Tag := Module.Entity_Tag;
 			Create_Entity.Template_Name := Module.Create_Entity_Template_Name;
 			Create_Entity.Inlined_Entity_Tags := Module.Inlined_Entity_Tags;
+			Create_Entity.Ignore := Module.Ignore;
 
 			Process_Request(
 					Create_Entity,
@@ -666,6 +674,7 @@ package body KOW_View.Entities is
 			Edit_Entity.Id := KOW_Ent.To_Id( Natural'Value( ID ) );
 			Edit_Entity.Template_Name := Module.Edit_Entity_Template_Name;
 			Edit_Entity.Inlined_Entity_Tags := Module.Inlined_Entity_Tags;
+			Edit_Entity.Ignore := Module.Ignore;
 
 			Process_Request(
 					Edit_Entity,
@@ -683,6 +692,7 @@ package body KOW_View.Entities is
 			View_Entity.Id := KOW_Ent.To_Id( Natural'Value( ID ) );
 			View_Entity.Template_Name := Module.View_Entity_Template_Name;
 			View_Entity.Inlined_Entity_Tags := Module.Inlined_Entity_Tags;
+			View_Entity.Ignore := Module.Ignore;
 
 			Process_Request(
 					View_Entity,
