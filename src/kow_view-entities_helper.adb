@@ -67,7 +67,7 @@ package body KOW_View.Entities_Helper is
 
 
 
-	function Should_Ignore( P : in KOW_Ent.Entity_Property_Ptr; Related_Entity_Tag : in String ) return Boolean is
+	function Should_Ignore( P : in KOW_Ent.Entity_Property_Ptr; Related_Entity_Tag : in String; Ignore : KOW_Lib.UString_Vectors.Vector ) return Boolean is
 		use KOW_Ent;
 		use KOW_Ent.Properties;
 	begin
@@ -77,7 +77,11 @@ package body KOW_View.Entities_Helper is
 			return false;
 		else
 			Log( "Comparing " & Ada.Tags.Expanded_Name( Foreign_Key_Property_Type( P.all ).Related_Entity_Tag ) & " with " & Related_Entity_Tag);
-			return Ada.Tags.Expanded_Name( Foreign_Key_Property_Type( P.all ).Related_Entity_Tag ) = Related_Entity_Tag;
+			if Ada.Tags.Expanded_Name( Foreign_Key_Property_Type( P.all ).Related_Entity_Tag ) = Related_Entity_Tag then
+				return true;
+			else
+				return KOW_Lib.UString_Vectors.Contains( Ignore, P.Column_Name );
+			end if;
 		end if;
 	end SHould_Ignore;
 
@@ -106,7 +110,8 @@ package body KOW_View.Entities_Helper is
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
 			Ignore_Relation	: in String := "";
-			Form_Pref	: in String := ""
+			Form_Pref	: in String := "";
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 			) return Templates_Parser.Tag is
 		Labels_Tag	: Templates_Parser.Tag;
 		Properties	: KOW_Ent.Property_Lists.List;
@@ -116,7 +121,7 @@ package body KOW_View.Entities_Helper is
 			Label	: Unbounded_String;
 		begin
 			P := KOW_Ent.Property_Lists.Element( C );
-			if not Should_Ignore( P, Ignore_Relation ) then
+			if not Should_Ignore( P, Ignore_Relation, Ignore ) then
 				declare
 					T	: constant String := Ada.Characters.Handling.To_Lower(
 								Ada.Tags.Expanded_Name( Entity'Tag )
@@ -148,11 +153,12 @@ package body KOW_View.Entities_Helper is
 			Variable_Name	: in String;
 			Form_Pref	: in String;
 			Entity		: in KOW_Ent.Entity_Type'Class;
-			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
+			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Association is
 		-- create a Tag inside with all labels (ordered by the entity's registry) in formatted as string
 	begin
-		return Templates_Parser.Assoc( Variable_Name, Get_Labels_Tag( Entity, Locale, Form_Pref => Form_Pref ) );
+		return Templates_Parser.Assoc( Variable_Name, Get_Labels_Tag( Entity, Locale, Form_Pref => Form_Pref, Ignore => Ignore ) );
 	end Assoc_Labels;
 
 
@@ -165,7 +171,8 @@ package body KOW_View.Entities_Helper is
 	function Get_Resolved_Labels_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
-			Ignore_Relation	: in String := ""
+			Ignore_Relation	: in String := "";
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Tag is
 		Labels_Tag	: Templates_Parser.Tag;
 		Properties	: KOW_Ent.Property_Lists.List;
@@ -176,7 +183,7 @@ package body KOW_View.Entities_Helper is
 		begin
 			P := KOW_Ent.Property_Lists.Element( C );
 
-			if not Should_Ignore( P, Ignore_Relation ) then 
+			if not Should_Ignore( P, Ignore_Relation, Ignore ) then 
 				if P.all in KOW_Ent.Properties.Foreign_Key_Property_Type'Class then
 					declare
 						PP : KOW_Ent.Properties.Foreign_Key_Property_Type'Class :=
@@ -215,12 +222,13 @@ package body KOW_View.Entities_Helper is
 	function Assoc_Resolved_Labels(
 			Variable_Name	: in String;
 			Entity		: in KOW_Ent.Entity_Type'Class;
-			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
+			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Association is
 		-- create a Tag inside with all labels (ordered by the entity's registry) in formatted as string
 		-- if the property is a foreign key, get the label for the related entity instead of the property's label
 	begin
-		return Templates_Parser.Assoc( Variable_Name, Get_Resolved_Labels_Tag( Entity, Locale ) );
+		return Templates_Parser.Assoc( Variable_Name, Get_Resolved_Labels_Tag( Entity, Locale, Ignore => Ignore ) );
 	end Assoc_Resolved_Labels;
 
 
@@ -232,7 +240,8 @@ package body KOW_View.Entities_Helper is
 	function Get_Values_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
-			Ignore_Relation	: in String := ""
+			Ignore_Relation	: in String := "";
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Tag is
 		-- create a Tag inside with all values (ordered by the entity's registry) in formatted as string
 		Values_Tag	: Templates_Parser.Tag;
@@ -242,7 +251,7 @@ package body KOW_View.Entities_Helper is
 			P : KOW_Ent.Entity_Property_Ptr;
 		begin
 
-			if not Should_Ignore( P, Ignore_Relation ) then
+			if not Should_Ignore( P, Ignore_Relation, Ignore ) then
 				P := KOW_Ent.Property_Lists.Element( C );
 				declare
 					R : KOW_View.Entity_Property_Renderers.Property_Renderer_Type'Class
@@ -273,11 +282,12 @@ package body KOW_View.Entities_Helper is
 	function Assoc_Values(
 			Variable_Name	: in String;
 			Entity		: in KOW_Ent.Entity_Type'Class;
-			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
+			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Association is
 		-- create a Tag inside with all values (ordered by the entity's registry) in formatted as string
 	begin
-		return Templates_Parser.Assoc( Variable_Name, Get_Values_Tag( Entity, Locale ) );
+		return Templates_Parser.Assoc( Variable_Name, Get_Values_Tag( Entity, Locale, Ignore => Ignore ) );
 	end Assoc_Values;
 
 
@@ -290,7 +300,8 @@ package body KOW_View.Entities_Helper is
 	function Get_Resolved_Values_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
-			Ignore_Relation	: in String := ""
+			Ignore_Relation	: in String := "";
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Tag is
 		-- create a Tag inside with all values (ordered by the entity's registry) in formatted as string
 		-- if the type is a Foreign Key, get not the ID but the label for this single related entity
@@ -304,7 +315,7 @@ package body KOW_View.Entities_Helper is
 
 
 
-			if not Should_Ignore( P, Ignore_Relation ) then
+			if not Should_Ignore( P, Ignore_Relation, Ignore ) then
 				declare
 					R : KOW_View.Entity_Property_Renderers.Property_Renderer_Type'Class
 							:= KOW_View.Entity_Property_Renderers.Registry.Get_Renderer(
@@ -337,11 +348,12 @@ package body KOW_View.Entities_Helper is
 	function Assoc_Resolved_Values(
 			Variable_Name	: in String;
 			Entity		: in KOW_Ent.Entity_Type'Class;
-			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
+			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Association is
 		-- create a Tag inside with all values (ordered by the entity's registry) in formatted as string
 	begin
-		return Templates_Parser.Assoc( Variable_Name, Get_Resolved_Values_Tag( Entity, Locale ) );
+		return Templates_Parser.Assoc( Variable_Name, Get_Resolved_Values_Tag( Entity, Locale, Ignore => Ignore ) );
 	end Assoc_Resolved_Values;
 
 
@@ -355,7 +367,8 @@ package body KOW_View.Entities_Helper is
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
 			Name_Prefix	: in String;
 			Form_Mode	: in Form_Mode_Type;
-			Ignore_Relation	: in String := ""
+			Ignore_Relation	: in String := "";
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Tag is
 		-- create a Tag inside with the corresponding Form element for each entity property.
 		-- currently it supports:
@@ -381,7 +394,7 @@ package body KOW_View.Entities_Helper is
 		begin
 			P	:= KOW_Ent.Property_Lists.Element( C );
 
-			if Should_Ignore( P, Ignore_Relation ) then
+			if Should_Ignore( P, Ignore_Relation, Ignore ) then
 				return;
 			end if;
 
@@ -423,7 +436,8 @@ package body KOW_View.Entities_Helper is
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
 			Name_Prefix	: in String;
-			Form_Mode	: in Form_Mode_Type
+			Form_Mode	: in Form_Mode_Type;
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Association is
 		-- create a Tag inside with the corresponding Form element for each entity property.
 		-- currently it supports:
@@ -436,7 +450,8 @@ package body KOW_View.Entities_Helper is
 						Entity		=> Entity,
 						Locale		=> Locale,
 						Name_Prefix	=> Name_Prefix,
-						Form_Mode	=> Form_Mode
+						Form_Mode	=> Form_Mode,
+						Ignore		=> Ignore
 					)
 				);
 	end Assoc_Form_Elements;
@@ -480,7 +495,8 @@ package body KOW_View.Entities_Helper is
 
 	function Get_column_ids_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class;
-			Ignore_Relation	: in String := ""
+			Ignore_Relation	: in String := "";
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Tag is
 		-- create a Tag inside with all Ids (ordered by the entity's registry) as string
 		Ids_Tag	: Templates_Parser.Tag;
@@ -495,7 +511,7 @@ package body KOW_View.Entities_Helper is
 					);
 			Key	: Unbounded_String;
 		begin
-			if Should_Ignore( P, Ignore_Relation ) then
+			if Should_Ignore( P, Ignore_Relation, Ignore ) then
 				P := KOW_Ent.Property_Lists.Element( C );
 				Key := T & "__" & P.Column_Name;
 				Ids_Tag := Ids_Tag & Key;
@@ -512,11 +528,12 @@ package body KOW_View.Entities_Helper is
 
 	function Assoc_column_ids(
 			Variable_Name	: in String;
-			Entity		: in KOW_Ent.Entity_Type'Class
+			Entity		: in KOW_Ent.Entity_Type'Class;
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Association is
 		-- create a Tag inside with all Ids (ordered by the entity's registry) as string
 	begin
-		return Templates_Parser.Assoc( Variable_Name, Get_Column_Ids_Tag( Entity ) );
+		return Templates_Parser.Assoc( Variable_Name, Get_Column_Ids_Tag( Entity, Ignore => Ignore ) );
 	end Assoc_column_ids;
 
 
@@ -542,16 +559,19 @@ package body KOW_View.Entities_Helper is
 		The_Tag : String := Ada.Characters.Handling.To_Lower(
 						Ada.Tags.Expanded_Name( Entity'Tag )
 					);
+
+		Ignore : KOW_Lib.UString_Vectors.Vector;
+		-- TODO :: enable de ignore stuff
 		use Templates_Parser;
 	begin
 		Insert( Set, Templates_Parser.Assoc( P & "_tag", The_Tag ) );
 		Insert( Set, Assoc_Id( P & "_id", Entity ) );
-		Insert( Set, Assoc_column_ids( P & "_column_ids", Entity ) );
-		Insert( Set, Assoc_Label( P & "_label", Entity, Locale ) );
-		Insert( Set, Assoc_Labels( P & "_labels", P, Entity, Locale ) );
-		Insert( Set, Assoc_Resolved_Labels( P & "_resolved_labels", Entity, Locale ) );
-		Insert( Set, Assoc_Values( P & "_values", Entity, Locale ) );
-		Insert( Set, Assoc_Resolved_Values( P & "_resolved_values", Entity, Locale ) );
+		Insert( Set, Assoc_column_ids( P & "_column_ids", Entity, Ignore ) );
+		Insert( Set, Assoc_Label( P & "_label", Entity, Locale) );
+		Insert( Set, Assoc_Labels( P & "_labels", P, Entity, Locale, Ignore ) );
+		Insert( Set, Assoc_Resolved_Labels( P & "_resolved_labels", Entity, Locale, Ignore ) );
+		Insert( Set, Assoc_Values( P & "_values", Entity, Locale, Ignore ) );
+		Insert( Set, Assoc_Resolved_Values( P & "_resolved_values", Entity, Locale, Ignore ) );
 		Insert( Set, Assoc( "filter_tags", Entity.Filter_Tags ) );
 		
 		if Include_Form then
@@ -560,7 +580,8 @@ package body KOW_View.Entities_Helper is
 						Entity		=> Entity,
 						Locale		=> Locale,
 						Name_Prefix	=> P,
-						Form_Mode	=> Form_Mode
+						Form_Mode	=> Form_Mode,
+						Ignore		=> Ignore
 					)
 				);
 		end if;
@@ -625,17 +646,21 @@ package body KOW_View.Entities_Helper is
 					);
 			Form_ID	: String := P & '_' & The_Tag;
 			The_Label : String := KOW_Ent.Get_Label( Entity, Locale );
+
+
+			Ignore			: KOW_Lib.UString_Vectors.Vector;
+		
 		begin
 			Form_IDs		:= Form_IDs		& Form_ID;
 			Tags_Tag		:= Tags_Tag		& The_Tag;
 			Template_Tags_Tag	:= Template_Tags_Tag	& The_Tag;
 			Ids_Tag			:= Ids_Tag		& Get_ID( Entity );
-			Column_Ids_Tag		:= Column_Ids_Tag	& Get_Column_Ids_Tag( Entity, Ignore_Relation );
+			Column_Ids_Tag		:= Column_Ids_Tag	& Get_Column_Ids_Tag( Entity, Ignore_Relation, Ignore => Ignore );
 			Label_Tag		:= Label_Tag		& The_Label;
-			Labels_Tag		:= Labels_Tag		& Get_Labels_Tag( Entity, Locale, Ignore_Relation );
-			Resolved_Labels_Tag	:= Resolved_Labels_Tag	& Get_Resolved_Labels_Tag( Entity, Locale, Ignore_Relation );
-			Values_Tag		:= Values_Tag		& Get_Values_Tag( Entity, Locale, Ignore_Relation );
-			Resolved_Values_Tag	:= Resolved_Values_Tag	& Get_Resolved_Values_Tag( Entity, Locale, Ignore_Relation );
+			Labels_Tag		:= Labels_Tag		& Get_Labels_Tag( Entity, Locale, Ignore_Relation, Ignore => Ignore );
+			Resolved_Labels_Tag	:= Resolved_Labels_Tag	& Get_Resolved_Labels_Tag( Entity, Locale, Ignore_Relation, Ignore => Ignore );
+			Values_Tag		:= Values_Tag		& Get_Values_Tag( Entity, Locale, Ignore_Relation, Ignore => Ignore );
+			Resolved_Values_Tag	:= Resolved_Values_Tag	& Get_Resolved_Values_Tag( Entity, Locale, Ignore_Relation, Ignore => Ignore );
 
 			if Include_Form then
 				Form_Elements_Tag := Form_Elements_Tag & Get_Form_Elements_Tag(
@@ -643,7 +668,8 @@ package body KOW_View.Entities_Helper is
 									Locale		=> Locale,
 									Name_Prefix	=> Variable_Prefix,
 									Form_Mode	=> Form_Mode,
-									Ignore_Relation => Ignore_Relation
+									Ignore_Relation => Ignore_Relation,
+									Ignore		=> Ignore
 								);
 			end if;
 
@@ -680,15 +706,18 @@ package body KOW_View.Entities_Helper is
 			L_Values_Tag		: Templates_Parser.Tag;
 
 			L_Tags_Tag		: Templates_Parser.Tag;
+
+
+			Ignore			: KOW_Lib.UString_Vectors.Vector;
 		
 
 		begin
 			Form_IDs		:= Form_IDs		& Form_ID;
 			Template_Tags_Tag	:= Template_Tags_Tag	& The_Tag;
-			Column_Ids_Tag		:= Column_Ids_Tag	& Get_Column_Ids_Tag( Entity, Ignore_Relation );
+			Column_Ids_Tag		:= Column_Ids_Tag	& Get_Column_Ids_Tag( Entity, Ignore_Relation, Ignore => Ignore );
 			Label_Tag		:= Label_Tag		& The_Label;
-			Labels_Tag		:= Labels_Tag		& Get_Labels_Tag( Entity, Locale, Ignore_Relation );
-			Resolved_Labels_Tag	:= Resolved_Labels_Tag	& Get_Resolved_Labels_Tag( Entity, Locale, Ignore_Relation );
+			Labels_Tag		:= Labels_Tag		& Get_Labels_Tag( Entity, Locale, Ignore_Relation, Ignore => Ignore );
+			Resolved_Labels_Tag	:= Resolved_Labels_Tag	& Get_Resolved_Labels_Tag( Entity, Locale, Ignore_Relation, Ignore => Ignore );
 
 
 
@@ -697,15 +726,16 @@ package body KOW_View.Entities_Helper is
 				L_IDs_Tag := L_IDs_Tag & Get_ID( Entity );
 				L_Tags_Tag := L_Tags_Tag & The_Tag;
 
-				L_Values_Tag		:= L_Values_Tag			& Get_Values_Tag( Entity, Locale, Ignore_Relation );
-				L_Resolved_Values_Tag	:= L_Resolved_Values_Tag	& Get_Resolved_Values_Tag( Entity, Locale, Ignore_Relation );
+				L_Values_Tag		:= L_Values_Tag			& Get_Values_Tag( Entity, Locale, Ignore_Relation, Ignore => Ignore );
+				L_Resolved_Values_Tag	:= L_Resolved_Values_Tag	& Get_Resolved_Values_Tag( Entity, Locale, Ignore_Relation, Ignore => Ignore );
 				if Include_Form then
 					L_Form_Elements_Tag := L_Form_Elements_Tag & Get_Form_Elements_Tag(
 										Entity		=> Entity,
 										Locale		=> Locale,
 										Name_Prefix	=> Variable_Prefix,
 										Form_Mode	=> Form_Mode,
-										Ignore_Relation => Ignore_Relation
+										Ignore_Relation => Ignore_Relation,
+										Ignore		=> Ignore
 									);
 				end if;
 			end loop;
@@ -723,7 +753,8 @@ package body KOW_View.Entities_Helper is
 									Locale		=> Locale,
 									Name_Prefix	=> Variable_Prefix,
 									Form_Mode	=> Create,
-									Ignore_Relation => Ignore_Relation
+									Ignore_Relation => Ignore_Relation,
+									Ignore		=> Ignore
 								);
 
 		end Edit_Tags_Iterator;

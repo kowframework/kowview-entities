@@ -45,7 +45,8 @@ package KOW_View.Entities_Helper is
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
 			Ignore_Relation	: in String := "";
-			Form_Pref	: in String := ""
+			Form_Pref	: in String := "";
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Tag;
 
 	
@@ -53,7 +54,8 @@ package KOW_View.Entities_Helper is
 			Variable_Name	: in String;
 			Form_Pref	: in String;
 			Entity		: in KOW_Ent.Entity_Type'Class;
-			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
+			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Association;
 	-- create a Tag inside with all labels (ordered by the entity's registry) in formatted as string
 
@@ -66,7 +68,8 @@ package KOW_View.Entities_Helper is
 	function Get_Resolved_Labels_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
-			Ignore_Relation	: in String := ""
+			Ignore_Relation	: in String := "";
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Tag;
 
 
@@ -74,7 +77,8 @@ package KOW_View.Entities_Helper is
 	function Assoc_Resolved_Labels(
 			Variable_Name	: in String;
 			Entity		: in KOW_Ent.Entity_Type'Class;
-			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
+			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Association;
 	-- create a Tag inside with all labels (ordered by the entity's registry) in formatted as string
 	-- if the property is a foreign key, get the label for the related entity instead of the property's label
@@ -88,7 +92,8 @@ package KOW_View.Entities_Helper is
 	function Get_Values_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
-			Ignore_Relation	: in String := ""
+			Ignore_Relation	: in String := "";
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Tag;
 	-- create a Tag inside with all values (ordered by the entity's registry) in formatted as string
 
@@ -97,7 +102,8 @@ package KOW_View.Entities_Helper is
 	function Assoc_Values(
 			Variable_Name	: in String;
 			Entity		: in KOW_Ent.Entity_Type'Class;
-			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
+			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Association;
 	-- create a Tag inside with all values (ordered by the entity's registry) in formatted as string
 
@@ -110,7 +116,8 @@ package KOW_View.Entities_Helper is
 	function Get_Resolved_Values_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
-			Ignore_Relation	: in String := ""
+			Ignore_Relation	: in String := "";
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Tag;
 	-- create a Tag inside with all values (ordered by the entity's registry) in formatted as string
 	-- if the type is a Foreign Key, get not the ID but the label for this single related entity
@@ -120,7 +127,8 @@ package KOW_View.Entities_Helper is
 	function Assoc_Resolved_Values(
 			Variable_Name	: in String;
 			Entity		: in KOW_Ent.Entity_Type'Class;
-			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale
+			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Association;
 	-- create a Tag inside with all values (ordered by the entity's registry) in formatted as string
 	-- if the type is a Foreign Key, get not the ID but the label for this single related entity
@@ -137,7 +145,8 @@ package KOW_View.Entities_Helper is
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
 			Name_Prefix	: in String;
 			Form_Mode	: in Form_Mode_Type;
-			Ignore_Relation	: in String := ""
+			Ignore_Relation	: in String := "";
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Tag;
 	-- create a Tag inside with the corresponding Form element for each entity property.
 	-- currently it supports:
@@ -151,7 +160,8 @@ package KOW_View.Entities_Helper is
 			Entity		: in KOW_Ent.Entity_Type'Class;
 			Locale		: in KOW_Lib.Locales.Locale := KOW_Lib.Locales.Default_Locale;
 			Name_Prefix	: in String; 
-			Form_Mode	: in Form_Mode_Type 
+			Form_Mode	: in Form_Mode_Type;
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Association;
 	-- create a Tag inside with the corresponding Form element for each entity property.
 	-- currently it supports:
@@ -181,14 +191,16 @@ package KOW_View.Entities_Helper is
 
 	function Get_column_ids_Tag(
 			Entity		: in KOW_Ent.Entity_Type'Class;
-			Ignore_Relation	: in String := ""
+			Ignore_Relation	: in String := "";
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Tag;
 	-- create a Tag inside with all Ids (ordered by the entity's registry) as string
 
 
 	function Assoc_column_ids(
 			Variable_Name	: in String;
-			Entity		: in KOW_Ent.Entity_Type'Class
+			Entity		: in KOW_Ent.Entity_Type'Class;
+			Ignore		: in KOW_Lib.UString_Vectors.Vector
 		) return Templates_Parser.Association;
 	-- create a Tag inside with all Ids (ordered by the entity's registry) as string
 
