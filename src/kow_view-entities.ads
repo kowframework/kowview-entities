@@ -3,6 +3,7 @@
 --------------
 -- Ada 2005 --
 --------------
+with Ada.Containers.Ordered_Maps;
 with Ada.Strings.Unbounded;		use Ada.Strings.Unbounded;
 with Ada.Tags;
 
@@ -282,6 +283,25 @@ package KOW_View.Entities is
 	-- same as the file download service, but with the option of showing the thumbnail..
 
 
+
+	type List_IDs_Function_Access is access function(
+					Module	: in Entity_Browser_Module'Class;
+					Filter	: in String;
+					Request	: in AWS.Status.Data
+			) return KOW_Ent.Id_Array_Type;
+	
+	package List_IDs_Function_Maps is new Ada.Containers.Ordered_Maps(
+						Key_Type	=> Unbounded_String,
+						Element_Type	=> List_IDs_Function_Access
+					);
+
+	protected List_IDs_Functions_Registry is
+		function Get( Name : in Unbounded_String ) return List_IDs_Function_Access;
+		procedure Register( Name : in String; Function_Access : in List_IDs_Function_Access );
+	private
+		My_Map : List_IDS_Function_Maps.Map;
+	end List_IDs_Functions_Registry;
+
 private
 
 
@@ -353,6 +373,8 @@ private
 		List_Entities_Template_Name	: Unbounded_String;
 		-- the template used when listing the entities
 		
+		List_IDs_Function		: Unbounded_String;
+		-- when set, it's the name of the list_Ids function to be used
 		
 		Inlined_Entity_Tags		: KOW_Lib.UString_Vectors.Vector;
 

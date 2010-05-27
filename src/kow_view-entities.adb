@@ -83,7 +83,7 @@ package body KOW_View.Entities is
 
 
 
-	function Get_IDs(
+	function Default_Get_IDs(
 				Module	: in Entity_Browser_Module;
 				Filter	: in String;
 				Request	: in AWS.Status.Data
@@ -158,8 +158,22 @@ package body KOW_View.Entities is
 		end if;
 		
 		return Get_All( Main_Query );
-	end Get_IDs;
+	end Default_Get_IDs;
 
+	function Get_IDs(
+				Module	: in Entity_Browser_Module;
+				Filter	: in String;
+				Request	: in AWS.Status.Data
+			) return KOW_Ent.Id_Array_type is
+	begin
+
+		if Module.List_IDs_Function /= "" then
+			return List_IDs_Functions_Registry.Get( Module.List_IDs_Function ).all( Module, Filter, Request );
+		else
+			return Default_Get_IDs( Module, Filter, Request );
+		end if;
+
+	end Get_IDs;
 
 
 
@@ -270,6 +284,7 @@ package body KOW_View.Entities is
 			Entity_Browser.Edit_Entity_Template_Name := KOW_Config.Value( Config, "edit_entity_template_name", Default_Edit_Entity_Template_Name );
 			Entity_Browser.Create_Entity_Template_Name := KOW_Config.Value( Config, "edit_entity_template_name", Default_Create_Entity_Template_Name );
 			Entity_Browser.List_Entities_Template_Name := KOW_Config.Value( Config, "list_entities_template_name", Default_List_Entities_Template_Name );
+			Entity_Browser.List_IDs_Function := KOW_Config.Value( Config, "list_ids_function", "" );
 			Entity_Browser.Narrow := KOW_Config.Value( Config, "narrow", True );
 			Entity_Browser.Ignore := KOW_Lib.String_Util.Explode( ',', TO_Unbounded_String( KOW_Config.Value( Config, "ignore", "" ) ) );
 			Entity_Browser.User_Data_Only := KOW_Config.Value( Config, "user_data_only", False );
@@ -1017,6 +1032,23 @@ package body KOW_View.Entities is
 
 	end Process_Request;
 
+
+
+
+	protected body List_IDs_Functions_Registry is
+		function Get( Name : in Unbounded_String ) return List_IDs_Function_Access is
+		begin
+			return List_IDs_Function_Maps.Element( My_Map, Name );
+		end Get;
+
+		procedure Register( Name : in String; Function_Access : in List_IDs_Function_Access ) is
+		begin
+			List_IDs_Function_Maps.Include( My_Map, To_Unbounded_String( Name ), Function_Access );
+		exception
+			when CONSTRAINT_ERROR =>
+				raise Constraint_Error with Name & " alredy in the List_IDs Functions Registry";
+		end Register;
+	end List_Ids_Functions_Registry;
 
 
 end KOW_View.Entities;
