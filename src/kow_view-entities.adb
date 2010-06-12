@@ -234,7 +234,12 @@ package body KOW_View.Entities is
 			return View_Entity;
 		elsif Module_Name = "edit_entity" then
 			Edit_Entity.Entity_Tag	:= KOW_Config.Element( Config, "entity_tag" );
-			Edit_Entity.Id		:= KOW_Ent.To_ID( KOW_Config.Value( Config, "id", 0  ) );
+			begin
+				Edit_Entity.Id		:= KOW_Ent.To_ID( KOW_Config.Element( Config, "id" ) );
+				Edit_Entity.Has_id	:= True;
+			exception
+				when others => Edit_Entity.Has_Id := false;
+			end;
 			Edit_Entity.Template_Name	:= KOW_Config.Value( Config, "template_name", Default_Edit_Entity_Template_Name );
 			Edit_Entity.Narrow	:= KOW_Config.Value( Config, "narrow", True );
 			Edit_Entity.Ignore	:= KOW_Lib.String_Util.Explode( ',', To_Unbounded_String( KOW_Config.Value( Config, "ignore", "" ) ) );
@@ -412,8 +417,9 @@ package body KOW_View.Entities is
 
 		-- first we check if we need to get the id from the request..
 
-		if Natural( Module.Id.Value ) = 0 then
+		if not Module.Has_Id then
 			Module.Id := KOW_Ent.To_Id( Natural'Value( AWS.Parameters.Get( P, "entity_id" ) ) );
+			Module.Has_id := AWS.Parameters.Get( P, "entity_id" ) /= "";
 		end if;
 
 		declare

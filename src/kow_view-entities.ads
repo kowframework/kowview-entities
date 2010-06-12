@@ -327,6 +327,7 @@ private
 
 	type Edit_Entity_Module is new KOW_View.Components.Module_Instance_Interface with record
 		Id			: KOW_Ent.ID_Type;
+		Has_Id			: Boolean := True;
 		Entity_Tag		: Unbounded_String;
 		Template_Name		: Unbounded_String;
 		Inlined_Entity_Tags	: KOW_Lib.UString_Vectors.Vector;
