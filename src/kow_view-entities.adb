@@ -234,7 +234,7 @@ package body KOW_View.Entities is
 			return View_Entity;
 		elsif Module_Name = "edit_entity" then
 			Edit_Entity.Entity_Tag	:= KOW_Config.Element( Config, "entity_tag" );
-			Edit_Entity.Id		:= KOW_Ent.To_ID( KOW_Config.Element( Config, "id" ) );
+			Edit_Entity.Id		:= KOW_Ent.To_ID( KOW_Config.Value( Config, "id", 0  ) );
 			Edit_Entity.Template_Name	:= KOW_Config.Value( Config, "template_name", Default_Edit_Entity_Template_Name );
 			Edit_Entity.Narrow	:= KOW_Config.Value( Config, "narrow", True );
 			Edit_Entity.Ignore	:= KOW_Lib.String_Util.Explode( ',', To_Unbounded_String( KOW_Config.Value( Config, "ignore", "" ) ) );
@@ -407,50 +407,60 @@ package body KOW_View.Entities is
 		) is
 		use Templates_Parser;
 
-
-		Properties	: KOW_Ent.Property_Lists.List;
-		Entity		: KOW_Ent.Entity_Type'Class := Load( Module.Entity_Tag, Module.Id, Module.Narrow );
-
-		My_Parameters : Templates_Parser.Translate_Set;
-
+		P : AWS.Parameters.List := AWS.Status.Parameters( Request );
 	begin
-		Properties := KOW_Ent.Entity_Registry.Get_Properties( Module.Entity_Tag );
 
-		KOW_View.Entities_Helper.Insert(
+		-- first we check if we need to get the id from the request..
+
+		if Natural( Module.Id.Value ) = 0 then
+			Module.Id := KOW_Ent.To_Id( Natural'Value( AWS.Parameters.Get( P, "entity_id" ) ) );
+		end if;
+
+		declare
+			Properties	: KOW_Ent.Property_Lists.List;
+			Entity		: KOW_Ent.Entity_Type'Class := Load( Module.Entity_Tag, Module.Id, Module.Narrow );
+	
+			My_Parameters : Templates_Parser.Translate_Set;
+	
+		begin
+			Properties := KOW_Ent.Entity_Registry.Get_Properties( Module.Entity_Tag );
+	
+			KOW_View.Entities_Helper.Insert(
+						My_Parameters,
+						"entity",
+						Entity,
+						Include_Form	=> True,
+						Form_Mode	=> KOW_View.Entity_Property_Renderers.Edit,
+						Ignore		=> Module.Ignore
+					);
+	
+	
+			KOW_View.Entities_Helper.Insert_All(
 					My_Parameters,
-					"entity",
-					Entity,
+					"inlined_entity",
+					Module.Inlined_Entity_Tags,
 					Include_Form	=> True,
 					Form_Mode	=> KOW_View.Entity_Property_Renderers.Edit,
-					Ignore		=> Module.Ignore
+					Related_Entity	=> Entity
 				);
-
-
-		KOW_View.Entities_Helper.Insert_All(
-				My_Parameters,
-				"inlined_entity",
-				Module.Inlined_Entity_Tags,
-				Include_Form	=> True,
-				Form_Mode	=> KOW_View.Entity_Property_Renderers.Edit,
-				Related_Entity	=> Entity
-			);
-
-
-
-		KOW_View.Security.Grant_Authorization(
-				Request,
-				Ada.Tags.Expanded_Name( Entity'Tag ) & "::" & KOW_Ent.To_String( Entity.Id ),
-				KOW_View.Security.Edit
-			);
-
-
-		Response := Response &
-			To_Unbounded_String(
-				Templates_Parser.Parse(
-						Get_Template( Module.Template_Name ),
-						My_Parameters
-					)
+	
+	
+	
+			KOW_View.Security.Grant_Authorization(
+					Request,
+					Ada.Tags.Expanded_Name( Entity'Tag ) & "::" & KOW_Ent.To_String( Entity.Id ),
+					KOW_View.Security.Edit
 				);
+	
+	
+			Response := Response &
+				To_Unbounded_String(
+					Templates_Parser.Parse(
+							Get_Template( Module.Template_Name ),
+							My_Parameters
+						)
+					);
+		end;
 	end Process_Request;
 
 
