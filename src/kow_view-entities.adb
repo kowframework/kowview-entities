@@ -35,6 +35,7 @@ with KOW_View.Security;
 ---------
 -- AWS --
 ---------
+with AWS.Messages;
 with AWS.MIME;
 with AWS.Parameters;
 with AWS.Status;
@@ -956,7 +957,8 @@ package body KOW_View.Entities is
 
 		Response := AWS.Response.File(
 				Content_Type	=> AWS.MIME.Content_Type( To_String( Filename ) ),
-				Filename	=> To_String( Filename )
+				Filename	=> To_String( Filename ),
+				Cache_Control	=> AWS.Messages.No_Cache
 			);
 
 
@@ -1025,13 +1027,15 @@ package body KOW_View.Entities is
 			begin
 				Response := AWS.Response.File(
 						Content_Type	=> AWS.MIME.Content_Type( Thumb ),
-						Filename	=> Thumb
+						Filename	=> Thumb,
+						Cache_Control	=> AWS.Messages.No_Cache
 					);
 			end;
 		else
 			Response := AWS.Response.File(
 					Content_Type	=> AWS.MIME.Content_Type( To_String( Filename ) ),
-					Filename	=> To_String( Filename )
+					Filename	=> To_String( Filename ),
+					Cache_Control	=> AWS.Messages.No_Cache
 				);
 		end if;
 
