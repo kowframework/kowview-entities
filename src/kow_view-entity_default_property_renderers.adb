@@ -18,6 +18,16 @@ with KOW_View.Entity_Property_Renderers;		 use KOW_View.Entity_Property_Renderer
 package body KOW_View.Entity_Default_Property_Renderers is
 
 
+	function Dojo_Require( Dojo_Package : in String ) return Unbounded_String is
+		JS_Start : constant String := "<script type=""text/javascript"">dojo.require('";
+		JS_End : constant String := "');</script>";
+	begin
+		return To_Unbounded_String( JS_Start & Dojo_Package & JS_End );
+	end Dojo_Require;
+
+
+
+
 	function T( Str : in String ) return unbounded_string renames To_Unbounded_String;
 
 
@@ -163,7 +173,8 @@ package body KOW_View.Entity_Default_Property_Renderers is
 
 
 	begin
-		Ret := T( "<select dojoType=""dijit.form.FilteringSelect"" name=""" );
+		Ret := Dojo_Require( "dijit.form.FilteringSelect" );
+		Ret := Ret & T( "<select dojoType=""dijit.form.FilteringSelect"" name=""" );
 		Ret := Ret & Name & """";
 		Ret := Ret & T( Disabled_Enabled( Property, Form_Mode ) );
 		Ret := Ret & T( ">" );
