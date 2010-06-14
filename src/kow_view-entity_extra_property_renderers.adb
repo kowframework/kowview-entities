@@ -20,6 +20,12 @@ with KOW_View.Entity_Property_Renderers;	use KOW_View.Entity_Property_Renderers;
 
 package body KOW_View.Entity_Extra_Property_Renderers is
 
+	function Dojo_Require( Dojo_Package : in String ) return Unbounded_String is
+		JS_Start : constant String := "<script type=""text/javascript"">dojo.require('";
+		JS_End : constant String := "');</script>";
+	begin
+		return To_Unbounded_String( JS_Start & Dojo_Package & JS_End );
+	end Dojo_Require;
 
 
 
@@ -39,7 +45,8 @@ package body KOW_View.Entity_Extra_Property_Renderers is
 		Ret : Unbounded_String;
 		String_Value : String := KOW_Ent.Get_Property( Property, Entity );
 	begin
-		Ret := To_Unbounded_String( "<input type=""text"" dojoType=""dijit.form.DateTextBox"" name=""" );
+		Ret := Dojo_Require( "dijit.form.DateTextBox" );
+		Ret := Ret & To_Unbounded_String( "<input type=""text"" dojoType=""dijit.form.DateTextBox"" name=""" );
 		Ret := Ret & Name;
 		Ret := Ret & To_Unbounded_String( """ value=""" & String_Value & """" );
 		Ret := Ret & To_Unbounded_String( Disabled_Enabled( Property, Form_Mode ) & "/>");
@@ -91,7 +98,8 @@ package body KOW_View.Entity_Extra_Property_Renderers is
 
 		function T( Str : in String ) return Unbounded_String renames To_Unbounded_String;
 	begin
-		Ret := T( "<script language=""javascript"">" &
+		Ret := Dojo_Require( "dijit.form.DateTextBox" ) & Dojo_Require( "dijit.form.TimeTextBox" );
+		Ret := Ret & T( "<script language=""javascript"">" &
 				"function "&function_name&"(){" &
 				"theDate = dijit.byId(""" & element_thedate & """).attr('value');" &
 				"theTime = dijit.byId(""" & element_thetime & """).attr('value');" &
