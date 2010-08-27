@@ -333,6 +333,9 @@ private
 		Inlined_Entity_Tags	: KOW_Lib.UString_Vectors.Vector;
 		Narrow			: Boolean;
 		Ignore			: KOW_Lib.UString_Vectors.Vector;
+
+		Form_Life_Time		: Duration;
+		-- how many secconds the form will be active
 	end record;
 
 	type Edit_User_Entity_Module is new Edit_Entity_Module with null record;
@@ -348,6 +351,9 @@ private
 		Template_Name		: Unbounded_String;
 		Inlined_Entity_Tags	: KOW_Lib.UString_Vectors.Vector;
 		Ignore			: KOW_Lib.UString_Vectors.Vector;
+
+		Form_Life_Time		: Duration;
+		-- how many secconds the form will be active
 	end record;
 
 
@@ -386,6 +392,12 @@ private
 
 		User_Data_Only			: Boolean;
 		User_Identity_Column		: Unbounded_String;
+
+
+
+
+		Form_Life_Time			: Duration;
+		-- how many secconds the form will be active
 	end record;
 
 

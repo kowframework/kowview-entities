@@ -256,6 +256,7 @@ package body KOW_View.Entities is
 				end loop;
 			end;
 
+			Edit_Entity.Form_Life_Time := Duration( KOW_Config.Value( Config, "form_life_time", 300.0 ) );
 
 
 			return Edit_Entity;
@@ -280,6 +281,8 @@ package body KOW_View.Entities is
 						);
 				end loop;
 			end;
+
+			Create_Entity.Form_Life_Time := Duration( KOW_Config.Value( Config, "form_life_time", 300.0 ) );
 
 			return Create_Entity;
 		elsif Module_Name = "entity_browser" then
@@ -310,6 +313,9 @@ package body KOW_View.Entities is
 						);
 				end loop;
 			end;
+
+
+			Entity_Browser.Form_Life_Time := Duration( KOW_Config.Value( Config, "form_life_time", 300.0 ) );
 
 
 			return Entity_Browser;
@@ -456,7 +462,8 @@ package body KOW_View.Entities is
 			KOW_View.Security.Grant_Authorization(
 					Request,
 					Ada.Tags.Expanded_Name( Entity'Tag ) & "::" & KOW_Ent.To_String( Entity.Id ),
-					KOW_View.Security.Edit
+					KOW_View.Security.Edit,
+					Module.Form_Life_Time
 				);
 	
 	
@@ -571,7 +578,8 @@ package body KOW_View.Entities is
 		KOW_View.Security.Grant_Authorization(
 				Request,
 				Ada.Tags.Expanded_Name( Entity'Tag ),
-				KOW_View.Security.Edit
+				KOW_View.Security.Edit,
+				Module.Form_Life_Time
 			);
 
 
@@ -688,6 +696,7 @@ package body KOW_View.Entities is
 			Create_Entity.Template_Name := Module.Create_Entity_Template_Name;
 			Create_Entity.Inlined_Entity_Tags := Module.Inlined_Entity_Tags;
 			Create_Entity.Ignore := Module.Ignore;
+			Create_Entity.Form_Life_Time := Module.Form_Life_Time;
 
 			Process_Request(
 					Create_Entity,
@@ -707,6 +716,7 @@ package body KOW_View.Entities is
 			Edit_Entity.Template_Name := Module.Edit_Entity_Template_Name;
 			Edit_Entity.Inlined_Entity_Tags := Module.Inlined_Entity_Tags;
 			Edit_Entity.Ignore := Module.Ignore;
+			Edit_Entity.Form_Life_Time := Module.Form_Life_Time;
 
 			Process_Request(
 					Edit_Entity,
