@@ -501,6 +501,8 @@ package body KOW_View.Entities is
 			return;
 		end if;
 
+		Module.Form_Life_time := 300.0;
+
 
 		-- if got here, time to work things out
 
