@@ -719,6 +719,7 @@ package body KOW_View.Entities is
 			Edit_Entity.Inlined_Entity_Tags := Module.Inlined_Entity_Tags;
 			Edit_Entity.Ignore := Module.Ignore;
 			Edit_Entity.Form_Life_Time := Module.Form_Life_Time;
+			Edit_Entity.Narrow := Module.Narrow;
 
 			Process_Request(
 					Edit_Entity,
@@ -737,6 +738,7 @@ package body KOW_View.Entities is
 			View_Entity.Template_Name := Module.View_Entity_Template_Name;
 			View_Entity.Inlined_Entity_Tags := Module.Inlined_Entity_Tags;
 			View_Entity.Ignore := Module.Ignore;
+			View_Entity.Narrow := Module.Narrow;
 
 			Process_Request(
 					View_Entity,
