@@ -125,7 +125,7 @@ package body KOW_View.Entity_Property_Renderers is
 	function Generic_Factory return Property_Renderer_Type'Class is
 		R : Renderer_Type;
 	begin
-		return R;
+		return Property_Renderer_Type'Class(R);
 	end Generic_Factory;
 
 
