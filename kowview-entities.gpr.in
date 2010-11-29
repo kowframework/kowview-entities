@@ -37,7 +37,5 @@ project KOWView.Entities is
 		for Default_Switches ("ada") use ("-O2", "-gnat05");
 	end Compiler;
 
-	package Linker renames KOWLib.Linker;
-
 end KOWView.Entities;
 
