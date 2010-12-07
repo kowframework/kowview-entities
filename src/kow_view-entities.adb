@@ -13,7 +13,7 @@ with KOW_Lib.Log;
 with KOW_Lib.String_Util;
 with KOW_Lib.UString_Vectors;
 with KOW_Sec;
-with KOW_Sec.Authentication.Entities;
+with KOW_Sec.Entities;
 with KOW_View;
 with KOW_View.Components_Registry;
 with KOW_View.Entities_Helper;
@@ -133,18 +133,12 @@ package body KOW_View.Entities is
 			Prepare( Main_Query, Module.Entity_Tag );
 			declare
 				use KOW_sec;
-				User : User_Access := KOW_View.Security.Get_user( Request );
-				UIdentity : Unbounded_String;
+				User : Logged_User_Type := KOW_View.Security.Get_user( Request );
 			begin
-				if User = null then
-					UIdentity := TO_Unbounded_String( "anonymous" );
-				else
-					UIdentity := To_Unbounded_String( Identity( User.all ) );
-				end if;
 				Append(
 						Q		=> Main_Query,
-						Column		=> Module.User_Identity_Column,
-						Value		=> UIdentity,
+						Column		=> To_String( Module.User_Identity_Column ),
+						Value		=> String( User.User.Identity ),
 						Appender	=> Appender_And,
 						Operator	=> Operator_Equals
 					);
@@ -486,51 +480,9 @@ package body KOW_View.Entities is
 			Parameters	: in out Templates_Parser.Translate_Set;
 			Response	: in out Unbounded_String
 		) is
-		-- draw up the form for the loged user
-		-- if no user is loged ir it's loged as other user type, return an empty string
-		--
-		-- also, make sure to reload the entity from the database at loading time
-		The_User : KOW_Sec.User_Access := KOW_View.Security.Get_User( Request );
-		use KOW_Sec;
 	begin
-		if The_User = null then
-			Response := Response & "you should be loged in to do that";
-			return;
-		elsif The_User.all not in KOW_Sec.Authentication.Entities.User_Type'Class then
-			Response := Response & "invalid user type :: " & Ada.Tags.Expanded_Name( The_User.all'Tag );
-			return;
-		end if;
-
-		Module.Form_Life_time := 300.0;
-
-
-		-- if got here, time to work things out
-
-		Module.ID := KOW_Sec.Authentication.Entities.User_Type'Class( The_User.all ).ID;
-		Module.Entity_Tag := To_Unbounded_String(
-					Ada.Tags.Expanded_Name( Module.ID.My_Tag )
-				);
-
-		-- time to reload the entity...
-		declare
-			Entity : KOW_Sec.Authentication.Entities.User_Entity_Type'Class :=
-					KOW_Sec.Authentication.Entities.To_User_Entity(
-							KOW_Sec.Authentication.Entities.User_Type'Class( The_User.all )
-						);
-		begin
-			KOW_Ent.Load( Entity, Module.ID );
-
-			KOW_Sec.Authentication.Entities.User_Type'Class( The_User.all ) := KOW_Sec.Authentication.Entities.To_User( Entity );
-			-- in order for these operations to be safe, we need the user types to be quite consistent
-		end;
-
-		Process_Request(
-				Edit_Entity_Module( Module ),
-				Request,
-				Parameters,
-				Response
-			);
-
+		-- TODO :: reimplement edit_user_entity_module as edit_user_module
+		null;
 	end Process_Request;
 
 
