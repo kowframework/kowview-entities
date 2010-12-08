@@ -7,9 +7,9 @@ with Ada.Containers.Ordered_Maps;
 with Ada.Strings.Unbounded;		use Ada.Strings.Unbounded;
 with Ada.Tags;
 
----------------
--- Ada Works --
----------------
+-------------------
+-- KOW Framework --
+-------------------
 with KOW_Config;
 with KOW_Ent;
 with KOW_Lib.File_System;

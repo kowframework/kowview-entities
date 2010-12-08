@@ -7,9 +7,9 @@
 -- Ada 2005 --
 --------------
 
----------------
--- Ada Works --
----------------
+-------------------
+-- KOW Framework --
+-------------------
 with KOW_Ent;
 with KOW_Lib.Locales;
 with KOW_Lib.UString_Vectors;
