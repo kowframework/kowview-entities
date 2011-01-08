@@ -4,7 +4,7 @@
 --                                                                          --
 --                              KOW Framework                               --
 --                                                                          --
---                                 B o d y                                  --
+--                                 S p e c                                  --
 --                                                                          --
 --               Copyright (C) 2007-2011, KOW Framework Project             --
 --                                                                          --
@@ -27,25 +27,15 @@ pragma License( GPL );
 
 
 
-
 -------------------
 -- KOW Framework --
 -------------------
-with KOW_View.Entities.Components;
-with KOW_View.Components.Registry;
+with KOW_View.Components;
+
+package KOW_View.Entities.Components is
+
+	type Entity_Component is new KOW_View.Components.Component_Type with null record;
 
 
-
-
-procedure KOW_View.Entities.Load is
-begin
-
-	
-	KOW_View.Components.Registry.Register(
-			KOW_View.Entities.Components.Component'Access,
-			false
-		);
-
-
-
-end KOW_View.Entities.Load;
+	Component : aliased Entity_Component;
+end KOW_View.Entities.Components;
