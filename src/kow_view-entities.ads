@@ -38,123 +38,56 @@ with Ada.Tags;
 -------------------
 with KOW_Config;
 with KOW_Ent;
+with KOW_Lib.Json;
 with KOW_Lib.File_System;
 with KOW_Lib.UString_Vectors;
-with KOW_View.Components;
+with KOW_View.Services;
 
 ---------
 -- AWS --
 ---------
-with AWS.Response;
 with AWS.Status;
-with Templates_Parser;
 
 package KOW_View.Entities is
 
 
 
+	-----------------------------------------
+	-- Service Triggering Entity Interface --
+	-----------------------------------------
 
-	type Service_Triggering_Entity_Type is interface;
-	-- entity type called by the store_entity_service (that can be use to retrieve username, for instance)
+	type Service_Triggering_Entity_Interface is interface;
+	-- implement this interface in your entity if you want all the methods in this component to call
+	-- Before_Service and After_Service
 
 	procedure Before_Service(
-			Entity		: in out Service_Triggering_Entity_Type;
-			Service		: in out KOW_View.Components.Service_Instance_Interface'Class;
+			Entity		: in out Service_Triggering_Entity_Interface;
+			Service		: in out KOW_View.Services.Service_Type'Class;
 			Request		: in     AWS.Status.Data
 		) is abstract;
 
 	procedure After_Service(
-			Entity		: in out Service_Triggering_Entity_Type;
-			Service		: in out KOW_View.Components.Service_Instance_Interface'Class;
-			Request		: in     AWS.Status.Data;
-			Response	: in out AWS.Response.Data
+			Entity		: in out Service_Triggering_Entity_Interface;
+			Service		: in out KOW_View.Services.Service_Type'Class;
+			Request		: in     AWS.Status.Data
 		) is abstract;
 
 
-
-
-	--------------------------
-	-- Store Entity Service --
-	--------------------------
-
-	type Store_Entity_Service is new KOW_View.Components.Service_Instance_Interface with private;
-
-
-	overriding
-	procedure Process_Request(
-			Service		: in out Store_Entity_Service;
-			Request		: in     AWS.Status.Data;
-			Response	: in out AWS.Response.Data
-		);
-	-- read the entity from the form and process it.
-	-- save it back to the database backend afterwards
-
-
-	---------------------------
-	-- File Download Service --
-	---------------------------
-
-
-	type File_Download_Service is new KOW_View.Components.Service_Instance_Interface with null record;
-
-	overriding
-	procedure Process_Request(
-			Service		: in out File_Download_Service;
-			Request		: in     AWS.Status.Data;
-			Response	: in out AWS.Response.Data
-		);
-	-- get an uploaded file, respecting the URL:
-	-- 	/service_mapping/[entity_tag]/[entity_id]/[column_name]
-	-- serve the file using the name used in the storage
-
-
-	----------------------------
-	-- Image Download Service --
-	----------------------------
-
-	type Image_Download_Service is new File_Download_Service with null record;
-
-	overriding
-	procedure Process_Request(
-			Service		: in out Image_Download_Service;
-			Request		: in     AWS.Status.Data;
-			Response	: in out AWS.Response.Data
-		);
-	-- same as the file download service, but with the option of showing the thumbnail..
-
-
-
-	type Get_IDs_Function_Access is access function(
-					Module	: in Entity_Browser_Module'Class;
-					Filter	: in String;
-					Request	: in AWS.Status.Data
-			) return KOW_Ent.Id_Array_Type;
 	
-	package Get_IDs_Function_Maps is new Ada.Containers.Ordered_Maps(
-						Key_Type	=> Unbounded_String,
-						Element_Type	=> Get_IDs_Function_Access
-					);
 
-	protected Get_IDs_Functions_Registry is
-		function Get( Name : in Unbounded_String ) return Get_IDs_Function_Access;
-		procedure Register( Name : in String; Function_Access : in Get_IDs_Function_Access );
-	private
-		My_Map : Get_IDs_Function_Maps.Map;
-	end Get_IDs_Functions_Registry;
-
-
-
-	---------------------------------------
-	-- Services for the Entity component --
-	---------------------------------------
-
-	type Store_Entity_Service is new KOW_View.Components.Service_Instance_Interface with record
-		Variable_Prefix 	: String( 1 .. 6  ) := "entity";
-		-- the prefix for every variable to be processed by this service
-		Inlined_Variable_Prefix	: String( 1 .. 14 ) := "inlined_entity";
-	end record;
-
-
+	procedure Before_Service(
+			Entity		: in out KOW_Ent.Entity_Type'Class;
+			Service		: in out KOW_View.Services.Service_Type'Class;
+			Request		: in     AWS.Status.Data
+		);
+	-- call the service_triggering interface's before_service if available
+	
+	procedure After_Service(
+			Entity		: in out KOW_Ent.Entity_Type'Class;
+			Service		: in out KOW_View.Services.Service_Type'Class;
+			Request		: in     AWS.Status.Data
+		);
+	-- call the service_triggering interface's after_service if available
 
 
 
