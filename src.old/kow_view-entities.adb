@@ -39,6 +39,7 @@ with KOW_Lib.Log;
 with KOW_Lib.String_Util;
 with KOW_Lib.UString_Vectors;
 with KOW_Sec;
+with KOW_Sec.Entities;
 with KOW_View;
 with KOW_View.Components_Registry;
 with KOW_View.Entities_Helper;
