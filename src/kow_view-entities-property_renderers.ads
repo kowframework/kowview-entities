@@ -25,74 +25,70 @@ pragma License( GPL );
 
 
 
+------------------------------------------------------------------------------
+-- Renderer for properties                                                  --
+------------------------------------------------------------------------------
 
---------------
--- Ada 2005 --
---------------
-with Ada.Containers.Ordered_Maps;
-with Ada.Strings.Unbounded;		use Ada.Strings.Unbounded;
-with Ada.Tags;
 
 -------------------
 -- KOW Framework --
 -------------------
-with KOW_Config;
 with KOW_Ent;
-with KOW_Lib.Json;
-with KOW_Lib.File_System;
-with KOW_Lib.UString_Vectors;
-with KOW_Sec.Accounting;
-with KOW_View.Services;
-
----------
--- AWS --
----------
-with AWS.Status;
-
-package KOW_View.Entities is
+with KOW_Ent.Generic_Property_Metadata;
 
 
-
-	Accountant      : aliased KOW_Sec.Accounting.Accountant_Type := KOW_Sec.Accounting.New_Accountant( "entities", KOW_View.Accountant'Access );
-
-
-	-----------------------------------------
-	-- Service Triggering Entity Interface --
-	-----------------------------------------
-
-	type Service_Triggering_Entity_Interface is interface;
-	-- implement this interface in your entity if you want all the methods in this component to call
-	-- Before_Service and After_Service
-
-	procedure Before_Service(
-			Entity		: in out Service_Triggering_Entity_Interface;
-			Service		: in out KOW_View.Services.Service_Type'Class;
-			Request		: in     AWS.Status.Data
-		) is abstract;
-
-	procedure After_Service(
-			Entity		: in out Service_Triggering_Entity_Interface;
-			Service		: in out KOW_View.Services.Service_Type'Class;
-			Request		: in     AWS.Status.Data
-		) is abstract;
+package KOW_View.Entities.Property_Renderers is
 
 
+	---------------------
+	-- Rendering Style --
+	---------------------
+
+	type Render_Style_Type is (
+				Tabular_Rendering,
+				Inlined_Rendering,
+				Tabular_Editing_Rendering,
+				Inilied_Editing_Rendering
+			);
+	-- how the property can be rendered..
+
+
+
+	-----------------------
+	-- Property Renderer --
+	-----------------------
+
+	type Property_Renderer_Interface is abstract new KOW_Ent.Entity_Property_Metadata_Interface with null record;
+	type Property_Renderer_Access is access all Property_Renderer_Interface'Class;
+
+	procedure Render_Property(
+				Entity		: in     KOW_Ent.Entity_Type'Class;
+				Property	: in     KOW_Ent.Entity_Property_Type'Class;
+				Style		: in     Render_Style_Type;
+				Output		:    out Unbounded_String
+			) is abstract;
+	-- render the entity property into the output
+
+
+	function Get_Default_Renderer(
+				Property	: in KOW_Ent.Entity_Property_Type'Class
+			) return Property_Renderer_Access;
+
+	package Property_Renderer_Metadata is new KOW_Ent.Generic_Property_Metadata(
+						Entity_Property_Metadata_Type	=> Property_Renderer_Interface,
+						Metadata_Access			=> Property_Renderer_Access,
+						On_NUll				=> Get_Default_Renderer
+					);
 	
-
-	procedure Before_Service(
-			Entity		: in out KOW_Ent.Entity_Type'Class;
-			Service		: in out KOW_View.Services.Service_Type'Class;
-			Request		: in     AWS.Status.Data
-		);
-	-- call the service_triggering interface's before_service if available
-	
-	procedure After_Service(
-			Entity		: in out KOW_Ent.Entity_Type'Class;
-			Service		: in out KOW_View.Services.Service_Type'Class;
-			Request		: in     AWS.Status.Data
-		);
-	-- call the service_triggering interface's after_service if available
+	-----------------------------
+	-- Basic Property Renderer --
+	-----------------------------
 
 
-
-end KOW_View.Entities;
+--	type Basic_Property_Renderer is new Property_Renderer_Interface with null record;
+--	
+--	overriding
+--	procedure Render_Property(
+--				Entity		: in     KOW_
+--
+end KOW_View.Entities.Property_Renderers;

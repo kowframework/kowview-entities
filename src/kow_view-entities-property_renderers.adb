@@ -4,7 +4,7 @@
 --                                                                          --
 --                              KOW Framework                               --
 --                                                                          --
---                                 S p e c                                  --
+--                                 B o d y                                  --
 --                                                                          --
 --               Copyright (C) 2007-2011, KOW Framework Project             --
 --                                                                          --
@@ -25,74 +25,37 @@ pragma License( GPL );
 
 
 
+------------------------------------------------------------------------------
+-- Renderer for properties                                                  --
+------------------------------------------------------------------------------
 
---------------
--- Ada 2005 --
---------------
-with Ada.Containers.Ordered_Maps;
-with Ada.Strings.Unbounded;		use Ada.Strings.Unbounded;
-with Ada.Tags;
 
 -------------------
 -- KOW Framework --
 -------------------
-with KOW_Config;
 with KOW_Ent;
-with KOW_Lib.Json;
-with KOW_Lib.File_System;
-with KOW_Lib.UString_Vectors;
-with KOW_Sec.Accounting;
-with KOW_View.Services;
-
----------
--- AWS --
----------
-with AWS.Status;
-
-package KOW_View.Entities is
+with KOW_Ent.Generic_Property_Metadata;
 
 
-
-	Accountant      : aliased KOW_Sec.Accounting.Accountant_Type := KOW_Sec.Accounting.New_Accountant( "entities", KOW_View.Accountant'Access );
-
-
-	-----------------------------------------
-	-- Service Triggering Entity Interface --
-	-----------------------------------------
-
-	type Service_Triggering_Entity_Interface is interface;
-	-- implement this interface in your entity if you want all the methods in this component to call
-	-- Before_Service and After_Service
-
-	procedure Before_Service(
-			Entity		: in out Service_Triggering_Entity_Interface;
-			Service		: in out KOW_View.Services.Service_Type'Class;
-			Request		: in     AWS.Status.Data
-		) is abstract;
-
-	procedure After_Service(
-			Entity		: in out Service_Triggering_Entity_Interface;
-			Service		: in out KOW_View.Services.Service_Type'Class;
-			Request		: in     AWS.Status.Data
-		) is abstract;
+package body KOW_View.Entities.Property_Renderers is
 
 
-	
+	function Get_Default_Renderer(
+				Property	: in KOW_Ent.Entity_Property_Type'Class
+			) return Property_Renderer_Access is
+	begin
+		return null;
+	end Get_Default_Renderer;
 
-	procedure Before_Service(
-			Entity		: in out KOW_Ent.Entity_Type'Class;
-			Service		: in out KOW_View.Services.Service_Type'Class;
-			Request		: in     AWS.Status.Data
-		);
-	-- call the service_triggering interface's before_service if available
-	
-	procedure After_Service(
-			Entity		: in out KOW_Ent.Entity_Type'Class;
-			Service		: in out KOW_View.Services.Service_Type'Class;
-			Request		: in     AWS.Status.Data
-		);
-	-- call the service_triggering interface's after_service if available
+	-----------------------------
+	-- Basic Property Renderer --
+	-----------------------------
 
 
-
-end KOW_View.Entities;
+--	type Basic_Property_Renderer is new Property_Renderer_Interface with null record;
+--	
+--	overriding
+--	procedure Render_Property(
+--				Entity		: in     KOW_
+--
+end KOW_View.Entities.Property_Renderers;
