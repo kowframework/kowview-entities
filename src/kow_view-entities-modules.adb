@@ -29,6 +29,7 @@ pragma License( GPL );
 -------------------
 with KOW_Config;
 with KOW_Ent;
+with KOW_View.Entities.Property_Renderers;
 with KOW_View.Modules;
 with KOW_View.Modules.Stateless_Module_Factories;
 
@@ -82,6 +83,57 @@ package body KOW_View.Entities.Modules is
 			return Entity;
 		end if;
 	end Load_Entity;
+
+
+	function Get_Properties(
+				Module	: in Entity_Module_Type;
+				Entity	: in KOW_Ent.Entity_Type'Class
+			) return KOW_Ent.Property_Lists.List is
+		-- ge the properties that will be used by this module..
+	begin
+		return KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag, True );
+	end Get_Properties;
+
+
+	function Render_View(
+				Module	: in Entity_Module_Type;
+				Entity	: in KOW_Ent.Entity_Type'Class;
+				Style	: in KOW_View.Entities.Rendering_Style_Type
+			) return Unbounded_String is
+		-- render the entity into a unbounded_string variable following the style
+		-- notice that no matter what "style" is called the entity will be rendered into a HTML table
+		--
+		-- how this table is displayed is then controlled by the CSS style and browser
+		-- NOTE :: this will assure the form will be usable in any browser
+		
+		Buffer : Unbounded_String := "<table>";
+
+		procedure Iterator( C : in KOW_Ent.Property_Lists.Cursor ) is
+			Property	: KOW_Ent.Entity_Property_Ptr := KOW_Ent.Property_Lists.Element( C );
+			Renderer_Buffer : Unbounded_String;
+		begin
+
+			KOW_View.Entities.Property_Renderers.Render_Property(
+							Entity		=> Entity,
+			                                Property	=> Property.all,
+							Style		=> Style,
+							Output		=> Renderer_Buffer
+						);
+
+			Append( Buffer, "<tr>" );
+			Append( Buffer, Renderer_Buffer );
+			Append( Buffer, "</tr>" );
+		end Iterator;
+	begin
+		KOW_Ent.Property_Lists.Iterate(
+					Get_Properties( Module, Entity ),
+					Iterator'Access
+				);
+		Append( Buffer, "</table>" );
+
+		return Buffer;
+	end Render_View;
+
 
 
 end KOW_View.Entities.Modules;

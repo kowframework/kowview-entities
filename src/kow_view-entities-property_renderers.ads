@@ -40,17 +40,6 @@ with KOW_Ent.Generic_Property_Metadata;
 package KOW_View.Entities.Property_Renderers is
 
 
-	---------------------
-	-- Rendering Style --
-	---------------------
-
-	type Render_Style_Type is (
-				Tabular_Rendering,
-				Inlined_Rendering,
-				Tabular_Editing_Rendering,
-				Inilied_Editing_Rendering
-			);
-	-- how the property can be rendered..
 
 
 

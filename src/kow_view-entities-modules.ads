@@ -79,4 +79,21 @@ package KOW_View.Entities.Modules is
 	-- if the configured narrow property is true then return the results for KOW_Ent.Narrow( entity )
 
 
+	function Get_Properties(
+				Module	: in Entity_Module_Type;
+				Entity	: in KOW_Ent.Entity_Type'Class
+			) return KOW_Ent.Property_Lists.List;
+	-- ge the properties that will be used by this module..
+
+	function Render_View(
+				Module	: in Entity_Module_Type;
+				Entity	: in KOW_Ent.Entity_Type'Class;
+				Style	: in KOW_View.Entities.Rendering_Style_Type
+			) return Unbounded_String;
+	-- render the entity into a unbounded_string variable following the style
+	-- notice that no matter what "style" is called the entity will be rendered into a HTML table
+	--
+	-- how this table is displayed is then controlled by the CSS style and browser
+	-- NOTE :: this will assure the form will be usable in any browser
+
 end KOW_View.Entities.Modules;

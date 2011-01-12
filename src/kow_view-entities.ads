@@ -94,5 +94,18 @@ package KOW_View.Entities is
 	-- call the service_triggering interface's after_service if available
 
 
+	---------------------
+	-- Rendering Style --
+	---------------------
+
+	type Render_Style_Type is (
+				Tabular_Rendering,
+				Inlined_Rendering,
+				Tabular_Editing_Rendering,
+				Inilied_Editing_Rendering
+			);
+	-- how the entity can be rendered..
+
+
 
 end KOW_View.Entities;
