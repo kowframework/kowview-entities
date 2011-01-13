@@ -94,7 +94,7 @@ package body KOW_View.Entities.Modules is
 				Module	: in Entity_Module_Type;
 				Entity	: in KOW_Ent.Entity_Type'Class
 			) return KOW_Ent.Property_Lists.List is
-		-- ge the properties that will be used by this module..
+		-- get the properties that will be used by this module..
 	begin
 		return KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag, True );
 	end Get_Properties;
