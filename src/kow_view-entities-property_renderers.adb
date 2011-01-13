@@ -120,6 +120,7 @@ package body KOW_View.Entities.Property_Renderers is
 	overriding
 	procedure Render_Property(
 				Renderer	: in out Basic_Property_Renderer_Type;
+				Module		: in out KOW_View.Modules.Module_Type'Class;
 				Request		: in     AWS.Status.Data;
 				Entity		: in     KOW_Ent.Entity_Type'Class;
 				Property	: in     KOW_Ent.Entity_Property_Type'Class;
@@ -135,15 +136,20 @@ package body KOW_View.Entities.Property_Renderers is
 							Property	=> Property,
 							Style		=> Style
 						);
-		Input	: constant String := Get_Input(
-							Renderer	=> Renderer,
-							Request		=> Request,
-							Entity		=> Entity,
-							Property	=> Property,
-							Style		=> Style
-						);
+
+		Input	: Unbounded_String;		
 	begin
-		Output := To_Unbounded_String( Label & Input );
+		Get_Input(
+				Renderer	=> Renderer,
+				Module		=> Module,
+				Request		=> Request,
+				Entity		=> Entity,
+				Property	=> Property,
+				Style		=> Style,
+				Output		=> Input
+			);
+	
+		Output := To_Unbounded_String( Label ) & Input;
 	end Render_Property;
 
 	function Get_Label(
@@ -157,39 +163,30 @@ package body KOW_View.Entities.Property_Renderers is
 		return KOW_Ent.Get_Label( Entity, Property.Column_Name, KOW_View.Locales.Get_Locale( Request ) );
 	end Get_Label;
 
-	function Get_Input(
-				Renderer	: in Basic_Property_Renderer_Type;
-				Request		: in AWS.Status.Data;
-				Entity		: in KOW_Ent.Entity_Type'Class;
-				Property	: in KOW_Ent.Entity_Property_Type'Class;
-				Style		: in Rendering_Style_Type
-			) return String is
-		-- TODO IMPLEMENT GET_INPUT
-		--
-		-- for this method I'll need to:
-		-- 	1. figure out how to calculate the HTML field's name.
-		-- 	2. find out a way to retrieve through AJAX form data using the renderer (IE, keeping the renderer somewhere in the module's memory)
-		-- 	3. send information about js include files (this will be required in future files)...
+	procedure Get_Input(
+				Renderer	: in out Basic_Property_Renderer_Type;
+				Module		: in out KOW_View.Modules.Module_Type'Class;
+				Request		: in     AWS.Status.Data;
+				Entity		: in     KOW_Ent.Entity_Type'Class;
+				Property	: in     KOW_Ent.Entity_Property_Type'Class;
+				Style		: in     Rendering_Style_Type;
+				Output		:    out Unbounded_String
+			) is
+		Value	: constant String := KOW_Ent.Get_Property( Property, Entity );
 	begin
 		case Style is
 			when Big_Rendering | Small_Rendering =>
-				return "input for big or small read-only rendering";-- TODO
+				Output := To_Unbounded_String( Value );
 			when Big_Edit_Rendering | Small_Edit_Rendering =>
-				return "input for editing rendering";-- TODO
+				declare
+					Buffer	: Unbounded_String;
+				begin
+					KOW_View.Modules.Include_Dojo_Package( Module, "dijit.Form.TextBox" );
+					Append( Buffer, "<input type=""text"" dojoType=""dijit.Form.TextBox"" name=""" );
+					Append( Buffer, Property.Column_Name );
+					Append( Buffer, """ value=""" & Value & """/>" );
+					Output := Buffer;
+				end;
 		end case;
 	end Get_Input;
-
-
-
-	-----------------------------
-	-- Basic Property Renderer --
-	-----------------------------
-
-
---	type Basic_Property_Renderer is new Property_Renderer_Interface with null record;
---	
---	overriding
---	procedure Render_Property(
---				Entity		: in     KOW_
---
 end KOW_View.Entities.Property_Renderers;

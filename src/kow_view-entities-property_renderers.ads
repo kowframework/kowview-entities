@@ -42,6 +42,7 @@ with Ada.Strings.Unbounded;			use Ada.Strings.Unbounded;
 -------------------
 with KOW_Ent;
 with KOW_Ent.Generic_Property_Metadata;
+with KOW_View.Modules;
 
 
 ---------
@@ -64,6 +65,7 @@ package KOW_View.Entities.Property_Renderers is
 
 	procedure Render_Property(
 				Renderer	: in out Property_Renderer_Interface;
+				Module		: in out KOW_View.Modules.Module_Type'Class;
 				Request		: in     AWS.Status.Data;
 				Entity		: in     KOW_Ent.Entity_Type'Class;
 				Property	: in     KOW_Ent.Entity_Property_Type'Class;
@@ -129,10 +131,11 @@ package KOW_View.Entities.Property_Renderers is
 	-----------------------------
 
 	type Basic_Property_Renderer_Type is new Property_Renderer_Interface with null record;
-	
+	-- render as text input using dijit.Form.TextBox widget
 	overriding
 	procedure Render_Property(
 				Renderer	: in out Basic_Property_Renderer_Type;
+				Module		: in out KOW_View.Modules.Module_Type'Class;
 				Request		: in     AWS.Status.Data;
 				Entity		: in     KOW_Ent.Entity_Type'Class;
 				Property	: in     KOW_Ent.Entity_Property_Type'Class;
@@ -149,13 +152,15 @@ package KOW_View.Entities.Property_Renderers is
 				Style		: in Rendering_Style_Type
 			) return String;
 
-	function Get_Input(
-				Renderer	: in Basic_Property_Renderer_Type;
-				Request		: in AWS.Status.Data;
-				Entity		: in KOW_Ent.Entity_Type'Class;
-				Property	: in KOW_Ent.Entity_Property_Type'Class;
-				Style		: in Rendering_Style_Type
-			) return String;
+	procedure Get_Input(
+				Renderer	: in out Basic_Property_Renderer_Type;
+				Module		: in out KOW_View.Modules.Module_Type'Class;
+				Request		: in     AWS.Status.Data;
+				Entity		: in     KOW_Ent.Entity_Type'Class;
+				Property	: in     KOW_Ent.Entity_Property_Type'Class;
+				Style		: in     Rendering_Style_Type;
+				Output		:    out Unbounded_String
+			);
 
 
 

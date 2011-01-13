@@ -85,12 +85,13 @@ package KOW_View.Entities.Modules is
 			) return KOW_Ent.Property_Lists.List;
 	-- ge the properties that will be used by this module..
 
-	function Render_View(
-				Module	: in Entity_Module_Type;
-				Request	: in AWS.Status.Data;
-				Entity	: in KOW_Ent.Entity_Type'Class;
-				Style	: in KOW_View.Entities.Rendering_Style_Type
-			) return Unbounded_String;
+	procedure Render_View(
+				Module	: in out Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Entity	: in     KOW_Ent.Entity_Type'Class;
+				Style	: in     KOW_View.Entities.Rendering_Style_Type;
+				Output	:    out Unbounded_String
+			);
 	-- render the entity into a unbounded_string variable following the style
 	--
 	-- style is used only by the renderer and every element fits inside a 

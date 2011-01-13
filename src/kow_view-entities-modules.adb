@@ -100,12 +100,13 @@ package body KOW_View.Entities.Modules is
 	end Get_Properties;
 
 
-	function Render_View(
-				Module	: in Entity_Module_Type;
-				Request	: in AWS.Status.Data;
-				Entity	: in KOW_Ent.Entity_Type'Class;
-				Style	: in KOW_View.Entities.Rendering_Style_Type
-			) return Unbounded_String is
+	procedure Render_View(
+				Module	: in out Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Entity	: in     KOW_Ent.Entity_Type'Class;
+				Style	: in     KOW_View.Entities.Rendering_Style_Type;
+				Output	:    out Unbounded_String
+			) is
 		Buffer : Unbounded_String := To_Unbounded_String( "<fieldset>" );
 
 		procedure Iterator( C : in KOW_Ent.Property_Lists.Cursor ) is
@@ -118,6 +119,7 @@ package body KOW_View.Entities.Modules is
 
 			KOW_View.Entities.Property_Renderers.Render_Property(
 							Renderer	=> Renderer.all,
+							Module		=> Module,
 							Request		=> Request,
 							Entity		=> Entity,
 			                                Property	=> Property.all,
@@ -139,7 +141,7 @@ package body KOW_View.Entities.Modules is
 				);
 		Append( Buffer, "</fieldset>" );
 
-		return Buffer;
+		Output := Buffer;
 	end Render_View;
 
 
