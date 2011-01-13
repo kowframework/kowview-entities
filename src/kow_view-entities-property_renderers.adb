@@ -139,22 +139,17 @@ package body KOW_View.Entities.Property_Renderers is
 
 		Input	: Unbounded_String;		
 	begin
-
-		if KOW_Ent.Should_Read( Property ) then
-			Get_Input(
-					Renderer	=> Renderer,
-					Module		=> Module,
-					Request		=> Request,
-					Entity		=> Entity,
-					Property	=> Property,
-					Style		=> Style,
-					Output		=> Input
-				);
-		
-			Output := To_Unbounded_String( Label ) & Input;
-		else
-			Output := Null_Unbounded_String;
-		end if;
+		Get_Input(
+				Renderer	=> Renderer,
+				Module		=> Module,
+				Request		=> Request,
+				Entity		=> Entity,
+				Property	=> Property,
+				Style		=> Style,
+				Output		=> Input
+			);
+	
+		Output := To_Unbounded_String( Label ) & Input;
 	end Render_Property;
 
 	function Get_Label(
