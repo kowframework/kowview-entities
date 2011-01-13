@@ -98,11 +98,11 @@ package KOW_View.Entities is
 	-- Rendering Style --
 	---------------------
 
-	type Render_Style_Type is (
-				Tabular_Rendering,
-				Inlined_Rendering,
-				Tabular_Editing_Rendering,
-				Inilied_Editing_Rendering
+	type Rendering_Style_Type is (
+				Big_Rendering,
+				Small_Rendering,
+				Big_Edit_Rendering,
+				Small_Edit_Rendering
 			);
 	-- how the entity can be rendered..
 

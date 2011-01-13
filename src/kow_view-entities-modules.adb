@@ -30,6 +30,7 @@ pragma License( GPL );
 with KOW_Config;
 with KOW_Ent;
 with KOW_View.Entities.Property_Renderers;
+with KOW_View.Locales;
 with KOW_View.Modules;
 with KOW_View.Modules.Stateless_Module_Factories;
 
@@ -97,39 +98,41 @@ package body KOW_View.Entities.Modules is
 
 	function Render_View(
 				Module	: in Entity_Module_Type;
+				Request	: in AWS.Status.Data;
 				Entity	: in KOW_Ent.Entity_Type'Class;
 				Style	: in KOW_View.Entities.Rendering_Style_Type
 			) return Unbounded_String is
-		-- render the entity into a unbounded_string variable following the style
-		-- notice that no matter what "style" is called the entity will be rendered into a HTML table
-		--
-		-- how this table is displayed is then controlled by the CSS style and browser
-		-- NOTE :: this will assure the form will be usable in any browser
-		
-		Buffer : Unbounded_String := "<table>";
+		Buffer : Unbounded_String := To_Unbounded_String( "<fieldset>" );
 
 		procedure Iterator( C : in KOW_Ent.Property_Lists.Cursor ) is
+			use KOW_View.Entities.Property_Renderers;
+
 			Property	: KOW_Ent.Entity_Property_Ptr := KOW_Ent.Property_Lists.Element( C );
+			Renderer	: Property_Renderer_Ptr := Property_Renderer_Metadata.Get( Property.all );
 			Renderer_Buffer : Unbounded_String;
 		begin
 
 			KOW_View.Entities.Property_Renderers.Render_Property(
+							Renderer	=> Renderer.all,
 							Entity		=> Entity,
 			                                Property	=> Property.all,
 							Style		=> Style,
 							Output		=> Renderer_Buffer
 						);
 
-			Append( Buffer, "<tr>" );
+			Append( Buffer, "<label>" );
 			Append( Buffer, Renderer_Buffer );
-			Append( Buffer, "</tr>" );
+			Append( Buffer, "</label>" );
 		end Iterator;
+
+		Legend : constant String := "<legend>" & KOW_Ent.Get_Label( Entity, KOW_View.Locales.Get_Locale( Request ) ) & "</legend>";
 	begin
+		Append( Buffer, Legend );
 		KOW_Ent.Property_Lists.Iterate(
 					Get_Properties( Module, Entity ),
 					Iterator'Access
 				);
-		Append( Buffer, "</table>" );
+		Append( Buffer, "</fieldset>" );
 
 		return Buffer;
 	end Render_View;

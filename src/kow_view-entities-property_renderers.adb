@@ -42,8 +42,9 @@ package body KOW_View.Entities.Property_Renderers is
 
 	function Get_Default_Renderer(
 				Property	: in KOW_Ent.Entity_Property_Type'Class
-			) return Property_Renderer_Access is
+			) return Property_Renderer_Ptr is
 	begin
+		-- TODO :: implement default renderer and return it here :)
 		return null;
 	end Get_Default_Renderer;
 

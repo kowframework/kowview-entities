@@ -48,12 +48,13 @@ package KOW_View.Entities.Property_Renderers is
 	-----------------------
 
 	type Property_Renderer_Interface is abstract new KOW_Ent.Entity_Property_Metadata_Interface with null record;
-	type Property_Renderer_Access is access all Property_Renderer_Interface'Class;
+	type Property_Renderer_Ptr is access all Property_Renderer_Interface'Class;
 
 	procedure Render_Property(
+				Renderer	: in out Property_Renderer_Interface;
 				Entity		: in     KOW_Ent.Entity_Type'Class;
 				Property	: in     KOW_Ent.Entity_Property_Type'Class;
-				Style		: in     Render_Style_Type;
+				Style		: in     Rendering_Style_Type;
 				Output		:    out Unbounded_String
 			) is abstract;
 	-- render the entity property into the output
@@ -61,11 +62,11 @@ package KOW_View.Entities.Property_Renderers is
 
 	function Get_Default_Renderer(
 				Property	: in KOW_Ent.Entity_Property_Type'Class
-			) return Property_Renderer_Access;
+			) return Property_Renderer_Ptr;
 
 	package Property_Renderer_Metadata is new KOW_Ent.Generic_Property_Metadata(
 						Entity_Property_Metadata_Type	=> Property_Renderer_Interface,
-						Metadata_Access			=> Property_Renderer_Access,
+						Metadata_Access			=> Property_Renderer_Ptr,
 						On_NUll				=> Get_Default_Renderer
 					);
 	

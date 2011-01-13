@@ -87,11 +87,21 @@ package KOW_View.Entities.Modules is
 
 	function Render_View(
 				Module	: in Entity_Module_Type;
+				Request	: in AWS.Status.Data;
 				Entity	: in KOW_Ent.Entity_Type'Class;
 				Style	: in KOW_View.Entities.Rendering_Style_Type
 			) return Unbounded_String;
 	-- render the entity into a unbounded_string variable following the style
-	-- notice that no matter what "style" is called the entity will be rendered into a HTML table
+	--
+	-- style is used only by the renderer and every element fits inside a 
+	-- 	<fieldset>
+	-- 		<legend>LABEL</legend>
+	--
+	-- 		<label>
+	-- 			<!-- Render results // -->
+	-- 		</label>
+	-- 		(...)
+	-- 	</fieldset>
 	--
 	-- how this table is displayed is then controlled by the CSS style and browser
 	-- NOTE :: this will assure the form will be usable in any browser
