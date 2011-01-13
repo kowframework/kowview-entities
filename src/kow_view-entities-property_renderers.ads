@@ -30,12 +30,24 @@ pragma License( GPL );
 ------------------------------------------------------------------------------
 
 
+
+--------------
+-- Ada 2005 --
+--------------
+with Ada.Tags;
+with Ada.Strings.Unbounded;			use Ada.Strings.Unbounded;
+
 -------------------
 -- KOW Framework --
 -------------------
 with KOW_Ent;
 with KOW_Ent.Generic_Property_Metadata;
 
+
+---------
+-- AWS --
+---------
+with AWS.Status;
 
 package KOW_View.Entities.Property_Renderers is
 
@@ -52,6 +64,7 @@ package KOW_View.Entities.Property_Renderers is
 
 	procedure Render_Property(
 				Renderer	: in out Property_Renderer_Interface;
+				Request		: in     AWS.Status.Data;
 				Entity		: in     KOW_Ent.Entity_Type'Class;
 				Property	: in     KOW_Ent.Entity_Property_Type'Class;
 				Style		: in     Rendering_Style_Type;
@@ -63,6 +76,8 @@ package KOW_View.Entities.Property_Renderers is
 	function Get_Default_Renderer(
 				Property	: in KOW_Ent.Entity_Property_Type'Class
 			) return Property_Renderer_Ptr;
+	-- uses Default_Renderers_Registry to look for the property renderer to return..
+	-- if none found return the singleton instance of the Basic_Renderer_type
 
 	package Property_Renderer_Metadata is new KOW_Ent.Generic_Property_Metadata(
 						Entity_Property_Metadata_Type	=> Property_Renderer_Interface,
@@ -70,15 +85,78 @@ package KOW_View.Entities.Property_Renderers is
 						On_NUll				=> Get_Default_Renderer
 					);
 	
+
+	--------------------------------
+	-- Property Renderer Registry --
+	--------------------------------
+	
+	package Renderer_Maps is new Ada.Containers.Ordered_Maps(
+					Key_Type	=> Unbounded_String,
+					Element_Type	=> Property_Renderer_Ptr
+				);
+
+	protected Default_Renderers_Registry is
+
+		-- the property renderers here are used in case no renderer is registered to a given property
+		-- in the entity property metadata.
+		--
+		-- These are called by the basic property renderer
+		
+		procedure Set(
+					Property_Tag	: in Ada.Tags.Tag; 
+					Renderer	: in Property_Renderer_Ptr
+				);
+
+		procedure Set(
+					Property_Tag	: in Unbounded_String;
+					Renderer	: in Property_Renderer_Ptr
+				);
+
+		function Get(
+					Property_Tag	: in Ada.Tags.Tag
+				) return Property_Renderer_Ptr;
+
+		function Get(
+					Property_Tag	: in Unbounded_String
+				) return Property_Renderer_Ptr;
+	private
+		Renderer_Map : Renderer_Maps.Map;
+	end Default_Renderers_Registry;
+
+
 	-----------------------------
 	-- Basic Property Renderer --
 	-----------------------------
 
+	type Basic_Property_Renderer_Type is new Property_Renderer_Interface with null record;
+	
+	overriding
+	procedure Render_Property(
+				Renderer	: in out Basic_Property_Renderer_Type;
+				Request		: in     AWS.Status.Data;
+				Entity		: in     KOW_Ent.Entity_Type'Class;
+				Property	: in     KOW_Ent.Entity_Property_Type'Class;
+				Style		: in     Rendering_Style_Type;
+				Output		:    out Unbounded_String
+			);
+	-- simply render using text input
 
---	type Basic_Property_Renderer is new Property_Renderer_Interface with null record;
---	
---	overriding
---	procedure Render_Property(
---				Entity		: in     KOW_
---
+	function Get_Label(
+				Renderer	: in Basic_Property_Renderer_Type;
+				Request		: in AWS.Status.Data;
+				Entity		: in KOW_Ent.Entity_Type'Class;
+				Property	: in KOW_Ent.Entity_Property_Type'Class;
+				Style		: in Rendering_Style_Type
+			) return String;
+
+	function Get_Input(
+				Renderer	: in Basic_Property_Renderer_Type;
+				Request		: in AWS.Status.Data;
+				Entity		: in KOW_Ent.Entity_Type'Class;
+				Property	: in KOW_Ent.Entity_Property_Type'Class;
+				Style		: in Rendering_Style_Type
+			) return String;
+
+
+
 end KOW_View.Entities.Property_Renderers;

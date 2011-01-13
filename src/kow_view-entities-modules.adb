@@ -114,6 +114,7 @@ package body KOW_View.Entities.Modules is
 
 			KOW_View.Entities.Property_Renderers.Render_Property(
 							Renderer	=> Renderer.all,
+							Request		=> Request,
 							Entity		=> Entity,
 			                                Property	=> Property.all,
 							Style		=> Style,

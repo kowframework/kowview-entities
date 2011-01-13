@@ -30,23 +30,156 @@ pragma License( GPL );
 ------------------------------------------------------------------------------
 
 
+--------------
+-- Ada 2005 --
+--------------
+with Ada.Tags;
+with Ada.Strings.Unbounded;			use Ada.Strings.Unbounded;
+
+
 -------------------
 -- KOW Framework --
 -------------------
 with KOW_Ent;
 with KOW_Ent.Generic_Property_Metadata;
+with KOW_View.Locales;
 
+---------
+-- AWS --
+---------
+with AWS.Status;
 
 package body KOW_View.Entities.Property_Renderers is
 
+
+	Default_Renderer : Property_Renderer_Ptr := new Basic_Property_Renderer_Type;
+	-- only one instance as it has no internal variables...
 
 	function Get_Default_Renderer(
 				Property	: in KOW_Ent.Entity_Property_Type'Class
 			) return Property_Renderer_Ptr is
 	begin
-		-- TODO :: implement default renderer and return it here :)
-		return null;
+		return Default_Renderers_Registry.Get( Property'Tag );
+	exception
+		when others =>
+			return Default_Renderer;
 	end Get_Default_Renderer;
+
+
+
+	--------------------------------
+	-- Property Renderer Registry --
+	--------------------------------
+	
+	protected body Default_Renderers_Registry is
+
+		-- the property renderers here are used in case no renderer is registered to a given property
+		-- in the entity property metadata.
+		--
+		-- These are called by the basic property renderer
+		
+		procedure Set(
+					Property_Tag	: in Ada.Tags.Tag; 
+					Renderer	: in Property_Renderer_Ptr
+				) is
+		begin
+			Set( To_Unbounded_String( Ada.Tags.Expanded_Name( Property_Tag ) ), Renderer );
+		end Set;
+
+		procedure Set(
+					Property_Tag	: in Unbounded_String;
+					Renderer	: in Property_Renderer_Ptr
+				) is
+		begin
+			Renderer_Maps.Include( Renderer_Map, Property_Tag, Renderer );
+		end Set;
+
+		function Get(
+					Property_Tag	: in Ada.Tags.Tag
+				) return Property_Renderer_Ptr is
+		begin
+			return Get( To_Unbounded_String( Ada.Tags.Expanded_Name( Property_Tag ) ) );
+		end Get;
+
+		function Get(
+					Property_Tag	: in Unbounded_String
+				) return Property_Renderer_Ptr is
+		begin
+			return Renderer_Maps.Element( Renderer_Map, Property_Tag );
+		exception
+			when others =>
+				return null;
+		end Get;
+	end Default_Renderers_Registry;
+
+
+	-----------------------------
+	-- Basic Property Renderer --
+	-----------------------------
+
+	overriding
+	procedure Render_Property(
+				Renderer	: in out Basic_Property_Renderer_Type;
+				Request		: in     AWS.Status.Data;
+				Entity		: in     KOW_Ent.Entity_Type'Class;
+				Property	: in     KOW_Ent.Entity_Property_Type'Class;
+				Style		: in     Rendering_Style_Type;
+				Output		:    out Unbounded_String
+			) is
+		-- render the property using the default property renderers registered by the property tag
+
+		Label	: constant String := Get_Label(
+							Renderer	=> Renderer,
+							Request		=> Request,
+							Entity		=> Entity,
+							Property	=> Property,
+							Style		=> Style
+						);
+		Input	: constant String := Get_Input(
+							Renderer	=> Renderer,
+							Request		=> Request,
+							Entity		=> Entity,
+							Property	=> Property,
+							Style		=> Style
+						);
+	begin
+		Output := To_Unbounded_String( Label & Input );
+	end Render_Property;
+
+	function Get_Label(
+				Renderer	: in Basic_Property_Renderer_Type;
+				Request		: in AWS.Status.Data;
+				Entity		: in KOW_Ent.Entity_Type'Class;
+				Property	: in KOW_Ent.Entity_Property_Type'Class;
+				Style		: in Rendering_Style_Type
+			) return String is
+	begin
+		return KOW_Ent.Get_Label( Entity, Property.Column_Name, KOW_View.Locales.Get_Locale( Request ) );
+	end Get_Label;
+
+	function Get_Input(
+				Renderer	: in Basic_Property_Renderer_Type;
+				Request		: in AWS.Status.Data;
+				Entity		: in KOW_Ent.Entity_Type'Class;
+				Property	: in KOW_Ent.Entity_Property_Type'Class;
+				Style		: in Rendering_Style_Type
+			) return String is
+		-- TODO IMPLEMENT GET_INPUT
+		--
+		-- for this method I'll need to:
+		-- 	1. figure out how to calculate the HTML field's name.
+		-- 	2. find out a way to retrieve through AJAX form data using the renderer (IE, keeping the renderer somewhere in the module's memory)
+		-- 	3. send information about js include files (this will be required in future files)...
+	begin
+		case Style is
+			when Big_Rendering | Small_Rendering =>
+				return "input for big or small read-only rendering";-- TODO
+			when Big_Edit_Rendering | Small_Edit_Rendering =>
+				return "input for editing rendering";-- TODO
+		end case;
+	end Get_Input;
+
+
 
 	-----------------------------
 	-- Basic Property Renderer --
