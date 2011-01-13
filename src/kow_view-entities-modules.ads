@@ -29,6 +29,7 @@ pragma License( GPL );
 -------------------
 with KOW_Config;
 with KOW_Ent;
+with KOW_Lib.Json;
 with KOW_View.Modules;
 with KOW_View.Modules.Stateless_Module_Factories;
 
@@ -76,6 +77,13 @@ package KOW_View.Entities.Modules is
 				Output	:    out Unbounded_String
 			);
 	
+	overriding
+	procedure Process_Json_Request(
+				Module	: in out Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Response:    out KOW_Lib.Json.Object_Type
+			);
+	
 	function Get_Entity_Id(
 				Module	: in Entity_Module_Type;
 				Request	: in AWS.Status.Data
@@ -110,6 +118,13 @@ package KOW_View.Entities.Modules is
 				Style	: in     KOW_View.Entities.Rendering_Style_Type;
 				Output	:    out Unbounded_String
 			);
+	
+	procedure Set_Values(
+				Module	: in out Entity_Module_Type;
+				Entity	: in out KOW_Ent.Entity_Type'Class;
+				Request	: in     AWS.Status.Data
+			);
+
 	-- render the entity into a unbounded_string variable following the style
 	--
 	-- style is used only by the renderer and every element fits inside a 

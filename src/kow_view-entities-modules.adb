@@ -29,7 +29,9 @@ pragma License( GPL );
 -------------------
 with KOW_Config;
 with KOW_Ent;
+with KOW_Lib.Json;
 with KOW_View.Entities.Property_Renderers;
+with KOW_View.Entities.Validation;
 with KOW_View.Locales;
 with KOW_View.Modules;
 with KOW_View.Modules.Stateless_Module_Factories;
@@ -94,6 +96,38 @@ package body KOW_View.Entities.Modules is
 				Output	=> Output
 			);
 	end Process_Body;
+
+
+	overriding
+	procedure Process_Json_Request(
+				Module	: in out Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Response:    out KOW_Lib.Json.Object_Type
+			) is
+		Entity_Id	: Integer := Get_Entity_id( Entity_Module_Type'Class( Module ), Request );
+		Entity		: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Entity_ID );
+	begin
+		Set_Values(
+				Module	=> Module,
+				Entity	=> Entity,
+				Request	=> Request
+			);
+
+		if Entity in KOW_View.Entities.Validation.Validatable_Entity_Interface'Class then
+			KOW_View.Entities.Validation.Validate(
+						Entity	=> KOW_View.Entities.Validation.Validatable_Entity_Interface'Class( Entity ),
+						Request	=> Request
+					);
+		end if;
+
+
+		KOW_Ent.Store( Entity );
+
+		Response := KOW_Ent.To_Json_Object( Entity );
+	end Process_Json_Request;
+	
+
+
 
 
 	function Get_Entity_id(
@@ -188,6 +222,29 @@ package body KOW_View.Entities.Modules is
 
 		Output := Buffer;
 	end Render_View;
+
+
+	procedure Set_Values(
+				Module	: in out Entity_Module_Type;
+				Entity	: in out KOW_Ent.Entity_Type'Class;
+				Request	: in     AWS.Status.Data
+			) is
+		Properties : KOW_Ent.Property_Lists.List := Get_Properties( Entity_Module_Type'Class( Module ), Entity );
+
+		Params	: AWS.Parameters.List := AWS.Status.Parameters( Request );
+
+		procedure Iterator( C : in KOW_Ent.Property_Lists.Cursor ) is
+			Property : KOW_Ent.Entity_Property_Ptr := KOW_Ent.Property_Lists.Element( C );
+		begin
+			KOW_Ent.Set_Property(
+					Property	=> Property.all,
+					Entity		=> Entity,
+					Value		=> AWS.Parameters.Get( Params, To_String( Property.all.Column_Name ) )
+				);
+		end Iterator;
+	begin
+		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
+	end Set_Values;
 
 
 
