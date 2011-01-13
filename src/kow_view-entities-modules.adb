@@ -37,6 +37,7 @@ with KOW_View.Modules.Stateless_Module_Factories;
 ---------
 -- AWS --
 ---------
+with AWS.Parameters;
 with AWS.Status;
 
 package body KOW_View.Entities.Modules is
@@ -58,15 +59,55 @@ package body KOW_View.Entities.Modules is
 			) is
 		-- setup the entity_tag and narrow variables...
 		-- if you override this method remember to call the Entity_Module_Type's implementation of it.
+
+		function Get_Style return Rendering_Style_Type is
+		begin
+			return Rendering_Style_Type'Value( KOW_Config.Element( Config, "style" ) & "_Rendering" );
+		exception
+			when others => return Big_Rendering;
+		end Get_Style;
+
 	begin
 		Module.Entity_Tag := KOW_Config.Element( Config, "entity_tag" );
 		Module.Narrow := KOW_Config.Value( Config, "narrow", True );
+		Module.Style := Get_Style;
 
 		Include_Module_Script( Module, "something.js" );
 		Include_Dojo_Package( Module, "dojo.Form.TextInput" );
 		Include_Module_CSS( Module, "basicentity.css" );
 	end Initialize_Request;
 
+	overriding
+	procedure Process_Body(
+				Module	: in out Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Output	:    out Unbounded_String
+			) is
+		Entity_Id	: Integer := Get_Entity_id( Entity_Module_Type'Class( Module ), Request );
+		Entity		: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Entity_ID );
+	begin
+		Render_View(
+				Module	=> Module,
+				Request	=> Request,
+				Entity	=> Entity,
+				Style	=> Module.Style,
+				Output	=> Output
+			);
+	end Process_Body;
+
+
+	function Get_Entity_id(
+				Module	: in Entity_Module_Type;
+				Request	: in AWS.Status.Data
+			) return Integer is
+		ID_Str : constant String := AWS.Parameters.Get( AWS.Status.Parameters( Request ), "entity_id" );
+	begin
+		if ID_Str = "" then
+			return -1;
+		else
+			return Integer'Value( ID_Str );
+		end if;
+	end Get_Entity_Id;
 
 	function New_Entity(
 				Module	: in Entity_Module_Type
@@ -77,11 +118,15 @@ package body KOW_View.Entities.Modules is
 	
 	function Load_Entity(
 				Module	: in Entity_Module_Type;
-				Id	: in Natural
+				Id	: in Integer
 			) return KOW_Ent.Entity_Type'Class is
 		Entity : KOW_Ent.Entity_Type'Class := New_Entity( Module );
 	begin
-		KOW_Ent.Load( Entity, Id );
+		if Id = -1 then
+			return Entity;
+		end if;
+
+		KOW_Ent.Load( Entity, Natural( Id ) );
 		if Module.Narrow then
 			return KOW_Ent.Narrow( Entity );
 		else

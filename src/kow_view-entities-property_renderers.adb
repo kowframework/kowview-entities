@@ -184,7 +184,11 @@ package body KOW_View.Entities.Property_Renderers is
 					KOW_View.Modules.Include_Dojo_Package( Module, "dijit.Form.TextBox" );
 					Append( Buffer, "<input type=""text"" dojoType=""dijit.Form.TextBox"" name=""" );
 					Append( Buffer, Property.Column_Name );
-					Append( Buffer, """ value=""" & Value & """/>" );
+					Append( Buffer, """ " );
+					if Property.Immutable and then not KOW_Ent.Is_New( Entity ) then
+						Append( Buffer, "disabled " );
+					end if;
+					Append( Buffer, "value=""" & Value & """/>" );
 					Output := Buffer;
 				end;
 		end case;

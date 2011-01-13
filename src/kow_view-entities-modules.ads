@@ -54,6 +54,9 @@ package KOW_View.Entities.Modules is
 
 		Narrow		: Boolean;
 		-- used by the load_entity function
+
+		Style		: Rendering_Style_Type;
+		-- in setup don't use the _rendering sufix
 	end record;
 
 	overriding
@@ -66,6 +69,20 @@ package KOW_View.Entities.Modules is
 	-- if you override this method remember to call the Entity_Module_Type's implementation of it.
 
 
+	overriding
+	procedure Process_Body(
+				Module	: in out Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Output	:    out Unbounded_String
+			);
+	
+	function Get_Entity_Id(
+				Module	: in Entity_Module_Type;
+				Request	: in AWS.Status.Data
+			) return Integer;
+	-- try to get the entity ID.
+	-- returns -1 if there is no entity id to be returned..
+
 	function New_Entity(
 				Module	: in Entity_Module_Type
 			) return KOW_Ent.Entity_Type'Class;
@@ -73,10 +90,11 @@ package KOW_View.Entities.Modules is
 	
 	function Load_Entity(
 				Module	: in Entity_Module_Type;
-				Id	: in Natural
+				Id	: in Integer
 			) return KOW_Ent.Entity_Type'Class;
 	-- load the entity of the configured entity tag with the given id
 	-- if the configured narrow property is true then return the results for KOW_Ent.Narrow( entity )
+	-- if id == -1 do not load, only call create
 
 
 	function Get_Properties(
