@@ -61,6 +61,10 @@ package body KOW_View.Entities.Modules is
 	begin
 		Module.Entity_Tag := KOW_Config.Element( Config, "entity_tag" );
 		Module.Narrow := KOW_Config.Value( Config, "narrow", True );
+
+		Include_Module_Script( Module, "something.js" );
+		Include_Dojo_Package( Module, "dojo.Form.TextInput" );
+		Include_Module_CSS( Module, "basicentity.css" );
 	end Initialize_Request;
 
 
