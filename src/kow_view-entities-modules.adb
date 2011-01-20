@@ -76,7 +76,7 @@ package body KOW_View.Entities.Modules is
 
 		Include_Component_Script( Module, "something.js" );
 		Include_Dojo_Package( Module, "dojo.Form.TextInput" );
-		Include_Module_CSS( Module, "basicentity.css" );
+		Include_Component_CSS( Module, "basicentity.css" );
 	end Initialize_Request;
 
 	overriding
