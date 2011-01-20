@@ -74,7 +74,7 @@ package body KOW_View.Entities.Modules is
 		Module.Narrow := KOW_Config.Value( Config, "narrow", True );
 		Module.Style := Get_Style;
 
-		Include_Module_Script( Module, "something.js" );
+		Include_Component_Script( Module, "something.js" );
 		Include_Dojo_Package( Module, "dojo.Form.TextInput" );
 		Include_Module_CSS( Module, "basicentity.css" );
 	end Initialize_Request;
