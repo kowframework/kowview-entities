@@ -52,6 +52,9 @@ package KOW_View.Entities.Modules is
 	type Entity_Module_Type is abstract new KOW_View.Modules.Module_Type with record
 		Entity_Tag	: Unbounded_String;
 		-- the base/core entity tag..
+		-- used only by the New_Entity method...
+		-- so, in case you need to enforce creating only one type of entity
+		-- you can simply override that method
 
 		Narrow		: Boolean;
 		-- used by the load_entity function

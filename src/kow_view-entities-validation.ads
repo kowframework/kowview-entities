@@ -23,6 +23,10 @@
 ------------------------------------------------------------------------------
 pragma License( GPL );
 
+--------------
+-- Ada 2005 --
+--------------
+with Ada.Exceptions;
 
 
 package KOW_View.Entities.Validation is
@@ -47,4 +51,13 @@ package KOW_View.Entities.Validation is
 				Message	: in String
 			);
 	-- raise an exception message 
+
+	procedure Raise_Exception(
+				Entity	: in Validatable_Entity_Interface'Class;
+				Column	: in String;
+				Message	: in String;
+				E	: in Ada.Exceptions.Exception_Occurrence
+			);
+	-- raise an exception message 
+
 end KOW_View.Entities.Validation;
