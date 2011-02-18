@@ -34,6 +34,15 @@ with Ada.Tags;
 package body KOW_View.Entities.Validation is
 
 	procedure Raise_Exception(
+				Column	: in String;
+				Message	: in String
+			) is
+		-- raise an exception with no entity information
+	begin
+		raise VALIDATION_ERROR with '|' & Column & '|' & Message;
+	end Raise_Exception;
+
+	procedure Raise_Exception(
 				Entity	: in Validatable_Entity_Interface'Class;
 				Column	: in String;
 				Message	: in String

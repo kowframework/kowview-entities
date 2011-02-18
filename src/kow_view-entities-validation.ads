@@ -46,6 +46,12 @@ package KOW_View.Entities.Validation is
 
 
 	procedure Raise_Exception(
+				Column	: in String;
+				Message	: in String
+			);
+	-- raise an exception with no entity information
+
+	procedure Raise_Exception(
 				Entity	: in Validatable_Entity_Interface'Class;
 				Column	: in String;
 				Message	: in String
