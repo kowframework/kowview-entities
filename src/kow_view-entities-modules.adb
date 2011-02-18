@@ -88,6 +88,10 @@ package body KOW_View.Entities.Modules is
 		Entity_Id	: Integer := Get_Entity_id( Entity_Module_Type'Class( Module ), Request );
 		Entity		: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Entity_ID );
 	begin
+		-- TODO ::
+		--
+		-- try/catch getting the entity...
+		-- if ok the do the following:
 		Render_View(
 				Module	=> Module,
 				Request	=> Request,
@@ -95,6 +99,10 @@ package body KOW_View.Entities.Modules is
 				Style	=> Module.Style,
 				Output	=> Output
 			);
+
+		-- if it fails then...
+		-- call list_entities and for each one of those run the listing. :)
+		-- btw: the property renderer could easily implement all the viewing methods available, including preview
 	end Process_Body;
 
 
