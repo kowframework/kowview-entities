@@ -63,6 +63,8 @@ package body KOW_View.Entities.Property_Renderers is
 		Renderer := Default_Renderers_Registry.Get( Property'Tag );
 		if Renderer = null then
 			return Default_Renderer;
+		else
+			return Renderer;
 		end if;
 	exception
 		when others =>
@@ -153,7 +155,7 @@ package body KOW_View.Entities.Property_Renderers is
 				Output		=> Input
 			);
 	
-		Output := To_Unbounded_String( Label ) & Input;
+		Output := To_Unbounded_String( Label ) & "<span>" & Input & "</span>";
 	end Render_Property;
 
 	function Get_Label(
