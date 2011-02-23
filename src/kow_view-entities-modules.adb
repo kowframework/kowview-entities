@@ -70,7 +70,7 @@ package body KOW_View.Entities.Modules is
 		end Get_Style;
 
 	begin
-		Module.Entity_Tag := KOW_Config.Element( Config, "entity_tag" );
+		Module.Entity_Tag := KOW_Config.Value( Config, "entity_tag", "" );
 		Module.Narrow := KOW_Config.Value( Config, "narrow", True );
 		Module.Style := Get_Style;
 
@@ -155,6 +155,9 @@ package body KOW_View.Entities.Modules is
 				Module	: in Entity_Module_Type
 			) return KOW_Ent.Entity_Type'Class is
 	begin
+		if Module.Entity_Tag = "" then
+			raise CONSTRAINT_ERROR with "you need to supply the 'entity_tag' parameter";
+		end if;
 		return KOW_Ent.Entity_Registry.New_Entity( Module.Entity_Tag );
 	end New_Entity;
 	
