@@ -84,7 +84,7 @@ package KOW_View.Entities.Property_Renderers is
 	package Property_Renderer_Metadata is new KOW_Ent.Generic_Property_Metadata(
 						Entity_Property_Metadata_Type	=> Property_Renderer_Interface,
 						Metadata_Access			=> Property_Renderer_Ptr,
-						On_NUll				=> Get_Default_Renderer
+						On_Null				=> Get_Default_Renderer
 					);
 	
 
@@ -161,6 +161,9 @@ package KOW_View.Entities.Property_Renderers is
 				Style		: in     Rendering_Style_Type;
 				Output		:    out Unbounded_String
 			);
+	
+
+	Default_Renderer : Property_Renderer_Ptr := new Basic_Property_Renderer_Type;
 
 
 
