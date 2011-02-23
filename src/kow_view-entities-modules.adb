@@ -165,7 +165,7 @@ package body KOW_View.Entities.Modules is
 				Module	: in Entity_Module_Type;
 				Id	: in Integer
 			) return KOW_Ent.Entity_Type'Class is
-		Entity : KOW_Ent.Entity_Type'Class := New_Entity( Module );
+		Entity : KOW_Ent.Entity_Type'Class := New_Entity( Entity_Module_Type'Class( Module ) );
 	begin
 		if Id = -1 then
 			return Entity;
