@@ -34,8 +34,8 @@ with KOW_View.Components;
 
 package KOW_View.Entities.Components is
 
-	type Entity_Component is new KOW_View.Components.Component_Type with null record;
+	type Entities_Component is new KOW_View.Components.Component_Type with null record;
 
 
-	Component : aliased Entity_Component;
+	Component : aliased Entities_Component;
 end KOW_View.Entities.Components;
