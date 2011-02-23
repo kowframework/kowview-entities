@@ -75,8 +75,8 @@ package body KOW_View.Entities.Modules is
 		Module.Narrow := KOW_Config.Value( Config, "narrow", True );
 		Module.Style := Get_Style;
 
-		Include_Component_Script( Module, KOW_View.Entities.Components.Component, "entity.js" );
-		Include_Component_CSS( Module, KOW_View.Entities.Components.Component, "entitiy.css" );
+		Include_Component_Script( Module, KOW_View.Entities.Components.Component, "kowview-entities.js" );
+		Include_Component_CSS( Module, KOW_View.Entities.Components.Component, "kowview-entities.css" );
 	end Initialize_Request;
 
 	overriding
