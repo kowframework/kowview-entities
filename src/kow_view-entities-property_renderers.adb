@@ -134,7 +134,7 @@ package body KOW_View.Entities.Property_Renderers is
 		-- render the property using the default property renderers registered by the property tag
 
 		Label	: constant String := Get_Label(
-							Renderer	=> Renderer,
+							Renderer	=> Basic_Property_Renderer_Type'Class( Renderer ),
 							Request		=> Request,
 							Entity		=> Entity,
 							Property	=> Property,
@@ -144,7 +144,7 @@ package body KOW_View.Entities.Property_Renderers is
 		Input	: Unbounded_String;		
 	begin
 		Get_Input(
-				Renderer	=> Renderer,
+				Renderer	=> Basic_Property_Renderer_Type'Class( Renderer ),
 				Module		=> Module,
 				Request		=> Request,
 				Entity		=> Entity,

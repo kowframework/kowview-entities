@@ -30,6 +30,7 @@ pragma License( GPL );
 with KOW_Config;
 with KOW_Ent;
 with KOW_Lib.Json;
+with KOW_View.Entities.Components;
 with KOW_View.Entities.Property_Renderers;
 with KOW_View.Entities.Validation;
 with KOW_View.Locales;
@@ -74,9 +75,8 @@ package body KOW_View.Entities.Modules is
 		Module.Narrow := KOW_Config.Value( Config, "narrow", True );
 		Module.Style := Get_Style;
 
-		Include_Component_Script( Module, "something.js" );
-		Include_Dojo_Package( Module, "dojo.Form.TextInput" );
-		Include_Component_CSS( Module, "basicentity.css" );
+		Include_Component_Script( Module, KOW_View.Entities.Components.Component, "entity.js" );
+		Include_Component_CSS( Module, KOW_View.Entities.Components.Component, "entitiy.css" );
 	end Initialize_Request;
 
 	overriding
