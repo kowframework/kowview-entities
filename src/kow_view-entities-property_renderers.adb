@@ -58,8 +58,12 @@ package body KOW_View.Entities.Property_Renderers is
 	function Get_Default_Renderer(
 				Property	: in KOW_Ent.Entity_Property_Type'Class
 			) return Property_Renderer_Ptr is
+		Renderer : Property_Renderer_Ptr;
 	begin
-		return Default_Renderers_Registry.Get( Property'Tag );
+		Renderer := Default_Renderers_Registry.Get( Property'Tag );
+		if Renderer = null then
+			return Default_Renderer;
+		end if;
 	exception
 		when others =>
 			return Default_Renderer;
