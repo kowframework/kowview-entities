@@ -163,8 +163,5 @@ package KOW_View.Entities.Property_Renderers is
 			);
 	
 
-	Default_Renderer : Property_Renderer_Ptr := new Basic_Property_Renderer_Type;
-
-
 
 end KOW_View.Entities.Property_Renderers;
