@@ -187,8 +187,8 @@ package body KOW_View.Entities.Property_Renderers is
 				declare
 					Buffer	: Unbounded_String;
 				begin
-					KOW_View.Modules.Include_Dojo_Package( Module, "dijit.Form.TextBox" );
-					Append( Buffer, "<input type=""text"" dojoType=""dijit.Form.TextBox"" name=""" );
+					KOW_View.Modules.Include_Dojo_Package( Module, "dijit.form.ValidationTextBox" );
+					Append( Buffer, "<input type=""text"" dojoType=""dijit.form.ValidationTextBox"" name=""" );
 					Append( Buffer, Property.Column_Name );
 					Append( Buffer, """ " );
 					if Property.Immutable and then not KOW_Ent.Is_New( Entity ) then
