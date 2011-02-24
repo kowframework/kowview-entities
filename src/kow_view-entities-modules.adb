@@ -358,4 +358,17 @@ package body KOW_View.Entities.Modules is
 
 
 
+	--------------------
+	-- Helper Methods --
+	--------------------
+
+	procedure Check_Tag( Module : in KOW_View.Modules.Module_Type'Class ) is
+		-- check if the module is in Entity_Module_Type'Class 
+		-- if not, raise constraint error
+	begin
+		if Module not in Entity_Module_Type'Class then
+			raise CONSTRAINT_ERROR with "subtype of Entity_Module_Type expected";
+		end if;
+	end Check_Tag;
+
 end KOW_View.Entities.Modules;

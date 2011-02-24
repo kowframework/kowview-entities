@@ -162,4 +162,12 @@ package KOW_View.Entities.Modules is
 	-- how this table is displayed is then controlled by the CSS style and browser
 	-- NOTE :: this will assure the form will be usable in any browser
 
+
+	--------------------
+	-- Helper Methods --
+	--------------------
+
+	procedure Check_Tag( Module : in KOW_View.Modules.Module_Type'Class );
+	-- check if the module is in Entity_Module_Type'Class 
+	-- if not, raise constraint error
 end KOW_View.Entities.Modules;
