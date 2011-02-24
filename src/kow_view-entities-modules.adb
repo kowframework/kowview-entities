@@ -133,6 +133,8 @@ package body KOW_View.Entities.Modules is
 									);
 			begin
 				Append( Output, "<ul>" );
+				Include_Dojo_Package( Module, "dijit.form.Button" );
+				Append( Output, "<button onClick=""window.location.href='?style=big_edit'"" dojoType=""dijit.form.Button"">new</button>" );
 
 				for i in Ids'range loop
 					Append( Output, "<li>" );
@@ -145,6 +147,7 @@ package body KOW_View.Entities.Modules is
 						);
 					Append( Output, "</li>" );
 				end loop;
+				Append( Output, "<button onClick=""window.location.href='?style=big_edit'"" dojoType=""dijit.form.Button"">new</button>" );
 				Append( Output, "</ul>" );
 			end;
 		else
