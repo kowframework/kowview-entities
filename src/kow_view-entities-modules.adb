@@ -27,8 +27,10 @@ pragma License( GPL );
 -------------------
 -- KOW Framework --
 -------------------
+with APQ;
 with KOW_Config;
 with KOW_Ent;
+with KOW_Ent.ID_Query_Builders;
 with KOW_Lib.Json;
 with KOW_View.Entities.Components;
 with KOW_View.Entities.Property_Renderers;
@@ -67,7 +69,7 @@ package body KOW_View.Entities.Modules is
 		begin
 			return Rendering_Style_Type'Value( KOW_Config.Element( Config, "style" ) & "_Rendering" );
 		exception
-			when others => return Big_Rendering;
+			when others => return Small_Rendering;
 		end Get_Style;
 
 	begin
@@ -86,23 +88,62 @@ package body KOW_View.Entities.Modules is
 				Output	:    out Unbounded_String
 			) is
 		Entity_Id	: Integer := Get_Entity_id( Entity_Module_Type'Class( Module ), Request );
-		Entity		: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Entity_ID );
 	begin
-		-- TODO ::
-		--
-		-- try/catch getting the entity...
-		-- if ok the do the following:
-		Render_View(
-				Module	=> Module,
-				Request	=> Request,
-				Entity	=> Entity,
-				Style	=> Module.Style,
-				Output	=> Output
-			);
 
-		-- if it fails then...
-		-- call list_entities and for each one of those run the listing. :)
-		-- btw: the property renderer could easily implement all the viewing methods available, including preview
+		
+		if Entity_Id = -1 and then ( Module.Style = Small_Rendering or Module.Style = Big_Rendering ) then
+			declare
+				P	: AWS.Parameters.List := AWS.Status.Parameters( Request );
+				function From return Positive is
+					F : constant String := AWS.Parameters.Get( P, "from" );
+				begin
+					if F = "" then
+						return 1;
+					else
+						return Positive'Value( F );
+					end if;
+				end From;
+
+				function Limit return Natural is
+					L : constant String := AWS.Parameters.Get( P, "limit" );
+				begin
+					if L = "" then
+						return 20;
+					else
+						return Natural'Value( L );
+					end if;
+				end Limit;
+				Ids : KOW_Ent.Id_Array_Type := Query_Entities(
+										Module	=> Module,
+										Request	=> Request,
+										From	=> From,
+										Limit	=> Limit
+									);
+			begin
+				Append( Output, "<ul>" );
+
+				for i in Ids'range loop
+					Append( Output, "<li>" );
+					Render_View(
+							Module	=> Module,
+							Request	=> Request,
+							Entity	=> Load_Entity( Module, Ids( i ) ),
+							Style	=> Module.Style,
+							Output	=> Output
+						);
+					Append( Output, "</li>" );
+				end loop;
+				Append( Output, "</ul>" );
+			end;
+		else
+			Render_View(
+					Module	=> Module,
+					Request	=> Request,
+					Entity	=> Load_Entity( Module, Entity_ID ),
+					Style	=> Module.Style,
+					Output	=> Output
+				);
+		end if;
 	end Process_Body;
 
 
@@ -151,6 +192,30 @@ package body KOW_View.Entities.Modules is
 		end if;
 	end Get_Entity_Id;
 
+
+	function Query_Entities(
+				Module	: in Entity_Module_Type;
+				Request	: in AWS.Status.Data;
+				From	: in Positive;
+				Limit	: in Natural
+			) return KOW_Ent.Id_Array_Type is
+		use KOW_Ent.Id_Query_Builders;
+
+		Q : Query_Type;
+	begin
+		Prepare(
+				Q		=> Q,
+				Entity_Tag	=> Module.Entity_Tag
+			);
+
+		return Get_Some(
+				Q		=> Q,
+				From		=> From,
+				Limit		=> Limit
+			);
+	end Query_Entities;
+
+
 	function New_Entity(
 				Module	: in Entity_Module_Type
 			) return KOW_Ent.Entity_Type'Class is
@@ -165,13 +230,22 @@ package body KOW_View.Entities.Modules is
 				Module	: in Entity_Module_Type;
 				Id	: in Integer
 			) return KOW_Ent.Entity_Type'Class is
+	begin
+		return Load_Entity( Module, KOW_Ent.To_Id( ID ) );
+	end Load_Entity;
+
+	function Load_Entity(
+				Module	: in Entity_Module_Type;
+				Id	: in KOW_Ent.Id_Type
+			) return KOW_Ent.Entity_Type'Class is
+		use APQ;
 		Entity : KOW_Ent.Entity_Type'Class := New_Entity( Entity_Module_Type'Class( Module ) );
 	begin
-		if Id = -1 then
+		if Id.Value = -1 then
 			return Entity;
 		end if;
 
-		KOW_Ent.Load( Entity, Natural( Id ) );
+		KOW_Ent.Load( Entity, Id );
 		if Module.Narrow then
 			return KOW_Ent.Narrow( Entity );
 		else

@@ -94,6 +94,13 @@ package KOW_View.Entities.Modules is
 	-- try to get the entity ID.
 	-- returns -1 if there is no entity id to be returned..
 
+	function Query_Entities(
+				Module	: in Entity_Module_Type;
+				Request	: in AWS.Status.Data;
+				From	: in Positive;
+				Limit	: in Natural
+			) return KOW_Ent.Id_Array_Type;
+
 	function New_Entity(
 				Module	: in Entity_Module_Type
 			) return KOW_Ent.Entity_Type'Class;
@@ -106,6 +113,16 @@ package KOW_View.Entities.Modules is
 	-- load the entity of the configured entity tag with the given id
 	-- if the configured narrow property is true then return the results for KOW_Ent.Narrow( entity )
 	-- if id == -1 do not load, only call create
+
+	function Load_Entity(
+				Module	: in Entity_Module_Type;
+				Id	: in KOW_Ent.Id_Type
+			) return KOW_Ent.Entity_Type'Class;
+	-- load the entity of the configured entity tag with the given id
+	-- if the configured narrow property is true then return the results for KOW_Ent.Narrow( entity )
+	-- if id == -1 do not load, only call create
+	--
+	-- extends this one in case you want to extend any load entity... 
 
 
 	function Get_Properties(

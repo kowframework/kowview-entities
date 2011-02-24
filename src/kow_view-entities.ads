@@ -99,10 +99,10 @@ package KOW_View.Entities is
 	---------------------
 
 	type Rendering_Style_Type is (
-				Big_Rendering,
-				Small_Rendering,
-				Big_Edit_Rendering,
-				Small_Edit_Rendering
+				Big_Rendering,			-- when opening a page that displays this entity
+				Small_Rendering,		-- when doing previews in a list of entities
+				Big_Edit_Rendering,		-- when opening a page to edit this entity
+				Small_Edit_Rendering		-- when editing inlined
 			);
 	-- how the entity can be rendered..
 
