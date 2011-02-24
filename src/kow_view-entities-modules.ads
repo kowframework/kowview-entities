@@ -56,6 +56,8 @@ package KOW_View.Entities.Modules is
 		-- so, in case you need to enforce creating only one type of entity
 		-- you can simply override that method
 
+		Submit_Label	: Unbounded_String;
+
 		Narrow		: Boolean;
 		-- used by the load_entity function
 

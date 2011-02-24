@@ -24,6 +24,13 @@
 pragma License( GPL );
 
 
+
+--------------
+-- Ada 2005 --
+--------------
+with Ada.Strings;
+with Ada.Strings.Fixed;
+
 -------------------
 -- KOW Framework --
 -------------------
@@ -67,13 +74,18 @@ package body KOW_View.Entities.Modules is
 
 		function Get_Style return Rendering_Style_Type is
 		begin
-			return Rendering_Style_Type'Value( KOW_Config.Element( Config, "style" ) & "_Rendering" );
+			return Rendering_Style_Type'Value( AWS.Parameters.Get( AWS.Status.Parameters( Request ), "style" ) & "_Rendering" );
 		exception
 			when others => return Small_Rendering;
 		end Get_Style;
 
 	begin
 		Module.Entity_Tag := KOW_Config.Value( Config, "entity_tag", "" );
+		if KOW_Config.Has_Element( Config, "submit_label" ) then
+			Module.Submit_Label := KOW_Config.Element( Config, To_Unbounded_String( "submit_label" ), KOW_View.Locales.Get_Locale( Request ).CODE );
+		else
+			Module.Submit_Label := To_Unbounded_String( "Submit" );
+		end if;
 		Module.Narrow := KOW_Config.Value( Config, "narrow", True );
 		Module.Style := Get_Style;
 
@@ -231,6 +243,9 @@ package body KOW_View.Entities.Modules is
 				Id	: in Integer
 			) return KOW_Ent.Entity_Type'Class is
 	begin
+		if Id = -1 then
+			return New_Entity( Entity_Module_Type'Class( Module ) );
+		end if;
 		return Load_Entity( Module, KOW_Ent.To_Id( ID ) );
 	end Load_Entity;
 
@@ -241,10 +256,6 @@ package body KOW_View.Entities.Modules is
 		use APQ;
 		Entity : KOW_Ent.Entity_Type'Class := New_Entity( Entity_Module_Type'Class( Module ) );
 	begin
-		if Id.Value = -1 then
-			return Entity;
-		end if;
-
 		KOW_Ent.Load( Entity, Id );
 		if Module.Narrow then
 			return KOW_Ent.Narrow( Entity );
@@ -271,7 +282,7 @@ package body KOW_View.Entities.Modules is
 				Style	: in     KOW_View.Entities.Rendering_Style_Type;
 				Output	:    out Unbounded_String
 			) is
-		Buffer : Unbounded_String := To_Unbounded_String( "<fieldset>" );
+		Buffer : Unbounded_String;
 
 		procedure Iterator( C : in KOW_Ent.Property_Lists.Cursor ) is
 			use KOW_View.Entities.Property_Renderers;
@@ -298,12 +309,26 @@ package body KOW_View.Entities.Modules is
 
 		Legend : constant String := "<legend>" & KOW_Ent.Get_Label( Entity, KOW_View.Locales.Get_Locale( Request ) ) & "</legend>";
 	begin
+
+		Buffer := To_Unbounded_String( "<fieldset><form enctype=""multipart/form-data"" id=""entity_form_" );
+		Append( Buffer, Ada.Strings.Fixed.Trim( Integer'Image( Module.ID ),Ada.Strings.Both ) );
+		Append( Buffer, """>" );
+
 		Append( Buffer, Legend );
 		KOW_Ent.Property_Lists.Iterate(
-					Get_Properties( Module, Entity ),
+					Get_Properties( Entity_Module_Type'Class( Module ), Entity ),
 					Iterator'Access
 				);
-		Append( Buffer, "</fieldset>" );
+
+		if Style = Small_Edit_Rendering or else Style = Big_Edit_Rendering then
+			Include_Dojo_Package( Module, "dijit.form.Button" );
+			Append( Buffer, "<button onclick=""kowview.entities.submitForm(" );
+			Append( Buffer, Integer'Image( Module.ID ) );
+			Append( Buffer, ")"" dojoType=""dijit.form.Button"">" );
+			Append( Buffer, Module.Submit_Label );
+			Append( Buffer, "</button>" );
+		end if;
+		Append( Buffer, "</form></fieldset>" );
 
 		Output := Buffer;
 	end Render_View;
