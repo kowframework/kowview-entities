@@ -170,6 +170,8 @@ package body KOW_View.Entities.Modules is
 			) is
 		Entity_Id	: Integer := Get_Entity_id( Entity_Module_Type'Class( Module ), Request );
 		Entity		: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Entity_ID );
+
+		Resp		: KOW_Lib.Json.Object_Type;
 	begin
 		Set_Values(
 				Module	=> Module,
@@ -187,7 +189,9 @@ package body KOW_View.Entities.Modules is
 
 		KOW_Ent.Store( Entity );
 
-		Response := KOW_Ent.To_Json_Object( Entity );
+		KOW_Lib.Json.Set( Resp, "entity_id", KOW_Ent.To_String( Entity.ID ) );
+		
+		Response := Resp;
 	end Process_Json_Request;
 	
 
