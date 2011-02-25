@@ -72,6 +72,11 @@ package body KOW_View.Entities.Properties is
 		return Orig & "_thumb." & Ada.Directories.Extension( Orig );
 	end Thumb_Name;
 
+	function Big_Name( Orig : in String ) return String is
+	begin
+		return Orig & "_big." & Ada.Directories.Extension( Orig );
+	end Big_Name;
+
 
 	----------------------------------
 	-- Hidden UString Property Type --
@@ -290,6 +295,7 @@ package body KOW_View.Entities.Properties is
 				Immutable	: in     Boolean := False;
 				Length		: in     Positive := 150;
 				Thumbnail	: in     String := "150x150";
+				Big		: in     String := "720x720";
 				Convert		: in     String := ""		-- default: do not convert image after upload... should be the destination extension
 			) return Entity_Property_Ptr is
 	-- used to assist the creation of UString properties.
@@ -315,6 +321,7 @@ package body KOW_View.Entities.Properties is
 		UStr.Length		:= Length;
 		UStr.File_Types		:= KOW_Lib.String_Util.Explode( ',',  "jpg,jpeg,gif,png" );
 		UStr.Thumbnail		:= To_Unbounded_String( thumbnail );
+		UStr.Big		:= To_Unbounded_String( Big );
 		UStr.Convert		:= To_Unbounded_String( Convert );
 		return new Image_Upload_Property_Type'( UStr );
 	end New_Image_Upload_Property;
@@ -401,6 +408,35 @@ package body KOW_View.Entities.Properties is
 			null;
 		end;
 		
+
+		--
+		-- generate big..
+		--
+
+		declare
+			P_Thumbnail	: aliased String := "-thumbnail";
+			P_Thumbpath	: aliased String := To_String( Property.Big );
+			P_Property	: aliased String := Get_Property( Property, Entity );
+			P_Thumbname	: aliased String := Big_Name( Get_Property( Property, Entity ) );
+
+			Arguments       : GNAT.OS_Lib.Argument_List := (
+							01 => P_Thumbnail'Unchecked_Access,	-- new String'( "-thumbnail" ),
+							02 => P_Thumbpath'Unchecked_Access,	-- new String'( To_String( Property.Thumbnail ) ),
+							03 => P_Property'Unchecked_Access,	-- new String'( Get_Property( Property, Entity ) ),
+							04 => P_Thumbname'Unchecked_Access	-- new String'( Thumb_Name( Get_Property( Property, Entity ) ) )
+						);
+		
+			Out_Status      : aliased Integer;
+			Output          : String := GNAT.Expect.Get_Command_Output(
+						Command         => "convert",
+						Arguments       => Arguments,
+						Input           => "",
+						Status          => Out_Status'Access,
+						Err_To_Out      => True
+					);
+		begin
+			null;
+		end;
 
 		
 	end Set_Property;

@@ -147,9 +147,9 @@ package body KOW_View.Entities.Modules is
 				Append( Output, Module.List_Label );
 				Append( Output, "</h1>" );
 
-				Append( Output, "<ul>" );
 				Include_Dojo_Package( Module, "dijit.form.Button" );
 				Append( Output, "<button onClick=""window.location.href='?style=big_edit'"" dojoType=""dijit.form.Button"">new</button>" );
+				Append( Output, "<ul>" );
 
 				for i in Ids'range loop
 					declare
@@ -170,13 +170,13 @@ package body KOW_View.Entities.Modules is
 						Append( Output, "</li>" );
 					end;
 				end loop;
-				Append( Output, "<button onClick=""window.location.href='?style=big_edit'"" dojoType=""dijit.form.Button"">new</button>" );
 				Append( Output, "</ul>" );
+				Append( Output, "<button onClick=""window.location.href='?style=big_edit'"" dojoType=""dijit.form.Button"">new</button>" );
 			end;
 		else
 			declare
 				Entity	: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Entity_ID );
-				Legend	: constant String := "<legend>" & KOW_Ent.Get_Label( Entity, KOW_View.Locales.Get_Locale( Request ) ) & "</legend>";
+				H1	: constant String := "<h1>" & KOW_Ent.Get_Label( Entity, KOW_View.Locales.Get_Locale( Request ) ) & "</h1>";
 				Buffer	: Unbounded_String;
 			begin
 				Render_View(
@@ -186,7 +186,7 @@ package body KOW_View.Entities.Modules is
 						Style	=> Module.Style,
 						Output	=> Buffer
 					);
-				Append( Output, Legend );
+				Append( Output, h1 );
 				Append( Output, Buffer );
 			end;
 		end if;

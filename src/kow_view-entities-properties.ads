@@ -55,6 +55,8 @@ package KOW_View.Entities.Properties is
 
 	function Thumb_Name( Orig : in String ) return String;
 
+	function Big_Name( Orig : in String ) return String;
+
 
 
 
@@ -148,6 +150,8 @@ package KOW_View.Entities.Properties is
 		thumbnail	: unbounded_string;
 		-- geometry of the thumbnails
 
+		big		: unbounded_string;
+		-- geometry to use in big visualizations
 
 		convert		: unbounded_string;
 		-- if set, contains the extension to convert the image in the server..
@@ -170,6 +174,7 @@ package KOW_View.Entities.Properties is
 				Immutable	: in     Boolean := False;
 				Length		: in     Positive := 150;
 				Thumbnail	: in     String := "150x150";
+				Big		: in     String := "720x720";
 				Convert		: in     String := ""		-- default: do not convert image after upload... should be the destination extension
 			) return Entity_Property_Ptr;
 	-- used to assist the creation of UString properties.

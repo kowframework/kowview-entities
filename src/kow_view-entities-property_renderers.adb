@@ -155,7 +155,7 @@ package body KOW_View.Entities.Property_Renderers is
 				Output		=> Input
 			);
 	
-		Output := To_Unbounded_String( Label ) & "<span>" & Input & "</span>";
+		Output := To_Unbounded_String( "<span class=""label"">" & Label ) & "</span><span class=""value"">" & Input & "</span>";
 	end Render_Property;
 
 	function Get_Label(
