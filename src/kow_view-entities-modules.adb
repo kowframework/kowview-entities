@@ -142,13 +142,72 @@ package body KOW_View.Entities.Modules is
 										From	=> From,
 										Limit	=> Limit
 									);
+
+				procedure Append_Button(
+						Label	: in String;
+						Href	: in String;
+						Enabled	: in Boolean := True
+					) is
+				begin
+					Append( Output, "<button onClick=""window.location.href='"&href&"'"" dojoType=""dijit.form.Button""");
+					if not Enabled then
+						Append( Output, " disabled=true" );
+					end if;
+					Append( Output, ">"&label&"</button>" );
+				end Append_Button;
+
+				procedure Append_Paging(
+						Label	: in String;
+						From	: in Integer;
+						Enabled	: in Boolean
+					) is
+					function T( i : in integer ) return String is
+					begin
+						return Ada.Strings.Fixed.Trim( Integer'Image( I ), Ada.Strings.Both );
+					end T;
+				begin
+					Append_Button(
+							Label	=> Label,
+							Href	=> "?from=" & T(From) & "&limit=" & T(Limit),
+							Enabled	=> Enabled
+						);
+				end Append_Paging;
+
+
+				function Previous_From return Integer is
+				begin
+					if From > Limit then
+						return From - Limit;
+					else
+						return 1;
+					end if;
+				end Previous_From;
+
+				function Has_Previous return Boolean is
+				begin
+					return From > 1;
+				end Has_Previous;
+
+				function Next_From return Integer is
+				begin
+					return From + Limit;
+				end Next_From;
+
+				function Has_Next return Boolean is
+				begin
+					return Ids'Length = Limit;
+				end Has_Next;
 			begin
 				Append( Output, "<h1>" );
 				Append( Output, Module.List_Label );
 				Append( Output, "</h1>" );
 
 				Include_Dojo_Package( Module, "dijit.form.Button" );
-				Append( Output, "<button onClick=""window.location.href='?style=big_edit'"" dojoType=""dijit.form.Button"">new</button>" );
+				Append( Output, "<div class=""entityToolbar"">" );
+					Append_Paging( "&lt;", Previous_From, Has_Previous );
+					Append_Button( "new", "?style=big_edit", True );
+					Append_Paging( "&gt;", Next_From, Has_Next );
+				Append( Output, "</div>" );
 				Append( Output, "<ul>" );
 
 				for i in Ids'range loop
@@ -171,7 +230,11 @@ package body KOW_View.Entities.Modules is
 					end;
 				end loop;
 				Append( Output, "</ul>" );
-				Append( Output, "<button onClick=""window.location.href='?style=big_edit'"" dojoType=""dijit.form.Button"">new</button>" );
+				Append( Output, "<div class=""entityToolbar"">" );
+					Append_Paging( "&lt;", Previous_From, Has_Previous );
+					Append_Button( "new", "?style=big_edit", True );
+					Append_Paging( "&gt;", Next_From, Has_Next );
+				Append( Output, "</div>" );
 			end;
 		else
 			declare
