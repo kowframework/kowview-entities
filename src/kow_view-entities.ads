@@ -42,7 +42,6 @@ with KOW_Lib.Json;
 with KOW_Lib.File_System;
 with KOW_Lib.UString_Vectors;
 with KOW_Sec.Accounting;
-with KOW_View.Services;
 
 ---------
 -- AWS --
@@ -56,42 +55,38 @@ package KOW_View.Entities is
 	Accountant      : aliased KOW_Sec.Accounting.Accountant_Type := KOW_Sec.Accounting.New_Accountant( "entities", KOW_View.Accountant'Access );
 
 
-	-----------------------------------------
-	-- Service Triggering Entity Interface --
-	-----------------------------------------
+	---------------------------------------
+	-- Store Triggering Entity Interface --
+	---------------------------------------
 
-	type Service_Triggering_Entity_Interface is interface;
+	type Store_Triggering_Entity_Interface is interface;
 	-- implement this interface in your entity if you want all the methods in this component to call
-	-- Before_Service and After_Service
+	-- Before_Store and After_Store
 
-	procedure Before_Service(
-			Entity		: in out Service_Triggering_Entity_Interface;
-			Service		: in out KOW_View.Services.Service_Type'Class;
+	procedure Before_Store(
+			Entity		: in out Store_Triggering_Entity_Interface;
 			Request		: in     AWS.Status.Data
 		) is abstract;
 
-	procedure After_Service(
-			Entity		: in out Service_Triggering_Entity_Interface;
-			Service		: in out KOW_View.Services.Service_Type'Class;
+	procedure After_Store(
+			Entity		: in out Store_Triggering_Entity_Interface;
 			Request		: in     AWS.Status.Data
 		) is abstract;
 
 
 	
 
-	procedure Before_Service(
+	procedure Before_Store(
 			Entity		: in out KOW_Ent.Entity_Type'Class;
-			Service		: in out KOW_View.Services.Service_Type'Class;
 			Request		: in     AWS.Status.Data
 		);
-	-- call the service_triggering interface's before_service if available
+	-- call the Store_Triggering interface's before_Store if available
 	
-	procedure After_Service(
+	procedure After_Store(
 			Entity		: in out KOW_Ent.Entity_Type'Class;
-			Service		: in out KOW_View.Services.Service_Type'Class;
 			Request		: in     AWS.Status.Data
 		);
-	-- call the service_triggering interface's after_service if available
+	-- call the Store_Triggering interface's after_Store if available
 
 
 	---------------------

@@ -55,36 +55,32 @@ package body KOW_View.Entities is
 
 
 
-	procedure Before_Service(
+	procedure Before_Store(
 			Entity		: in out KOW_Ent.Entity_Type'Class;
-			Service		: in out KOW_View.Services.Service_Type'Class;
 			Request		: in     AWS.Status.Data
 		) is
-		-- call the service_triggering interface's before_service if available
+		-- call the Store_Triggering interface's before_Store if available
 	begin
-		if Entity in Service_Triggering_Entity_Interface'Class then
-			Before_Service(
-					Entity	=> Service_Triggering_Entity_Interface'Class( Entity ),
-					Service	=> Service,
+		if Entity in Store_Triggering_Entity_Interface'Class then
+			Before_Store(
+					Entity	=> Store_Triggering_Entity_Interface'Class( Entity ),
 					Request	=> Request
 				);
 		end if;
-	end Before_Service;
+	end Before_Store;
 	
-	procedure After_Service(
+	procedure After_Store(
 			Entity		: in out KOW_Ent.Entity_Type'Class;
-			Service		: in out KOW_View.Services.Service_Type'Class;
 			Request		: in     AWS.Status.Data
 		) is
-		-- call the service_triggering interface's after_service if available
+		-- call the Store_Triggering interface's after_Store if available
 	begin
-		if Entity in Service_Triggering_Entity_Interface'Class then
-			After_Service(
-					Entity	=> Service_Triggering_Entity_Interface'Class( Entity ),
-					Service	=> Service,
+		if Entity in Store_Triggering_Entity_Interface'Class then
+			After_Store(
+					Entity	=> Store_Triggering_Entity_Interface'Class( Entity ),
 					Request	=> Request
 				);
 		end if;
-	end After_Service;
+	end After_Store;
 
 end KOW_View.Entities;

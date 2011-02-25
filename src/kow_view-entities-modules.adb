@@ -194,8 +194,17 @@ package body KOW_View.Entities.Modules is
 					);
 		end if;
 
+		Before_Store(
+				Entity	=> Entity,
+				Request	=> Request
+			);
 
 		KOW_Ent.Store( Entity );
+
+		After_Store(
+				Entity	=> Entity,
+				Request	=> Request
+			);
 
 		KOW_Lib.Json.Set( Resp, "entity_id", KOW_Ent.To_String( Entity.ID ) );
 		
