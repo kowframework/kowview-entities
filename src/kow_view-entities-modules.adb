@@ -137,15 +137,20 @@ package body KOW_View.Entities.Modules is
 				Append( Output, "<button onClick=""window.location.href='?style=big_edit'"" dojoType=""dijit.form.Button"">new</button>" );
 
 				for i in Ids'range loop
-					Append( Output, "<li>" );
-					Render_View(
-							Module	=> Module,
-							Request	=> Request,
-							Entity	=> Load_Entity( Module, Ids( i ) ),
-							Style	=> Module.Style,
-							Output	=> Output
-						);
-					Append( Output, "</li>" );
+					declare
+						Buffer : Unbounded_String;
+					begin
+						Append( Output, "<li>" );
+						Render_View(
+								Module	=> Module,
+								Request	=> Request,
+								Entity	=> Load_Entity( Module, Ids( i ) ),
+								Style	=> Module.Style,
+								Output	=> Buffer
+							);
+						Append( Output, Buffer );
+						Append( Output, "</li>" );
+					end;
 				end loop;
 				Append( Output, "<button onClick=""window.location.href='?style=big_edit'"" dojoType=""dijit.form.Button"">new</button>" );
 				Append( Output, "</ul>" );
