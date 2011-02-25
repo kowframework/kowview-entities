@@ -137,7 +137,7 @@ package body KOW_View.Entities.Modules is
 					end if;
 				end Limit;
 				Ids : KOW_Ent.Id_Array_Type := Query_Entities(
-										Module	=> Module,
+										Module	=> Entity_Module_Type'Class( Module ),
 										Request	=> Request,
 										From	=> From,
 										Limit	=> Limit
