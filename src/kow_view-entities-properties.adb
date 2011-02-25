@@ -51,6 +51,7 @@ with KOW_Ent;			use KOW_Ent;
 with KOW_Ent.Properties;
 with KOW_Lib.File_System;
 with KOW_Lib.String_Util;
+with KOW_View.Entities.Validation;
 
 --------------------------------------------
 -- package with some useful properties... --
@@ -210,8 +211,10 @@ package body KOW_View.Entities.Properties is
 					);
 
 			if not IS_OK then
-				raise KOW_Ent.Data_Validation_Error with "invalid file type.. please submit one of the following: " & 
-							KOW_Lib.String_Util.Implode( ',', Property.File_Types );
+				KOW_View.Entities.Validation.Raise_Exception(
+						Column	=> To_String( Property.Column_Name ),
+						Message	=> "invalid file type.. please submit one of the following: " & KOW_Lib.String_Util.Implode( ',', Property.File_Types )
+					);
 			end if;
 		end;
 
