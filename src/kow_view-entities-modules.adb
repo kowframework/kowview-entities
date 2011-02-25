@@ -139,16 +139,19 @@ package body KOW_View.Entities.Modules is
 				for i in Ids'range loop
 					declare
 						Buffer : Unbounded_String;
+						Entity	: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Ids( i ) );
 					begin
 						Append( Output, "<li>" );
+						Append( Output, "<a href=""?style=big&entity_id=" & KOW_ent.To_String( Entity.ID ) & """>" );
 						Render_View(
 								Module	=> Module,
 								Request	=> Request,
-								Entity	=> Load_Entity( Module, Ids( i ) ),
+								Entity	=> Entity,
 								Style	=> Module.Style,
 								Output	=> Buffer
 							);
 						Append( Output, Buffer );
+						Append( Output, "</a>" );
 						Append( Output, "</li>" );
 					end;
 				end loop;
