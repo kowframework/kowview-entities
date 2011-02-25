@@ -39,6 +39,7 @@ with KOW_Config;
 with KOW_Ent;
 with KOW_Ent.ID_Query_Builders;
 with KOW_Lib.Json;
+with KOW_Lib.Locales;
 with KOW_View.Entities.Components;
 with KOW_View.Entities.Property_Renderers;
 with KOW_View.Entities.Validation;
@@ -79,13 +80,23 @@ package body KOW_View.Entities.Modules is
 			when others => return Small_Rendering;
 		end Get_Style;
 
+
+		L : constant KOW_Lib.Locales.Locale := KOW_View.Locales.Get_Locale( Request );
+		function E( Key, Default : in String ) return Unbounded_String is
+		begin
+			if KOW_Config.Has_Element( Config, Key ) then
+				return KOW_Config.Element( Config, To_Unbounded_String( Key ), L.CODE );
+			else
+				return To_Unbounded_String( Default );
+			end if;
+		end E;
+
 	begin
 		Module.Entity_Tag := KOW_Config.Value( Config, "entity_tag", "" );
-		if KOW_Config.Has_Element( Config, "submit_label" ) then
-			Module.Submit_Label := KOW_Config.Element( Config, To_Unbounded_String( "submit_label" ), KOW_View.Locales.Get_Locale( Request ).CODE );
-		else
-			Module.Submit_Label := To_Unbounded_String( "Submit" );
-		end if;
+
+		Module.Submit_Label := E( "submit_label", "Submit" );
+		Module.List_Label := E( "list_label", "List" );
+
 		Module.Narrow := KOW_Config.Value( Config, "narrow", True );
 		Module.Style := Get_Style;
 
@@ -102,7 +113,7 @@ package body KOW_View.Entities.Modules is
 		Entity_Id	: Integer := Get_Entity_id( Entity_Module_Type'Class( Module ), Request );
 	begin
 
-		
+		Append( Output, "<span class=""" & KOW_View.Modules.Get_Name( Entity_Module_Type'Class( Module ) ) & """>" );
 		if Entity_Id = -1 and then ( Module.Style = Small_Rendering or Module.Style = Big_Rendering ) then
 			declare
 				P	: AWS.Parameters.List := AWS.Status.Parameters( Request );
@@ -132,6 +143,10 @@ package body KOW_View.Entities.Modules is
 										Limit	=> Limit
 									);
 			begin
+				Append( Output, "<h1>" );
+				Append( Output, Module.List_Label );
+				Append( Output, "</h1>" );
+
 				Append( Output, "<ul>" );
 				Include_Dojo_Package( Module, "dijit.form.Button" );
 				Append( Output, "<button onClick=""window.location.href='?style=big_edit'"" dojoType=""dijit.form.Button"">new</button>" );
@@ -159,14 +174,24 @@ package body KOW_View.Entities.Modules is
 				Append( Output, "</ul>" );
 			end;
 		else
-			Render_View(
-					Module	=> Module,
-					Request	=> Request,
-					Entity	=> Load_Entity( Module, Entity_ID ),
-					Style	=> Module.Style,
-					Output	=> Output
-				);
+			declare
+				Entity	: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Entity_ID );
+				Legend	: constant String := "<legend>" & KOW_Ent.Get_Label( Entity, KOW_View.Locales.Get_Locale( Request ) ) & "</legend>";
+				Buffer	: Unbounded_String;
+			begin
+				Render_View(
+						Module	=> Module,
+						Request	=> Request,
+						Entity	=> Entity,
+						Style	=> Module.Style,
+						Output	=> Buffer
+					);
+				Append( Output, Legend );
+				Append( Output, Buffer );
+			end;
 		end if;
+
+		Append( Output, "</span>" );
 	end Process_Body;
 
 
@@ -331,14 +356,12 @@ package body KOW_View.Entities.Modules is
 			Append( Buffer, "</label>" );
 		end Iterator;
 
-		Legend : constant String := "<legend>" & KOW_Ent.Get_Label( Entity, KOW_View.Locales.Get_Locale( Request ) ) & "</legend>";
 	begin
 
 		Buffer := To_Unbounded_String( "<fieldset><form enctype=""multipart/form-data"" id=""entity_form_" );
 		Append( Buffer, Ada.Strings.Fixed.Trim( Integer'Image( Module.ID ),Ada.Strings.Both ) );
 		Append( Buffer, """>" );
 
-		Append( Buffer, Legend );
 		KOW_Ent.Property_Lists.Iterate(
 					Get_Properties( Entity_Module_Type'Class( Module ), Entity ),
 					Iterator'Access

@@ -57,6 +57,7 @@ package KOW_View.Entities.Modules is
 		-- you can simply override that method
 
 		Submit_Label	: Unbounded_String;
+		List_Label	: Unbounded_String;
 
 		Narrow		: Boolean;
 		-- used by the load_entity function
