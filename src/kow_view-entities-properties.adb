@@ -139,6 +139,54 @@ package body KOW_View.Entities.Properties is
 	----------------------------------
 	
 
+
+	protected File_Lock is
+		procedure Write( Destination_Path, Old_Path, Value : in String );
+
+		procedure Read( The_path : in String; Buffer : out Unbounded_String );
+	end File_Lock;
+
+
+	protected body File_Lock is
+		procedure Write( Destination_Path, Old_Path, Value : in String ) is
+			use Ada.Text_IO;
+			File		: File_Type;
+		begin
+			if Ada.Directories.Exists( Destination_Path ) then
+				Ada.Directories.Delete_File( Destination_Path );
+			end if;
+
+			if Old_Path /= "" and then Ada.Directories.Exists( Old_Path ) then
+				Ada.Directories.Delete_File( Old_Path );
+			end if;
+
+			Create( File, Out_File, Destination_Path );
+			Put( File, Value );
+			Close( File );
+		end Write;
+
+		procedure Read( The_path : in String; Buffer : out Unbounded_String ) is
+			use Ada.Text_IO;
+			File	: File_Type;
+			First	: Boolean := True;
+		begin
+
+			Open( File, In_File, The_Path );
+
+			while not End_Of_File( File ) loop
+				if First then
+					First := False;
+				else
+					Append( Buffer, Ada.Characters.Latin_1.LF );
+				end if;
+				Append( Buffer, Get_Line( File ) );
+			end loop;
+
+			Close( File );
+
+		end Read;
+	end ;
+
 	overriding
 	procedure Set_Property(
 				Property	: in     Rich_Text_File_Property_Type;
@@ -148,22 +196,8 @@ package body KOW_View.Entities.Properties is
 		Destination_Path : constant String := Compute_Path( Property, Entity );
 		Old_Path	 : constant String := To_String( Property.Getter.all( Entity ) );
 
-
-		use Ada.Text_IO;
-		File		: File_Type;
-	begin
-		if Ada.Directories.Exists( Destination_Path ) then
-			Ada.Directories.Delete_File( Destination_Path );
-		end if;
-
-		if Old_Path /= "" and then Ada.Directories.Exists( Old_Path ) then
-			Ada.Directories.Delete_File( Old_Path );
-		end if;
-
-		Create( File, Out_File, Destination_Path );
-		Put( File, Value );
-		Close( File );
-		
+	begin		
+		File_Lock.Write( Destination_Path, Old_Path, Value );
 
 		Property.Setter.all( Entity, To_Unbounded_String( Destination_Path ) );
 	end Set_Property;
@@ -179,12 +213,7 @@ package body KOW_View.Entities.Properties is
 		The_Path : constant String := To_String( Property.Getter.all( Entity ) );
 
 		use Ada.Directories;
-		use Ada.Text_IO;
-		
-
-		File	: File_Type;
-		First	: Boolean := True;
-		Buffer	: Unbounded_String;
+		Buffer : Unbounded_String;
 	begin
 		if KOW_Ent.Is_New( Entity ) then
 			-- new entities have no path
@@ -195,19 +224,7 @@ package body KOW_View.Entities.Properties is
 			raise CONSTRAINT_ERROR with "inconsistency in the database detected in the rich text file property!";
 		end if;
 
-		Open( File, In_File, The_Path );
-
-		while not End_Of_File( File ) loop
-			if First then
-				First := False;
-			else
-				Append( Buffer, Ada.Characters.Latin_1.LF );
-			end if;
-			Append( Buffer, Get_Line( File ) );
-		end loop;
-
-		Close( File );
-
+		File_Lock.Read( The_Path, Buffer );
 		return To_String( Buffer );
 	end Get_Property;
 
