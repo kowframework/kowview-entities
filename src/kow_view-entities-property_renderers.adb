@@ -296,4 +296,9 @@ begin
 					new Rich_Text_PRoperty_Renderer_Type
 				);
 
+	Default_Renderers_Registry.Set(
+					KOW_View.Entities.Properties.Rich_Text_File_Property_Type'Tag,
+					new Rich_Text_PRoperty_Renderer_Type
+				);
+
 end KOW_View.Entities.Property_Renderers;
