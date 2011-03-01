@@ -42,6 +42,7 @@ with Ada.Strings.Unbounded;			use Ada.Strings.Unbounded;
 -------------------
 with KOW_Ent;
 with KOW_Ent.Generic_Property_Metadata;
+with KOW_View.Entities.Properties;
 with KOW_View.Locales;
 
 ---------
@@ -199,4 +200,39 @@ package body KOW_View.Entities.Property_Renderers is
 				end;
 		end case;
 	end Get_Input;
+
+
+	---------------------------------
+	-- Rich Text Property Renderer --
+	---------------------------------
+
+	overriding
+	procedure Get_Input(
+				Renderer	: in out Rich_Text_Property_Renderer_Type;
+				Module		: in out KOW_View.Modules.Module_type'Class;
+				Request		: in     AWS.Status.Data;
+				Entity		: in     KOW_Ent.Entity_Type'Class;
+				Property	: in     KOW_Ent.Entity_Property_Type'Class;
+				Style		: in     Rendering_Style_Type;
+				Output		:    out Unbounded_String
+			) is
+		Value : constant String := KOW_Ent.Get_Property( Property, Entity );
+	begin
+		case Style is
+			when Big_Rendering | Small_Rendering =>
+				Output := To_Unbounded_String( "<div class=""richTextContent"">" & Value & "</div>" );
+
+			when Big_Edit_Rendering | Small_Edit_Rendering =>
+				KOW_View.Modules.Include_Dojo_Package( Module, "dijit.Editor" );
+				Output := To_Unbounded_String( "<div class=""rightTextEditor"" dojoType=""dijit.Editor"">" & Value & "</div>" );
+				-- TODO :: implement in the property support for plugins in dojo editor through parameters
+		end case;
+	end Get_Input;
+
+begin
+	Default_Renderers_Registry.Set(
+					KOW_View.Entities.Properties.Rich_Text_Property_Type'Tag,
+					new Rich_Text_PRoperty_Renderer_Type
+				);
+
 end KOW_View.Entities.Property_Renderers;
