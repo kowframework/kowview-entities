@@ -6,7 +6,7 @@
 --                                                                          --
 --                                 B o d y                                  --
 --                                                                          --
---               Copyright (C) 2007-2011, KOW Framework Project             --
+--               CopyRich (C) 2007-2011, KOW Framework Project             --
 --                                                                          --
 --                                                                          --
 -- KOWView is free software; you can redistribute it  and/or modify it under--
@@ -219,12 +219,18 @@ package body KOW_View.Entities.Property_Renderers is
 		Value : constant String := KOW_Ent.Get_Property( Property, Entity );
 	begin
 		case Style is
-			when Big_Rendering | Small_Rendering =>
+			when Big_Rendering =>
 				Output := To_Unbounded_String( "<div class=""richTextContent"">" & Value & "</div>" );
+			when Small_Rendering =>
+				Output := To_Unbounded_String( "<div class=""richTextContentPreview"">TODO :: this should be a preview of the <b>rich text</b></div>" ); -- TODO here
 
-			when Big_Edit_Rendering | Small_Edit_Rendering =>
+			when Big_Edit_Rendering =>
 				KOW_View.Modules.Include_Dojo_Package( Module, "dijit.Editor" );
-				Output := To_Unbounded_String( "<div class=""rightTextEditor"" dojoType=""dijit.Editor"">" & Value & "</div>" );
+				Output := To_Unbounded_String( "<div class=""richTextEditor"" dojoType=""dijit.Editor"">" & Value & "</div>" );
+
+			when Small_Edit_Rendering =>
+				KOW_View.Modules.Include_Dojo_Package( Module, "dijit.Editor" );
+				Output := To_Unbounded_String( "<div class=""smallRichTextEditor"" dojoType=""dijit.Editor"">" & Value & "</div>" );
 				-- TODO :: implement in the property support for plugins in dojo editor through parameters
 		end case;
 	end Get_Input;
