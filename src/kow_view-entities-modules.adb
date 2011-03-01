@@ -282,6 +282,8 @@ package body KOW_View.Entities.Modules is
 					);
 		end if;
 
+		KOW_Lib.Json.Set( Resp, "is_new", KOW_Ent.Is_New( Entity ) );
+
 		Before_Store(
 				Entity	=> Entity,
 				Request	=> Request
