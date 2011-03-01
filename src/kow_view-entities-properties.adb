@@ -32,12 +32,13 @@ pragma License( GPL );
 -- Ada 2005 --
 --------------
 with Ada.Characters.Handling;
+with Ada.Characters.Latin_1;
 with Ada.Directories;
 with Ada.Numerics.Discrete_Random;
 with Ada.Strings;
 with Ada.Strings.Fixed;
 with Ada.Strings.Unbounded;	use Ada.Strings.Unbounded;
-with Ada.Tags;
+with Ada.Text_IO;
 
 
 
@@ -62,6 +63,9 @@ with KOW_View.Entities.Validation;
 package body KOW_View.Entities.Properties is
 
 
+
+
+	package Positive_Random is new Ada.Numerics.Discrete_Random( Result_Subtype => Positive );
 
 	----------------------
 	-- Helper Functions --
@@ -130,6 +134,149 @@ package body KOW_View.Entities.Properties is
 		return new Rich_Text_Property_Type'( UStr );
 	end New_Rich_Text_Property;
 
+	----------------------------------
+	-- Rich Text File Property Type --
+	----------------------------------
+	
+
+	overriding
+	procedure Set_Property(
+				Property	: in     Rich_Text_File_Property_Type;
+				Entity		: in out Entity_Type'Class;
+				Value		: in     String
+			) is
+		Destination_Path : constant String := Compute_Path( Property, Entity );
+		Old_Path	 : constant String := To_String( Property.Getter.all( Entity ) );
+
+
+		use Ada.Text_IO;
+		File		: File_Type;
+	begin
+		if Ada.Directories.Exists( Destination_Path ) then
+			Ada.Directories.Delete_File( Destination_Path );
+		end if;
+
+		if Old_Path /= "" and then Ada.Directories.Exists( Old_Path ) then
+			Ada.Directories.Delete_File( Old_Path );
+		end if;
+
+		Create( File, Out_File, Destination_Path );
+		Put( File, Value );
+		Close( File );
+		
+
+		Property.Setter.all( Entity, To_Unbounded_String( Destination_Path ) );
+	end Set_Property;
+
+
+
+	overriding
+	function Get_Property(
+				Property	: in     Rich_Text_File_Property_Type;
+				Entity		: in     Entity_Type'Class
+			) return String is
+		-- get the file contents
+		The_Path : constant String := To_String( Property.Getter.all( Entity ) );
+
+		use Ada.Directories;
+		use Ada.Text_IO;
+		
+
+		File	: File_Type;
+		First	: Boolean := True;
+		Buffer	: Unbounded_String;
+	begin
+		if KOW_Ent.Is_New( Entity ) then
+			-- new entities have no path
+			return "";
+		end if;
+
+		if The_Path = "" or else not Exists( The_Path ) or else Kind( The_Path ) /= Ordinary_File then
+			raise CONSTRAINT_ERROR with "inconsistency in the database detected in the rich text file property!";
+		end if;
+
+		Open( File, In_File, The_Path );
+
+		while not End_Of_File( File ) loop
+			if First then
+				First := False;
+			else
+				Append( Buffer, Ada.Characters.Latin_1.LF );
+			end if;
+			Append( Buffer, Get_Line( File ) );
+		end loop;
+
+		Close( File );
+
+		return To_String( Buffer );
+	end Get_Property;
+
+	function Compute_Path(
+				Property	: in Rich_Text_File_Property_Type;
+				Entity		: in Entity_Type'Class
+			) return String is
+		-- compute the path where to store the file
+		use KOW_Lib.File_System;
+
+		Extension : constant String := "html";
+	begin
+		if not KOW_Ent.Is_New( Entity ) then
+			-- if we are updating the entity, we have the id... so we save it where we want it
+			return To_String( Property.Store_Path ) / 
+					KOW_Ent.To_String( Entity.ID ) & '_' & To_String( Property.Column_Name ) & '.' & Extension;
+		else
+			declare
+				Gen : Positive_Random.Generator;
+			begin
+				Positive_Random.Reset( Gen );
+
+				loop
+					declare
+						Rnd_Str : constant String := Ada.Strings.Fixed.Trim(
+											Positive'Image( Positive_Random.Random( Gen ) ),
+											Ada.Strings.Both
+										);
+						R : constant String := To_String( Property.Store_Path ) / 
+							"tmp_" & Rnd_Str & '_' & To_String( Property.Column_Name ) & '.' & Extension;
+					begin
+						if not Ada.Directories.Exists( R ) then
+							return R;
+						end if;
+					end;
+				end loop;
+			end;
+		end if;
+	end Compute_Path;
+
+	function New_Rich_Text_File_Property(
+				Column_Name	: in     String;
+				Getter		: KOW_Ent.Properties.UString_Getter_Callback;
+				Setter		: KOW_Ent.Properties.UString_Setter_Callback;
+				Store_Path	: in     String;				-- where to store files
+				Default_Value	: in     String := "<p></p>";
+				Immutable	: in     Boolean := False;
+				Length		: in     Positive := 150			-- here it refers to the filename length, which depends on the store_path
+			) return Entity_Property_Ptr is
+		use Ada.Directories;
+
+		Rich : Rich_Text_File_Property_Type;
+	begin
+		if not Ada.Directories.Exists( Store_Path ) then
+			Ada.Directories.Create_Path( Store_Path );
+		elsif Ada.Directories.Kind( Store_Path ) /= Directory then
+			raise Name_Error with "[" & Column_name & "] store path must be a directory!";
+		end if;
+
+		Rich.Column_Name	:= To_Unbounded_String( Column_Name );
+		Rich.Getter		:= Getter;
+		Rich.Setter		:= Setter;
+		Rich.Store_Path		:= To_Unbounded_String( Store_Path );
+		Rich.Default_Value	:= To_Unbounded_String( Default_Value );
+		Rich.Immutable		:= Immutable;
+		Rich.Length		:= Length;
+
+		return new Rich_Text_File_Property_Type'( Rich );
+	end New_Rich_Text_File_Property;
 
 
 
@@ -138,8 +285,6 @@ package body KOW_View.Entities.Properties is
 	-- File Upload Property Type --
 	-------------------------------
 
-
-	package Positive_Random is new Ada.Numerics.Discrete_Random( Result_Subtype => Positive );
 
 	overriding
 	procedure Set_Property(
@@ -153,12 +298,11 @@ package body KOW_View.Entities.Properties is
 		-- if /="", move the file to it's definitive location ( [P.Upload_Path]/[ID]_column_name.[ext]) and set it using the setter
 
 		function The_Destination_Path return String is
-			use Ada.Tags;
 			use KOW_Lib.File_System;
 
 			Extension : constant String := Ada.Characters.Handling.To_Lower( Ada.Directories.Extension( Value ) );
 		begin
-			if Entity.id.My_Tag = Entity'Tag then
+			if not KOW_Ent.Is_New( Entity ) then
 				-- if we are updating the entity, we have the id... so we save it where we want it
 				return To_String( Property.Upload_Path ) / 
 						KOW_Ent.To_String( Entity.ID ) & '_' & To_String( Property.Column_Name ) & '.' & Extension;

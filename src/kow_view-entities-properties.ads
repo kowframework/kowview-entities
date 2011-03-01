@@ -99,6 +99,52 @@ package KOW_View.Entities.Properties is
 	-- default_value represents the value to be set when the one retoner from database is NULL
 
 
+	----------------------------------
+	-- Rich Text File Property Type --
+	----------------------------------
+	
+	type Rich_Text_File_Property_Type is new Rich_Text_Property_Type with record
+		-- a property that stores a path for a rich text content to be received through forms.
+		-- NOTE : it was implemented using ada.text_io and unbounded_String as buffer.. it's not efficient at all!
+		-- I know that... but it's faster to implement than to deal with nasty file handling stuff...
+		--
+		-- At least we have something we can do to optimize the framework now :D:D
+		Store_Path : Unbounded_String;
+	end record;
+
+	overriding
+	procedure Set_Property(
+				Property	: in     Rich_Text_File_Property_Type;
+				Entity		: in out Entity_Type'Class;
+				Value		: in     String
+			);
+	-- set the file contentd
+
+	overriding
+	function Get_Property(
+				Property	: in     Rich_Text_File_Property_Type;
+				Entity		: in     Entity_Type'Class
+			) return String;
+	-- get the file contents
+
+
+	function Compute_Path(
+				Property	: in Rich_Text_File_Property_Type;
+				Entity		: in Entity_Type'Class
+			) return String;
+	-- compute the path where to store the file
+
+	function New_Rich_Text_File_Property(
+				Column_Name	: in     String;
+				Getter		: KOW_Ent.Properties.UString_Getter_Callback;
+				Setter		: KOW_Ent.Properties.UString_Setter_Callback;
+				Store_Path	: in     String;				-- where to store files
+				Default_Value	: in     String := "<p></p>";
+				Immutable	: in     Boolean := False;
+				Length		: in     Positive := 150			-- here it refers to the filename length, which depends on the store_path
+			) return Entity_Property_Ptr;
+
+
 	-------------------------------
 	-- File Upload Property Type --
 	-------------------------------
@@ -179,6 +225,8 @@ package KOW_View.Entities.Properties is
 			) return Entity_Property_Ptr;
 	-- used to assist the creation of UString properties.
 	-- default_value represents the value to be set when the one retoner from database is NULL
+
+
 
 
 end KOW_View.Entities.Properties;
