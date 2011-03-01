@@ -206,6 +206,38 @@ package body KOW_View.Entities.Property_Renderers is
 	-- Rich Text Property Renderer --
 	---------------------------------
 
+
+	function Strip_HTML(
+				Input		: in String;
+				Max_Length	: in Positive
+			) return String is
+		Striped		: string( 1 .. Max_Length ) := ( others => ' ' );
+		Real_Length	: Positive := 1;
+
+		In_Tag		: Boolean := False;
+	begin
+		for i in Input'range loop
+			if In_tag then
+				In_Tag := Input( i ) /= '>';
+			else
+				In_Tag := Input( i ) = '<';
+				
+				if not In_Tag then
+					Striped( Real_Length ) := Input( i );
+	
+					exit when Real_Length = Max_Length;
+					Real_Length := Real_Length + 1;
+				end if;
+			end if;
+		end loop;
+
+		if Real_Length = Max_Length then
+			return Striped & "...";
+		else
+			return Striped( 1 .. Real_Length );
+		end if;
+	end Strip_HTML;
+
 	overriding
 	procedure Get_Input(
 				Renderer	: in out Rich_Text_Property_Renderer_Type;
@@ -217,21 +249,44 @@ package body KOW_View.Entities.Property_Renderers is
 				Output		:    out Unbounded_String
 			) is
 		Value : constant String := KOW_Ent.Get_Property( Property, Entity );
+
+		procedure Editor( Class : in String ) is
+			-- TODO :: implement in the property support for plugins in dojo editor through parameters
+			Editor_ID	: Unbounded_String;
+			Input_ID	: Unbounded_String;
+		begin
+			KOW_View.Modules.Generate_HTML_Id( Module, Editor_ID );
+			KOW_View.Modules.Generate_HTML_Id( Module, Input_ID );
+
+			KOW_View.Modules.Include_Dojo_Package( Module, "dijit.Editor" );
+			Append( Output, "<div class=""" & Class & """ dojoType=""dijit.Editor"" id=""" );
+			Append( Output, Editor_ID );
+			Append( Output, """>" & Value & "</div>" );
+
+			Append( Output, "<input type=""hidden"" name=""" );
+			Append( Output, Property.Column_Name );
+			Append( Output, """ id=""" );
+			Append( Output, Input_ID );
+			Append( Output, """/>" );
+
+			Append( Output, "<script type=""text/javascript"">dojo.addOnLoad(function () { kowview.entities.connectEditor( """ );
+			Append( Output, Editor_ID );
+			Append( Output, """,""" );
+			Append( Output, Input_ID );
+			Append( Output, """);});</script>" );
+		end Editor;
 	begin
 		case Style is
 			when Big_Rendering =>
 				Output := To_Unbounded_String( "<div class=""richTextContent"">" & Value & "</div>" );
 			when Small_Rendering =>
-				Output := To_Unbounded_String( "<div class=""richTextContentPreview"">TODO :: this should be a preview of the <b>rich text</b></div>" ); -- TODO here
+				Output := To_Unbounded_String( "<div class=""richTextContentPreview"">"& Strip_HTML( Value, 150 ) & "</div>" ); -- TODO here
 
 			when Big_Edit_Rendering =>
-				KOW_View.Modules.Include_Dojo_Package( Module, "dijit.Editor" );
-				Output := To_Unbounded_String( "<div class=""richTextEditor"" dojoType=""dijit.Editor"">" & Value & "</div>" );
+				Editor( "richTextEditor" );
 
 			when Small_Edit_Rendering =>
-				KOW_View.Modules.Include_Dojo_Package( Module, "dijit.Editor" );
-				Output := To_Unbounded_String( "<div class=""smallRichTextEditor"" dojoType=""dijit.Editor"">" & Value & "</div>" );
-				-- TODO :: implement in the property support for plugins in dojo editor through parameters
+				Editor( "smallRichTextEditor" );
 		end case;
 	end Get_Input;
 
