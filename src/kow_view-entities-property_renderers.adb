@@ -235,7 +235,7 @@ package body KOW_View.Entities.Property_Renderers is
 					Length	: constant Positive := KOW_Ent.Properties.UString_Property_Type'Class( Property ).Length;
 					SLength : constant String := Ada.Strings.Fixed.Trim( Positive'Image( Length ), Ada.Strings.Both );
 				begin
-					if Length < 150 then
+					if Length <= 255 then
 						KOW_View.Modules.Include_Dojo_Package( Module, "dijit.form.ValidationTextBox" );
 						Append( Buffer, "<input type=""text"" dojoType=""dijit.form.ValidationTextBox"" name=""" );
 						Append( Buffer, Property.Column_Name );
