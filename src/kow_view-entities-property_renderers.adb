@@ -246,8 +246,8 @@ package body KOW_View.Entities.Property_Renderers is
 						Append( Buffer, "value=""" & Value & """ maxLength=""" & SLength & """/>" );
 						Output := Buffer;
 					else
-						KOW_View.Modules.Include_Dojo_Package( Module, "dijit.form.TextArea" );
-						Append( Buffer, "<textarea dojoType=""dijit.form.TextArea"" name=""" );
+						KOW_View.Modules.Include_Dojo_Package( Module, "dijit.form.Textarea" );
+						Append( Buffer, "<textarea dojoType=""dijit.form.Textarea"" name=""" );
 						Append( Buffer, Property.Column_Name );
 						Append( Buffer, """ " );
 						if Property.Immutable and then not KOW_Ent.Is_New( Entity ) then
