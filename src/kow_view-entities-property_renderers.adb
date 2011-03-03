@@ -34,6 +34,8 @@ pragma License( GPL );
 -- Ada 2005 --
 --------------
 with Ada.Tags;
+with Ada.Strings;
+with Ada.Strings.Fixed;
 with Ada.Strings.Unbounded;			use Ada.Strings.Unbounded;
 
 
@@ -42,6 +44,7 @@ with Ada.Strings.Unbounded;			use Ada.Strings.Unbounded;
 -------------------
 with KOW_Ent;
 with KOW_Ent.Generic_Property_Metadata;
+with KOW_Ent.Properties;
 with KOW_View.Entities.Properties;
 with KOW_View.Locales;
 
@@ -201,6 +204,65 @@ package body KOW_View.Entities.Property_Renderers is
 		end case;
 	end Get_Input;
 
+	----------------------------
+	-- Text Property Renderer --
+	----------------------------
+
+	overriding
+	procedure Get_Input(
+				Renderer	: in out Text_property_Renderer_Type;
+				Module		: in out KOW_View.Modules.Module_Type'Class;
+				Request		: in     AWS.Status.Data;
+				Entity		: in     KOW_Ent.Entity_Type'Class;
+				Property	: in     KOW_Ent.Entity_Property_Type'Class;
+				Style		: in     Rendering_Style_Type;
+				Output		:    out Unbounded_String
+			) is
+		Value	: constant String := KOW_Ent.Get_Property( Property, Entity );
+	begin
+		if Property not in KOW_Ent.Properties.UString_Property_Type'Class then
+			raise CONSTRAINT_ERROR with "Can't render text property that's not implemented by ustring_property_type";
+		end if;
+
+
+
+		case Style is
+			when Big_Rendering | Small_Rendering =>
+				Output := To_Unbounded_String( Value );
+			when Big_Edit_Rendering | Small_Edit_Rendering =>
+				declare
+					Buffer	: Unbounded_String;
+					Length	: constant Positive := KOW_Ent.Properties.UString_Property_Type'Class( Property ).Length;
+					SLength : constant String := Ada.Strings.Fixed.Trim( Positive'Image( Length ), Ada.Strings.Both );
+				begin
+					if Length < 150 then
+						KOW_View.Modules.Include_Dojo_Package( Module, "dijit.form.ValidationTextBox" );
+						Append( Buffer, "<input type=""text"" dojoType=""dijit.form.ValidationTextBox"" name=""" );
+						Append( Buffer, Property.Column_Name );
+						Append( Buffer, """ " );
+						if Property.Immutable and then not KOW_Ent.Is_New( Entity ) then
+							Append( Buffer, "disabled " );
+						end if;
+						Append( Buffer, "value=""" & Value & """ maxLength=""" & SLength & """/>" );
+						Output := Buffer;
+					else
+						KOW_View.Modules.Include_Dojo_Package( Module, "dijit.form.TextArea" );
+						Append( Buffer, "<textarea dojoType=""dijit.form.TextArea"" name=""" );
+						Append( Buffer, Property.Column_Name );
+						Append( Buffer, """ " );
+						if Property.Immutable and then not KOW_Ent.Is_New( Entity ) then
+							Append( Buffer, "disabled " );
+						end if;
+						Append( Buffer, "maxLength=""" & SLength & """>" );
+						Append( Buffer, Value );
+						Append( Buffer, "</textarea>" );
+
+						Output := Buffer;
+					end if;
+				end;
+		end case;
+	end Get_Input;
+
 
 	---------------------------------
 	-- Rich Text Property Renderer --
@@ -292,13 +354,18 @@ package body KOW_View.Entities.Property_Renderers is
 
 begin
 	Default_Renderers_Registry.Set(
+					KOW_Ent.Properties.UString_Property_Type'Tag,
+					new Text_Property_Renderer_Type
+				);
+
+	Default_Renderers_Registry.Set(
 					KOW_View.Entities.Properties.Rich_Text_Property_Type'Tag,
-					new Rich_Text_PRoperty_Renderer_Type
+					new Rich_Text_Property_Renderer_Type
 				);
 
 	Default_Renderers_Registry.Set(
 					KOW_View.Entities.Properties.Rich_Text_File_Property_Type'Tag,
-					new Rich_Text_PRoperty_Renderer_Type
+					new Rich_Text_Property_Renderer_Type
 				);
 
 end KOW_View.Entities.Property_Renderers;

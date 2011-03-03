@@ -162,6 +162,21 @@ package KOW_View.Entities.Property_Renderers is
 				Output		:    out Unbounded_String
 			);
 	
+	----------------------------
+	-- Text Property Renderer --
+	----------------------------
+	type Text_Property_Renderer_Type is new Basic_Property_Renderer_Type with null record;
+
+	overriding
+	procedure Get_Input(
+				Renderer	: in out Text_property_Renderer_Type;
+				Module		: in out KOW_View.Modules.Module_Type'Class;
+				Request		: in     AWS.Status.Data;
+				Entity		: in     KOW_Ent.Entity_Type'Class;
+				Property	: in     KOW_Ent.Entity_Property_Type'Class;
+				Style		: in     Rendering_Style_Type;
+				Output		:    out Unbounded_String
+		);
 
 	---------------------------------
 	-- Rich Text Property Renderer --
