@@ -221,6 +221,8 @@ package KOW_View.Entities.Property_Renderers is
 				Entity		: in KOW_Ent.Entity_Type'Class;
 				Property	: in KOW_Ent.Entity_Property_Type'Class
 			) return KOW_Ent.Id_Array_Type;
+	-- the operation used (with dispatching enabled) for getting the entities
+	-- to be selected :)
 
 
 

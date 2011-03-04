@@ -389,7 +389,7 @@ package body KOW_View.Entities.Property_Renderers is
 				declare
 					Entity_Tag	: Ada.Tags.Tag		:= KOW_Ent.Properties.Foreign_Key_Property_Type'Class( Property ).Related_Entity_Tag;
 					Ids		: KOW_Ent.Id_Array_Type := Query_Entities(
-										Renderer	=> Renderer,
+										Renderer	=> Foreign_Key_Property_Renderer_Type'Class( Renderer ),
 										Request		=> Request,
 										Entity		=> Entity,
 										Property	=> Property
