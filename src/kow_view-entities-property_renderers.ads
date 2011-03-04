@@ -195,4 +195,34 @@ package KOW_View.Entities.Property_Renderers is
 				Output		:    out Unbounded_String
 			);
 
+
+	-----------------------------------
+	-- Foreing Key Property Renderer --
+	-----------------------------------
+
+
+	type Foreign_Key_Property_Renderer_Type is new Basic_Property_Renderer_Type with null record;
+
+	overriding
+	procedure Get_Input(
+				Renderer	: in out Foreign_Key_Property_Renderer_Type;
+				Module		: in out KOW_View.Modules.Module_type'Class;
+				Request		: in     AWS.Status.Data;
+				Entity		: in     KOW_Ent.Entity_Type'Class;
+				Property	: in     KOW_Ent.Entity_Property_Type'Class;
+				Style		: in     Rendering_Style_Type;
+				Output		:    out Unbounded_String
+			);
+	
+
+	function Query_Entities(
+				Renderer	: in Foreign_Key_Property_Renderer_Type;
+				Request		: in AWS.Status.Data;
+				Entity		: in KOW_Ent.Entity_Type'Class;
+				Property	: in KOW_Ent.Entity_Property_Type'Class
+			) return KOW_Ent.Id_Array_Type;
+
+
+
+
 end KOW_View.Entities.Property_Renderers;

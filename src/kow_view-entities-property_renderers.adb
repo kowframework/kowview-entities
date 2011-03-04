@@ -44,6 +44,7 @@ with Ada.Strings.Unbounded;			use Ada.Strings.Unbounded;
 -------------------
 with KOW_Ent;
 with KOW_Ent.Generic_Property_Metadata;
+with KOW_Ent.Id_Query_Builders;
 with KOW_Ent.Properties;
 with KOW_View.Entities.Properties;
 with KOW_View.Locales;
@@ -352,6 +353,99 @@ package body KOW_View.Entities.Property_Renderers is
 		end case;
 	end Get_Input;
 
+
+
+	-----------------------------------
+	-- Foreing Key Property Renderer --
+	-----------------------------------
+
+
+	overriding
+	procedure Get_Input(
+				Renderer	: in out Foreign_Key_Property_Renderer_Type;
+				Module		: in out KOW_View.Modules.Module_type'Class;
+				Request		: in     AWS.Status.Data;
+				Entity		: in     KOW_Ent.Entity_Type'Class;
+				Property	: in     KOW_Ent.Entity_Property_Type'Class;
+				Style		: in     Rendering_Style_Type;
+				Output		:    out Unbounded_String
+			) is
+	begin
+		if Property not in KOW_Ent.Properties.Foreign_Key_Property_Type'Class then
+			raise PROGRAM_ERROR with "expected foreign key property type";
+		end if;
+
+		case Style is
+			when Big_Rendering | Small_Rendering =>
+				declare
+					Entity_Tag	: Ada.Tags.Tag	 	:= KOW_Ent.Properties.Foreign_Key_Property_Type'Class( Property ).Related_Entity_Tag;
+					Id		: KOW_Ent.Id_Type	:= KOW_Ent.Properties.Foreign_Key_Property_Type'Class( Property ).Getter.all( Entity );
+				begin
+					Append( Output, KOW_Ent.To_String( KOW_Ent.Load_Entity( Entity_Tag, ID ) ) );
+				exception
+					when others => Output := To_Unbounded_String( "--" );
+				end;
+			when Big_Edit_Rendering | Small_Edit_Rendering =>
+				declare
+					Entity_Tag	: Ada.Tags.Tag		:= KOW_Ent.Properties.Foreign_Key_Property_Type'Class( Property ).Related_Entity_Tag;
+					Ids		: KOW_Ent.Id_Array_Type := Query_Entities(
+										Renderer	=> Renderer,
+										Request		=> Request,
+										Entity		=> Entity,
+										Property	=> Property
+									);
+					Id		: KOW_Ent.Id_Type	:= KOW_Ent.Properties.Foreign_Key_Property_Type'Class( Property ).Getter.all( Entity );
+				begin
+					KOW_View.Modules.Include_Dojo_Package( Module, "dijit.form.FilteringSelect" );
+					Append( Output, "<select dojoType=""dijit.form.FilteringSelect"" name=""" );
+					Append( Output, Property.Column_Name );
+					Append( Output, """" );
+					if Property.Immutable and then not KOW_Ent.Is_New( Entity ) then
+						Append( Output, " disabled" );
+					end if;
+					Append( Output, "/>" );
+
+					for i in Ids'range loop
+						declare
+							use KOW_Ent;
+							Ent : KOW_Ent.Entity_Type'Class := KOW_Ent.Load_Entity( Entity_Tag, Ids( i ) );
+						begin
+							Append( Output, "<option value=""" & KOW_Ent.To_String( Ent.ID ) & """" );
+								if Ent.id = Id then
+									Append( Output, " selected" );
+								end if;
+							Append( Output, ">" );
+							Append( Output, KOW_Ent.To_String( Ent ) );
+							Append( Output, "</option>" );
+						end;
+					end loop;
+
+					Append( Output, "</select>" );
+				end;
+		end case;
+	end Get_Input;
+	
+
+	function Query_Entities(
+				Renderer	: in Foreign_Key_Property_Renderer_Type;
+				Request		: in AWS.Status.Data;
+				Entity		: in KOW_Ent.Entity_Type'Class;
+				Property	: in KOW_Ent.Entity_Property_Type'Class
+			) return KOW_Ent.Id_Array_Type is
+		use KOW_Ent.ID_Query_Builders;
+
+		Q : Query_Type;
+	begin
+
+		Prepare(
+				Q		=> Q,
+				Entity_Tag	=> KOW_Ent.Properties.Foreign_Key_Property_Type'Class( Property ).Related_Entity_Tag
+			);
+
+		return Get_All( Q );
+	end Query_Entities;
+
+
 begin
 	Default_Renderers_Registry.Set(
 					KOW_Ent.Properties.UString_Property_Type'Tag,
@@ -366,6 +460,12 @@ begin
 	Default_Renderers_Registry.Set(
 					KOW_View.Entities.Properties.Rich_Text_File_Property_Type'Tag,
 					new Rich_Text_Property_Renderer_Type
+				);
+
+
+	Default_Renderers_Registry.Set(
+					KOW_Ent.Properties.Foreign_Key_Property_Type'Tag,
+					new Foreign_Key_Property_Renderer_Type
 				);
 
 end KOW_View.Entities.Property_Renderers;
