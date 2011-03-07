@@ -296,7 +296,7 @@ package body KOW_View.Entities.Modules is
 				Request	=> Request
 			);
 
-		KOW_Lib.Json.Set( Resp, "entity_id", KOW_Ent.To_String( Entity.ID ) );
+		KOW_Lib.Json.Set( Resp, "entity_id", Integer( Entity.ID.Value ) );
 		
 		Response := Resp;
 	end Process_Json_Request;
