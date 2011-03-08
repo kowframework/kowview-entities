@@ -423,7 +423,7 @@ package body KOW_View.Entities.Modules is
 
 	begin
 
-		Buffer := To_Unbounded_String( "<fieldset><form enctype=""multipart/form-data"" id=""entity_form_" );
+		Buffer := To_Unbounded_String( "<fieldset><form method=""POST"" enctype=""multipart/form-data"" id=""entity_form_" );
 		Append( Buffer, Ada.Strings.Fixed.Trim( Integer'Image( Module.ID ),Ada.Strings.Both ) );
 		Append( Buffer, """>" );
 
