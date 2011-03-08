@@ -457,7 +457,7 @@ package body KOW_View.Entities.Modules is
 		procedure Iterator( C : in KOW_Ent.Property_Lists.Cursor ) is
 			Property : KOW_Ent.Entity_Property_Ptr := KOW_Ent.Property_Lists.Element( C );
 		begin
-			if not KOW_Ent.Is_new( Entity ) and then not Property.Immutable then
+			if KOW_Ent.Is_new( Entity ) or not Property.Immutable then
 				-- we do not touch immutable values as probably we won't even receive
 				-- a value from the browser, which would cause an exception
 				KOW_Ent.Set_Property(
