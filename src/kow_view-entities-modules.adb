@@ -24,7 +24,6 @@
 pragma License( GPL );
 
 
-
 --------------
 -- Ada 2005 --
 --------------
@@ -458,11 +457,15 @@ package body KOW_View.Entities.Modules is
 		procedure Iterator( C : in KOW_Ent.Property_Lists.Cursor ) is
 			Property : KOW_Ent.Entity_Property_Ptr := KOW_Ent.Property_Lists.Element( C );
 		begin
-			KOW_Ent.Set_Property(
-					Property	=> Property.all,
-					Entity		=> Entity,
-					Value		=> AWS.Parameters.Get( Params, To_String( Property.all.Column_Name ) )
-				);
+			if not KOW_Ent.Is_new( Entity ) and then not Property.Immutable then
+				-- we do not touch immutable values as probably we won't even receive
+				-- a value from the browser, which would cause an exception
+				KOW_Ent.Set_Property(
+						Property	=> Property.all,
+						Entity		=> Entity,
+						Value		=> AWS.Parameters.Get( Params, To_String( Property.all.Column_Name ) )
+					);
+			end if;
 		end Iterator;
 	begin
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
