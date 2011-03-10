@@ -30,6 +30,7 @@ pragma License( GPL );
 with KOW_Config;
 with KOW_Ent;
 with KOW_Lib.Json;
+with KOW_View.Entities.Components;
 with KOW_View.Modules;
 with KOW_View.Modules.Stateless_Module_Factories;
 
@@ -171,4 +172,17 @@ package KOW_View.Entities.Modules is
 	procedure Check_Tag( Module : in KOW_View.Modules.Module_Type'Class );
 	-- check if the module is in Entity_Module_Type'Class 
 	-- if not, raise constraint error
+
+
+
+
+	--------------------------------------
+	-- An instance of the entity module --
+	--------------------------------------
+	type Entity_Module is new Entity_Module_Type with null record;
+	package Entity_Module_Factories is new KOW_View.Modules.Stateless_Module_Factories(
+							Module_Type	=> Entity_Module,
+							Component	=> KOW_View.Entities.Components.Component'Access
+						);
+
 end KOW_View.Entities.Modules;
