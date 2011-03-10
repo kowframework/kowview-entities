@@ -49,6 +49,8 @@ with KOW_Ent.Properties;
 with KOW_View.Entities.Properties;
 with KOW_View.Locales;
 
+with KOW_View.Entities.Modules;
+
 ---------
 -- AWS --
 ---------
@@ -446,6 +448,39 @@ package body KOW_View.Entities.Property_Renderers is
 	end Query_Entities;
 
 
+	-----------------------------------
+	-- File Upload Property Renderer --
+	-----------------------------------
+
+	overriding
+	procedure Get_Input(
+				Renderer	: in out File_Upload_Property_Renderer_Type;
+				Module		: in out KOW_View.Modules.Module_Type'Class;
+				Request		: in     AWS.Status.Data;
+				Entity		: in     KOW_Ent.Entity_Type'Class;
+				Property	: in     KOW_Ent.Entity_Property_Type'Class;
+				Style		: in     Rendering_Style_Type;
+				Output		:    out Unbounded_String
+			) is
+		function File_Input return String is
+		begin
+			if not KOW_Ent.Is_New( Entity ) then
+				-- we don't let the user replace existing image 
+				return "";
+			end if;
+
+			case KOW_View.Entities.Modules.Entity_Module_Type'Class( Module ).Style is
+				when Small_Rendering | Big_Rendering =>
+					return "";
+				when Small_Edit_Rendering | Big_Edit_Rendering =>
+					return "Selecione um arquivo: <span><input type=""file"" name=""image_path""/></span>";
+			end case;
+		end File_Input;
+	begin
+		Output := To_Unbounded_String( File_Input );
+	end Get_Input;
+
+
 begin
 	Default_Renderers_Registry.Set(
 					KOW_Ent.Properties.UString_Property_Type'Tag,
@@ -466,6 +501,12 @@ begin
 	Default_Renderers_Registry.Set(
 					KOW_Ent.Properties.Foreign_Key_Property_Type'Tag,
 					new Foreign_Key_Property_Renderer_Type
+				);
+	
+
+	Default_Renderers_Registry.Set(
+					KOW_View.Entities.Properties.File_Upload_Property_Type'Tag,
+					new File_Upload_Property_Renderer_Type
 				);
 
 end KOW_View.Entities.Property_Renderers;
