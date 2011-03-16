@@ -473,7 +473,7 @@ package body KOW_View.Entities.Property_Renderers is
 				when Small_Rendering | Big_Rendering =>
 					return "";
 				when Small_Edit_Rendering | Big_Edit_Rendering =>
-					return "Selecione um arquivo: <span><input type=""file"" name=""image_path""/></span>";
+					return "<span><input type=""file"" name=""" & To_String( Property.Column_Name ) & """/></span>";
 			end case;
 		end File_Input;
 	begin
