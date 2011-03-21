@@ -217,7 +217,7 @@ package body KOW_View.Entities.Modules is
 						Append( Output, "<li>" );
 						Append( Output, "<a href=""?style=big&entity_id=" & KOW_ent.To_String( Entity.ID ) & """>" );
 						Render_View(
-								Module	=> Module,
+								Module	=> Entity_Module_Type'Class( Module ),
 								Request	=> Request,
 								Entity	=> Entity,
 								Style	=> Module.Style,
@@ -242,7 +242,7 @@ package body KOW_View.Entities.Modules is
 				Buffer	: Unbounded_String;
 			begin
 				Render_View(
-						Module	=> Module,
+						Module	=> Entity_Module_Type'Class( Module ),
 						Request	=> Request,
 						Entity	=> Entity,
 						Style	=> Module.Style,
