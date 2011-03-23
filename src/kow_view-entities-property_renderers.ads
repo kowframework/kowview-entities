@@ -182,7 +182,10 @@ package KOW_View.Entities.Property_Renderers is
 	-- Rich Text Property Renderer --
 	---------------------------------
 
-	type Rich_Text_Property_Renderer_Type is new Basic_Property_Renderer_Type with null record;
+	type Rich_Text_Property_Renderer_Type is new Basic_Property_Renderer_Type with record
+		Plugins		: Unbounded_String;
+		Extra_Plugins	: Unbounded_String;
+	end record;
 
 	overriding
 	procedure Get_Input(

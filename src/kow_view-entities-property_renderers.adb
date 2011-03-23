@@ -315,8 +315,19 @@ package body KOW_View.Entities.Property_Renderers is
 			) is
 		Value : constant String := KOW_Ent.Get_Property( Property, Entity );
 
+
+		procedure Append_If_Set( Key : in String; Value : in Unbounded_String ) is
+		begin
+			if Value /= "" then
+				Append( Output, " " );
+				Append( Output, Key );
+				Append( Output, "=""" );
+				Append( Output, Value );
+				Append( Output, """" );
+			end if;
+		end Append_if_Set;
+
 		procedure Editor( Class : in String ) is
-			-- TODO :: implement in the property support for plugins in dojo editor through parameters
 			Editor_ID	: Unbounded_String;
 			Input_ID	: Unbounded_String;
 		begin
@@ -326,7 +337,12 @@ package body KOW_View.Entities.Property_Renderers is
 			KOW_View.Modules.Include_Dojo_Package( Module, "dijit.Editor" );
 			Append( Output, "<div class=""" & Class & """ dojoType=""dijit.Editor"" id=""" );
 			Append( Output, Editor_ID );
-			Append( Output, """>" & Value & "</div>" );
+			Append( Output, """" );
+
+			Append_If_Set( "plugins", Renderer.Plugins );
+			Append_If_Set( "extraPlugins", Renderer.Extra_Plugins );
+			
+			Append( Output, ">" & Value & "</div>" );
 
 			Append( Output, "<input type=""hidden"" name=""" );
 			Append( Output, Property.Column_Name );
@@ -345,7 +361,7 @@ package body KOW_View.Entities.Property_Renderers is
 			when Big_Rendering =>
 				Output := To_Unbounded_String( "<div class=""richTextContent"">" & Value & "</div>" );
 			when Small_Rendering =>
-				Output := To_Unbounded_String( "<div class=""richTextContentPreview"">"& Strip_HTML( Value, 150 ) & "</div>" ); -- TODO here
+				Output := To_Unbounded_String( "<div class=""richTextContentPreview"">"& Strip_HTML( Value, 150 ) & "</div>" ); 
 
 			when Big_Edit_Rendering =>
 				Editor( "richTextEditor" );
