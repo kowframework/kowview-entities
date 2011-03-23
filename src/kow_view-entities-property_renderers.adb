@@ -371,6 +371,17 @@ package body KOW_View.Entities.Property_Renderers is
 		end case;
 	end Get_Input;
 
+	function New_Rich_Text_Property_Renderer(
+			Plugins		: in String := "";
+			Extra_Plugins	: in String := ""
+		) return Property_Renderer_Ptr is
+	begin
+		return new Rich_Text_Property_Renderer_Type'(
+					Basic_Property_Renderer_Type with
+						Plugins		=> To_Unbounded_String( Plugins ),
+						Extra_Plugins	=> To_Unbounded_String( Extra_Plugins )
+					);
+	end New_Rich_Text_Property_Renderer;
 
 
 	-----------------------------------
@@ -510,7 +521,7 @@ begin
 
 	Default_Renderers_Registry.Set(
 					KOW_View.Entities.Properties.Rich_Text_File_Property_Type'Tag,
-					new Rich_Text_Property_Renderer_Type
+					New_Rich_Text_Property_Renderer
 				);
 
 

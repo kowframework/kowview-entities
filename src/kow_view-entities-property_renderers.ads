@@ -197,6 +197,11 @@ package KOW_View.Entities.Property_Renderers is
 				Style		: in     Rendering_Style_Type;
 				Output		:    out Unbounded_String
 			);
+	
+	function New_Rich_Text_Property_Renderer(
+			Plugins		: in String := "";
+			Extra_Plugins	: in String := ""
+		) return Property_Renderer_Ptr;
 
 
 	-----------------------------------
