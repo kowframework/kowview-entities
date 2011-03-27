@@ -46,6 +46,7 @@ with KOW_Ent;
 with KOW_Ent.Generic_Property_Metadata;
 with KOW_Ent.Id_Query_Builders;
 with KOW_Ent.Properties;
+with KOW_View.Entities.Components;
 with KOW_View.Entities.Properties;
 with KOW_View.Locales;
 
@@ -335,7 +336,7 @@ package body KOW_View.Entities.Property_Renderers is
 			KOW_View.Modules.Generate_HTML_Id( Module, Input_ID );
 
 			KOW_View.Modules.Include_Dojo_Package( Module, "dijit.Editor" );
-			Append( Output, "<div class=""" & Class & """ dojoType=""dijit.Editor"" id=""" );
+			Append( Output, "<div class=""" & Class & """ styleSheets=""/pages/css/component:entities/kowview-rich_text.css"" dojoType=""dijit.Editor"" id=""" );
 			Append( Output, Editor_ID );
 			Append( Output, """" );
 
@@ -357,6 +358,12 @@ package body KOW_View.Entities.Property_Renderers is
 			Append( Output, """);});</script>" );
 		end Editor;
 	begin
+		KOW_View.Modules.Include_Component_CSS(
+					Module		=> Module,
+					Component	=> KOW_View.Entities.Components.Component,
+					CSS		=> "kowview-rich_text.css"		-- css with some data formating
+				);
+
 		case Style is
 			when Big_Rendering =>
 				Output := To_Unbounded_String( "<div class=""richTextContent"">" & Value & "</div>" );
