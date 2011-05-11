@@ -415,7 +415,9 @@ package body KOW_View.Entities.Modules is
 							Output		=> Renderer_Buffer
 						);
 
-			Append( Buffer, "<label>" );
+			Append( Buffer, "<label class=""" );
+			Append( Buffer, Property.Column_Name );
+			Append( Buffer, """>" );
 			Append( Buffer, Renderer_Buffer );
 			Append( Buffer, "</label>" );
 		end Iterator;
