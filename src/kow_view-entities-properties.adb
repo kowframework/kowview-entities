@@ -302,6 +302,25 @@ package body KOW_View.Entities.Properties is
 	-- File Upload Property Type --
 	-------------------------------
 
+	protected Random_Generator is
+		procedure Random( Result : out Positive );
+
+		procedure Reset;
+	private
+		Generator : Positive_Random.Generator;
+	end Random_Generator;
+
+	protected body Random_Generator is
+		procedure Random( Result : out Positive ) is
+		begin
+			Result := Positive_Random.Random( Generator );
+		end Random;
+
+		procedure Reset is
+		begin
+			Positive_Random.Reset( Generator );
+		end Reset;
+	end Random_Generator;
 
 	overriding
 	procedure Set_Property(
@@ -325,14 +344,13 @@ package body KOW_View.Entities.Properties is
 						KOW_Ent.To_String( Entity.ID ) & '_' & To_String( Property.Column_Name ) & '.' & Extension;
 			else
 				declare
-					Gen : Positive_Random.Generator;
+					Val : Positive;
 				begin
-					Positive_Random.Reset( Gen );
-
 					loop
+						Random_Generator.Random( Val );
 						declare
 							Rnd_Str : constant String := Ada.Strings.Fixed.Trim(
-												Positive'Image( Positive_Random.Random( Gen ) ),
+												Positive'Image( Val ),
 												Ada.Strings.Both
 											);
 							R : constant String := To_String( Property.Upload_Path ) / 
@@ -603,6 +621,6 @@ package body KOW_View.Entities.Properties is
 	end Set_Property;
 
 
-
-
+begin
+	Random_Generator.Reset;
 end KOW_View.Entities.Properties;
