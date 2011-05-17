@@ -45,6 +45,7 @@ with KOW_View.Entities.Validation;
 with KOW_View.Locales;
 with KOW_View.Modules;
 with KOW_View.Modules.Stateless_Module_Factories;
+with KOW_View.URI_Util;
 
 ---------
 -- AWS --
@@ -141,72 +142,19 @@ package body KOW_View.Entities.Modules is
 										From	=> From,
 										Limit	=> Limit
 									);
-
-				procedure Append_Button(
-						Label	: in String;
-						Href	: in String;
-						Enabled	: in Boolean := True
-					) is
-				begin
-					Append( Output, "<button onClick=""window.location.href='"&href&"'"" dojoType=""dijit.form.Button""");
-					if not Enabled then
-						Append( Output, " disabled=true" );
-					end if;
-					Append( Output, ">"&label&"</button>" );
-				end Append_Button;
-
-				procedure Append_Paging(
-						Label	: in String;
-						From	: in Integer;
-						Enabled	: in Boolean
-					) is
-					function T( i : in integer ) return String is
-					begin
-						return Ada.Strings.Fixed.Trim( Integer'Image( I ), Ada.Strings.Both );
-					end T;
-				begin
-					Append_Button(
-							Label	=> Label,
-							Href	=> "?from=" & T(From) & "&limit=" & T(Limit),
-							Enabled	=> Enabled
-						);
-				end Append_Paging;
-
-
-				function Previous_From return Integer is
-				begin
-					if From > Limit then
-						return From - Limit;
-					else
-						return 1;
-					end if;
-				end Previous_From;
-
-				function Has_Previous return Boolean is
-				begin
-					return From > 1;
-				end Has_Previous;
-
-				function Next_From return Integer is
-				begin
-					return From + Limit;
-				end Next_From;
-
-				function Has_Next return Boolean is
-				begin
-					return Ids'Length = Limit;
-				end Has_Next;
 			begin
 				Append( Output, "<h1>" );
 				Append( Output, Module.List_Label );
 				Append( Output, "</h1>" );
 
-				Include_Dojo_Package( Module, "dijit.form.Button" );
-				Append( Output, "<div class=""entityToolbar"">" );
-					Append_Paging( "&lt;", Previous_From, Has_Previous );
-					Append_Button( "new", "?style=big_edit", True );
-					Append_Paging( "&gt;", Next_From, Has_Next );
-				Append( Output, "</div>" );
+				Render_Navigation_Bar(
+							Module		=> Entity_Module_Type'Class( Module ),
+							Request		=> Request,
+							From		=> From,
+							Limit		=> Limit,
+							Total_Shown	=> Ids'Length,
+							Output		=> Output
+						);
 				Append( Output, "<ul>" );
 
 				for i in Ids'range loop
@@ -215,177 +163,261 @@ package body KOW_View.Entities.Modules is
 						Entity	: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Ids( i ) );
 					begin
 						Append( Output, "<li>" );
-						Append( Output, "<a href=""?style=big&entity_id=" & KOW_ent.To_String( Entity.ID ) & """>" );
-						Render_View(
-								Module	=> Entity_Module_Type'Class( Module ),
-								Request	=> Request,
-								Entity	=> Entity,
-								Style	=> Module.Style,
-								Output	=> Buffer
+						Append( Output, "<a href=""" );
+							Append( Output, KOW_View.URI_Util.Build_URL( Request => Request, Key1 => "style", Value1 => "big", key2 => "entity_id", Value2 => KOW_ent.To_String( Entity.ID )  ) );
+							Append( Output, """>" );
+							Render_View(
+									Module	=> Entity_Module_Type'Class( Module ),
+									Request	=> Request,
+									Entity	=> Entity,
+									Style	=> Module.Style,
+									Output	=> Buffer
+								);
+							Append( Output, Buffer );
+							Append( Output, "</a>" );
+							Append( Output, "</li>" );
+						end;
+					end loop;
+					Append( Output, "</ul>" );
+
+					Render_Navigation_Bar(
+								Module		=> Entity_Module_Type'Class( Module ),
+								Request		=> Request,
+								From		=> From,
+								Limit		=> Limit,
+								Total_Shown	=> Ids'Length,
+								Output		=> Output
 							);
-						Append( Output, Buffer );
-						Append( Output, "</a>" );
-						Append( Output, "</li>" );
-					end;
-				end loop;
-				Append( Output, "</ul>" );
-				Append( Output, "<div class=""entityToolbar"">" );
-					Append_Paging( "&lt;", Previous_From, Has_Previous );
-					Append_Button( "new", "?style=big_edit", True );
-					Append_Paging( "&gt;", Next_From, Has_Next );
-				Append( Output, "</div>" );
-			end;
-		else
-			declare
-				Entity	: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Entity_ID );
-				H1	: constant String := "<h1>" & KOW_Ent.Get_Label( Entity, KOW_View.Locales.Get_Locale( Request ) ) & "</h1>";
-				Buffer	: Unbounded_String;
-			begin
-				Render_View(
-						Module	=> Entity_Module_Type'Class( Module ),
-						Request	=> Request,
-						Entity	=> Entity,
-						Style	=> Module.Style,
-						Output	=> Buffer
-					);
-				Append( Output, h1 );
-				Append( Output, Buffer );
-			end;
-		end if;
 
-		Append( Output, "</span>" );
-	end Process_Body;
+				end;
+			else
+				declare
+					Entity	: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Entity_ID );
+					H1	: constant String := "<h1>" & KOW_Ent.Get_Label( Entity, KOW_View.Locales.Get_Locale( Request ) ) & "</h1>";
+					Buffer	: Unbounded_String;
+				begin
+					Render_View(
+							Module	=> Entity_Module_Type'Class( Module ),
+							Request	=> Request,
+							Entity	=> Entity,
+							Style	=> Module.Style,
+							Output	=> Buffer
+						);
+					Append( Output, h1 );
+					Append( Output, Buffer );
+				end;
+			end if;
+
+			Append( Output, "</span>" );
+		end Process_Body;
 
 
-	overriding
-	procedure Process_Json_Request(
-				Module	: in out Entity_Module_Type;
-				Request	: in     AWS.Status.Data;
-				Response:    out KOW_Lib.Json.Object_Type
-			) is
-		Entity_Id	: Integer := Get_Entity_id( Entity_Module_Type'Class( Module ), Request );
-		Entity		: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Entity_ID );
+		overriding
+		procedure Process_Json_Request(
+					Module	: in out Entity_Module_Type;
+					Request	: in     AWS.Status.Data;
+					Response:    out KOW_Lib.Json.Object_Type
+				) is
+			Entity_Id	: Integer := Get_Entity_id( Entity_Module_Type'Class( Module ), Request );
+			Entity		: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Entity_ID );
 
-		Resp		: KOW_Lib.Json.Object_Type;
-	begin
-		Set_Values(
-				Module	=> Module,
-				Entity	=> Entity,
-				Request	=> Request
-			);
+			Resp		: KOW_Lib.Json.Object_Type;
+		begin
+			Set_Values(
+					Module	=> Module,
+					Entity	=> Entity,
+					Request	=> Request
+				);
 
-		if Entity in KOW_View.Entities.Validation.Validatable_Entity_Interface'Class then
-			KOW_View.Entities.Validation.Validate(
-						Entity	=> KOW_View.Entities.Validation.Validatable_Entity_Interface'Class( Entity ),
-						Request	=> Request
-					);
-		end if;
+			if Entity in KOW_View.Entities.Validation.Validatable_Entity_Interface'Class then
+				KOW_View.Entities.Validation.Validate(
+							Entity	=> KOW_View.Entities.Validation.Validatable_Entity_Interface'Class( Entity ),
+							Request	=> Request
+						);
+			end if;
 
-		KOW_Lib.Json.Set( Resp, "is_new", KOW_Ent.Is_New( Entity ) );
+			KOW_Lib.Json.Set( Resp, "is_new", KOW_Ent.Is_New( Entity ) );
 
-		Before_Store(
-				Entity	=> Entity,
-				Request	=> Request
-			);
+			Before_Store(
+					Entity	=> Entity,
+					Request	=> Request
+				);
 
-		KOW_Ent.Store( Entity );
+			KOW_Ent.Store( Entity );
 
-		After_Store(
-				Entity	=> Entity,
-				Request	=> Request
-			);
+			After_Store(
+					Entity	=> Entity,
+					Request	=> Request
+				);
 
-		KOW_Lib.Json.Set( Resp, "entity_id", Integer( Entity.ID.Value ) );
+			KOW_Lib.Json.Set( Resp, "entity_id", Integer( Entity.ID.Value ) );
+			
+			Response := Resp;
+		end Process_Json_Request;
 		
-		Response := Resp;
-	end Process_Json_Request;
-	
 
 
 
 
-	function Get_Entity_id(
-				Module	: in Entity_Module_Type;
-				Request	: in AWS.Status.Data
-			) return Integer is
-		ID_Str : constant String := AWS.Parameters.Get( AWS.Status.Parameters( Request ), "entity_id" );
-	begin
-		if ID_Str = "" then
-			return -1;
-		else
-			return Integer'Value( ID_Str );
-		end if;
-	end Get_Entity_Id;
+		function Get_Entity_id(
+					Module	: in Entity_Module_Type;
+					Request	: in AWS.Status.Data
+				) return Integer is
+			ID_Str : constant String := AWS.Parameters.Get( AWS.Status.Parameters( Request ), "entity_id" );
+		begin
+			if ID_Str = "" then
+				return -1;
+			else
+				return Integer'Value( ID_Str );
+			end if;
+		end Get_Entity_Id;
 
 
-	function Query_Entities(
-				Module	: in Entity_Module_Type;
-				Request	: in AWS.Status.Data;
-				From	: in Positive;
-				Limit	: in Natural
-			) return KOW_Ent.Id_Array_Type is
-		use KOW_Ent.Id_Query_Builders;
+		function Query_Entities(
+					Module	: in Entity_Module_Type;
+					Request	: in AWS.Status.Data;
+					From	: in Positive;
+					Limit	: in Natural
+				) return KOW_Ent.Id_Array_Type is
+			use KOW_Ent.Id_Query_Builders;
 
-		Q : Query_Type;
-	begin
-		Prepare(
-				Q		=> Q,
-				Entity_Tag	=> Module.Entity_Tag
-			);
+			Q : Query_Type;
+		begin
+			Prepare(
+					Q		=> Q,
+					Entity_Tag	=> Module.Entity_Tag
+				);
 
-		return Get_Some(
-				Q		=> Q,
-				From		=> From,
-				Limit		=> Limit
-			);
-	end Query_Entities;
-
-
-	function New_Entity(
-				Module	: in Entity_Module_Type
-			) return KOW_Ent.Entity_Type'Class is
-	begin
-		if Module.Entity_Tag = "" then
-			raise CONSTRAINT_ERROR with "you need to supply the 'entity_tag' parameter";
-		end if;
-		return KOW_Ent.Entity_Registry.New_Entity( Module.Entity_Tag );
-	end New_Entity;
-	
-	function Load_Entity(
-				Module	: in Entity_Module_Type;
-				Id	: in Integer
-			) return KOW_Ent.Entity_Type'Class is
-	begin
-		if Id = -1 then
-			return New_Entity( Entity_Module_Type'Class( Module ) );
-		end if;
-		return Load_Entity( Module, KOW_Ent.To_Id( ID ) );
-	end Load_Entity;
-
-	function Load_Entity(
-				Module	: in Entity_Module_Type;
-				Id	: in KOW_Ent.Id_Type
-			) return KOW_Ent.Entity_Type'Class is
-		use APQ;
-		Entity : KOW_Ent.Entity_Type'Class := New_Entity( Entity_Module_Type'Class( Module ) );
-	begin
-		KOW_Ent.Load( Entity, Id );
-		if Module.Narrow then
-			return KOW_Ent.Narrow( Entity );
-		else
-			return Entity;
-		end if;
-	end Load_Entity;
+			return Get_Some(
+					Q		=> Q,
+					From		=> From,
+					Limit		=> Limit
+				);
+		end Query_Entities;
 
 
-	function Get_Properties(
-				Module	: in Entity_Module_Type;
-				Entity	: in KOW_Ent.Entity_Type'Class
-			) return KOW_Ent.Property_Lists.List is
-		-- get the properties that will be used by this module..
-	begin
-		return KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag, True );
-	end Get_Properties;
+		function New_Entity(
+					Module	: in Entity_Module_Type
+				) return KOW_Ent.Entity_Type'Class is
+		begin
+			if Module.Entity_Tag = "" then
+				raise CONSTRAINT_ERROR with "you need to supply the 'entity_tag' parameter";
+			end if;
+			return KOW_Ent.Entity_Registry.New_Entity( Module.Entity_Tag );
+		end New_Entity;
+		
+		function Load_Entity(
+					Module	: in Entity_Module_Type;
+					Id	: in Integer
+				) return KOW_Ent.Entity_Type'Class is
+		begin
+			if Id = -1 then
+				return New_Entity( Entity_Module_Type'Class( Module ) );
+			end if;
+			return Load_Entity( Module, KOW_Ent.To_Id( ID ) );
+		end Load_Entity;
+
+		function Load_Entity(
+					Module	: in Entity_Module_Type;
+					Id	: in KOW_Ent.Id_Type
+				) return KOW_Ent.Entity_Type'Class is
+			use APQ;
+			Entity : KOW_Ent.Entity_Type'Class := New_Entity( Entity_Module_Type'Class( Module ) );
+		begin
+			KOW_Ent.Load( Entity, Id );
+			if Module.Narrow then
+				return KOW_Ent.Narrow( Entity );
+			else
+				return Entity;
+			end if;
+		end Load_Entity;
+
+
+		function Get_Properties(
+					Module	: in Entity_Module_Type;
+					Entity	: in KOW_Ent.Entity_Type'Class
+				) return KOW_Ent.Property_Lists.List is
+			-- get the properties that will be used by this module..
+		begin
+			return KOW_Ent.Entity_Registry.Get_Properties( Entity'Tag, True );
+		end Get_Properties;
+
+
+		procedure Render_Navigation_Bar(
+					Module		: in out Entity_Module_Type;
+					Request		: in     AWS.Status.Data;
+					From		: in     Positive;
+					Limit		: in     Natural;
+					Total_Shown	: in     Natural;
+					Output		:    out Unbounded_String
+				) is
+
+
+			procedure Append_Button(
+					Label	: in String;
+					Href	: in String;
+					Enabled	: in Boolean := True
+				) is
+			begin
+				Append( Output, "<button onClick=""window.location.href='"&href&"'"" dojoType=""dijit.form.Button""");
+				if not Enabled then
+					Append( Output, " disabled=true" );
+				end if;
+				Append( Output, ">"&label&"</button>" );
+			end Append_Button;
+
+			procedure Append_Paging(
+					Label	: in String;
+					From	: in Integer;
+					Enabled	: in Boolean
+				) is
+				function T( i : in integer ) return String is
+				begin
+					return Ada.Strings.Fixed.Trim( Integer'Image( I ), Ada.Strings.Both );
+				end T;
+			begin
+				Append_Button(
+						Label	=> Label,
+						Href	=> KOW_View.URI_Util.Build_URL( Request => Request, Key1 => "from", Value1 => T(From), Key2 => "limit", Value2 => T(Limit) ),
+						Enabled	=> Enabled
+					);
+			end Append_Paging;
+
+
+			function Previous_From return Integer is
+			begin
+				if From > Limit then
+					return From - Limit;
+				else
+					return 1;
+				end if;
+			end Previous_From;
+
+			function Has_Previous return Boolean is
+			begin
+				return From > 1;
+			end Has_Previous;
+
+			function Next_From return Integer is
+			begin
+				return From + Limit;
+			end Next_From;
+
+			function Has_Next return Boolean is
+			begin
+				return Total_Shown = Limit;
+			end Has_Next;
+
+		begin
+			Include_Dojo_Package( Module, "dijit.form.Button" );
+			Append( Output, "<div class=""entityToolbar"">" );
+				Append_Paging( "&lt;", Previous_From, Has_Previous );
+				Append_Button( "new", KOW_View.URI_Util.Build_URL( Request, "style", "big_edit" ) );
+			Append_Paging( "&gt;", Next_From, Has_Next );
+		Append( Output, "</div>" );
+	end Render_Navigation_Bar;
+
+
 
 
 	procedure Render_View(

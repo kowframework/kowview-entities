@@ -135,6 +135,16 @@ package KOW_View.Entities.Modules is
 			) return KOW_Ent.Property_Lists.List;
 	-- ge the properties that will be used by this module..
 
+	procedure Render_Navigation_Bar(
+				Module		: in out Entity_Module_Type;
+				Request		: in     AWS.Status.Data;
+				From		: in     Positive;
+				Limit		: in     Natural;
+				Total_Shown	: in     Natural;
+				Output		:    out Unbounded_String
+			);
+
+
 	procedure Render_View(
 				Module	: in out Entity_Module_Type;
 				Request	: in     AWS.Status.Data;
