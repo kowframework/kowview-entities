@@ -641,9 +641,16 @@ package body KOW_View.Entities.Modules is
 				Output	:    out Unbounded_String
 			) is
 	begin
-		if not Can_Edit( Entity_Module_Type'Class( Module ), Request, Entity ) then
-			-- render no button if can't edit
-			return;
+
+		if KOW_Ent.Is_New( Entity ) then
+			if not Can_Create( Entity_Module_Type'Class( Module ), Request ) then
+				return;
+			end if;
+		else
+			if not Can_Edit( Entity_Module_Type'Class( Module ), Request, Entity ) then
+				-- render no button if can't edit
+				return;
+			end if;
 		end if;
 
 		case Module.Style is
