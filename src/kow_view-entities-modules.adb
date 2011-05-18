@@ -42,6 +42,7 @@ with KOW_Lib.Locales;
 with KOW_View.Entities.Components;
 with KOW_View.Entities.Property_Renderers;
 with KOW_View.Entities.Validation;
+with KOW_View.Entities.Toolbar_Util;				use KOW_View.Entities.Toolbar_Util;
 with KOW_View.Locales;
 with KOW_View.Modules;
 with KOW_View.Modules.Stateless_Module_Factories;
@@ -94,6 +95,7 @@ package body KOW_View.Entities.Modules is
 	begin
 		Module.Entity_Tag := KOW_Config.Value( Config, "entity_tag", "" );
 
+		Module.New_Label	:= E( "new_label", "Create" );
 		Module.Edit_Label	:= E( "edit_label", "Edit" );
 		Module.Submit_Label	:= E( "submit_label", "Submit" );
 		Module.List_Label	:= E( "list_label", "List" );
@@ -412,19 +414,6 @@ package body KOW_View.Entities.Modules is
 			) is
 
 
-		procedure Append_Button(
-				Label	: in String;
-				Href	: in String;
-				Enabled	: in Boolean := True
-			) is
-		begin
-			Append( Output, "<button onClick=""window.location.href='"&href&"'"" dojoType=""dijit.form.Button""");
-			if not Enabled then
-				Append( Output, " disabled=true" );
-			end if;
-			Append( Output, ">"&label&"</button>" );
-		end Append_Button;
-
 		procedure Append_Paging(
 				Label	: in String;
 				From	: in Integer;
@@ -435,7 +424,8 @@ package body KOW_View.Entities.Modules is
 				return Ada.Strings.Fixed.Trim( Integer'Image( I ), Ada.Strings.Both );
 			end T;
 		begin
-			Append_Button(
+			Append_Link_Button(
+					Output	=> Output,
 					Label	=> Label,
 					Href	=> KOW_View.URI_Util.Build_URL( Request => Request, Key1 => "from", Value1 => T(From), Key2 => "limit", Value2 => T(Limit) ),
 					Enabled	=> Enabled
@@ -468,12 +458,15 @@ package body KOW_View.Entities.Modules is
 		end Has_Next;
 
 	begin
-		Include_Dojo_Package( Module, "dijit.form.Button" );
-		Append( Output, "<div class=""entityToolbar navigation"">" );
-			Append_Paging( "&lt;", Previous_From, Has_Previous );
-			Append_Button( "new", KOW_View.URI_Util.Build_URL( Request, "style", "big_edit" ) );
-			Append_Paging( "&gt;", Next_From, Has_Next );
-		Append( Output, "</div>" );
+		Toolbar_Open(
+				Output	=> Output,
+				Module	=> Module,
+				Mode	=> Navigation_Toolbar
+			);
+		Append_Paging( "&lt;", Previous_From, Has_Previous );
+		Append_Link_Button( Output, Module.New_Label, KOW_View.URI_Util.Build_URL( Request, "style", "big_edit" ) );
+		Append_Paging( "&gt;", Next_From, Has_Next );
+		Toolbar_Close(	Output	=> Output );
 	end Render_List_Navigation_Bar;
 
 
@@ -606,37 +599,18 @@ package body KOW_View.Entities.Modules is
 				Entity	: in     KOW_Ent.Entity_Type'Class;
 				Output	:    out Unbounded_String
 			) is
-		procedure Toolbar_Open is
-		begin
-			Include_Dojo_Package( Module, "dijit.form.Button" );
-			Append( Output, "<div class=""entityToolbar view"">" );
-		end Toolbar_Open;
-
-		procedure Toolbar_Close is
-		begin	
-			Append( Output, "</div>" );
-		end Toolbar_Close;
-
-
-		procedure Append_Button( Label : in Unbounded_String; onClick : in String ) is
-		begin
-			Append( Output, "<button onClick=""" & onClick & """ dojoType=""dijit.form.Button"">" );
-			Append( Output, Label );
-			Append( Output, "</button>" );
-		end Append_Button;
-
-		procedure Append_Link_Button( Label : in Unbounded_String; Href : in String ) is
-		begin
-			Append_Button( Label, "document.location.href='" & Href & ''' );
-		end Append_Link_Button;
-
 	begin
 		case Module.Style is
 			when Small_Rendering | Small_Edit_Rendering =>
 				null;
 			when Big_Rendering =>
-				Toolbar_Open;
+				Toolbar_Open(
+						Output	=> Output,
+						Module	=> Module,
+						Mode	=> Form_Toolbar
+					);
 				Append_Link_Button(
+						Output	=> Output,
 						Label	=> Module.Edit_Label,
 						Href	=> KOW_View.URI_Util.Build_URL(
 											Request	=> Request,
@@ -646,15 +620,21 @@ package body KOW_View.Entities.Modules is
 											Value2	=> "big_edit"
 										)
 								);
-				Toolbar_Close;
+				Toolbar_Close( Output => Output );
 
 			when Big_Edit_Rendering =>
-				Toolbar_Open;
+				Toolbar_Open(
+						Output	=> Output,
+						Module	=> Module,
+						Mode	=> Form_Toolbar
+					);
+
 				Append_Button(
+						Output	=> Output,
 						Label	=> Module.Submit_Label,
 						onClick	=> "kowview.entities.submitForm(" & Integer'Image( Module.ID ) & ")"
 					);
-				Toolbar_Close;
+				Toolbar_Close( Output => Output );
 		end case;
 	end Render_View_Buttons;
 

@@ -61,6 +61,7 @@ package KOW_View.Entities.Modules is
 		-- all the object method calls in this code has dynamic dispatching enabled.
 		-- also, all the rendering methods only append to the output
 
+		New_Label	: Unbounded_String;
 		Edit_Label	: Unbounded_String;
 		Submit_Label	: Unbounded_String;
 		List_Label	: Unbounded_String;
