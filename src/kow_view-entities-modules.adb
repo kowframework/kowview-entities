@@ -39,6 +39,7 @@ with KOW_Ent;
 with KOW_Ent.ID_Query_Builders;
 with KOW_Lib.Json;
 with KOW_Lib.Locales;
+with KOW_Sec;
 with KOW_View.Entities.Components;
 with KOW_View.Entities.Property_Renderers;
 with KOW_View.Entities.Validation;
@@ -46,6 +47,7 @@ with KOW_View.Entities.Toolbar_Util;				use KOW_View.Entities.Toolbar_Util;
 with KOW_View.Locales;
 with KOW_View.Modules;
 with KOW_View.Modules.Stateless_Module_Factories;
+with KOW_View.Security;
 with KOW_View.URI_Util;
 
 ---------
@@ -151,6 +153,19 @@ package body KOW_View.Entities.Modules is
 
 		Resp		: KOW_Lib.Json.Object_Type;
 	begin
+
+		-- security measures...
+
+		if KOW_Ent.Is_New( Entity ) then
+			if not Can_Create( Entity_Module_Type'Class( Module ), Request ) then
+				raise KOW_Sec.Access_Denied with "Can't create entity";
+			end if;
+		else
+			if not Can_Edit( Entity_Module_type'Class( Module ), Request, Entity ) then
+				raise KOW_Sec.Access_Denied with "Can't edit the entity " & KOW_Ent.To_String( Entity );
+			end if;
+		end if;
+
 		Set_Values(
 				Module	=> Module,
 				Entity	=> Entity,
@@ -182,7 +197,31 @@ package body KOW_View.Entities.Modules is
 		
 		Response := Resp;
 	end Process_Json_Request;
+
+
+	----------------------
+	-- Security Methods --
+	----------------------
+
+	function Can_Create(
+				Module	: in     Entity_Module_Type;
+				Request	: in     AWS.Status.Data
+			) return Boolean is
+		-- check if the user can created entities
+		-- default implementation check if the user is online only
+	begin
+		return not KOW_Sec.Is_Anonymous( KOW_View.Security.Get_User( Request ) );
+	end Can_Create;
 	
+	function Can_Edit(
+				Module	: in     Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Entity	: in     KOW_Ent.Entity_Type'Class
+			) return Boolean is
+		-- check if the user can edit the given entity
+	begin
+		return not KOW_Sec.Is_Anonymous( KOW_View.Security.Get_User( Request ) );
+	end Can_Edit;
 
 
 	-------------------
@@ -464,7 +503,9 @@ package body KOW_View.Entities.Modules is
 				Mode	=> Navigation_Toolbar
 			);
 		Append_Paging( "&lt;", Previous_From, Has_Previous );
-		Append_Link_Button( Output, Module.New_Label, KOW_View.URI_Util.Build_URL( Request, "style", "big_edit" ) );
+		if Can_Create( Entity_Module_Type'Class( Module ), Request ) then
+			Append_Link_Button( Output, Module.New_Label, KOW_View.URI_Util.Build_URL( Request, "style", "big_edit" ) );
+		end if;
 		Append_Paging( "&gt;", Next_From, Has_Next );
 		Toolbar_Close(	Output	=> Output );
 	end Render_List_Navigation_Bar;
@@ -600,6 +641,11 @@ package body KOW_View.Entities.Modules is
 				Output	:    out Unbounded_String
 			) is
 	begin
+		if not Can_Edit( Entity_Module_Type'Class( Module ), Request, Entity ) then
+			-- render no button if can't edit
+			return;
+		end if;
+
 		case Module.Style is
 			when Small_Rendering | Small_Edit_Rendering =>
 				null;

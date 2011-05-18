@@ -98,6 +98,24 @@ package KOW_View.Entities.Modules is
 			);
 
 	
+	----------------------
+	-- Security Methods --
+	----------------------
+
+	function Can_Create(
+				Module	: in     Entity_Module_Type;
+				Request	: in     AWS.Status.Data
+			) return Boolean;
+	-- check if the user can created entities
+	-- default implementation check if the user is online only
+	
+	function Can_Edit(
+				Module	: in     Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Entity	: in     KOW_Ent.Entity_Type'Class
+			) return Boolean;
+	-- check if the user can edit the given entity
+	
 	-------------------
 	-- Data Handling --
 	-------------------
