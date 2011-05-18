@@ -56,7 +56,12 @@ package KOW_View.Entities.Modules is
 		-- used only by the New_Entity method...
 		-- so, in case you need to enforce creating only one type of entity
 		-- you can simply override that method
+		--
+		--
+		-- all the object method calls in this code has dynamic dispatching enabled.
+		-- also, all the rendering methods only append to the output
 
+		Edit_Label	: Unbounded_String;
 		Submit_Label	: Unbounded_String;
 		List_Label	: Unbounded_String;
 
@@ -90,6 +95,11 @@ package KOW_View.Entities.Modules is
 				Request	: in     AWS.Status.Data;
 				Response:    out KOW_Lib.Json.Object_Type
 			);
+
+	
+	-------------------
+	-- Data Handling --
+	-------------------
 	
 	function Get_Entity_Id(
 				Module	: in Entity_Module_Type;
@@ -135,7 +145,42 @@ package KOW_View.Entities.Modules is
 			) return KOW_Ent.Property_Lists.List;
 	-- ge the properties that will be used by this module..
 
-	procedure Render_Navigation_Bar(
+
+	procedure Set_Values(
+				Module	: in out Entity_Module_Type;
+				Entity	: in out KOW_Ent.Entity_Type'Class;
+				Request	: in     AWS.Status.Data
+			);
+	-- set the values
+
+
+
+
+	-----------------------
+	-- Rendering Methods --
+	-----------------------
+
+	procedure Render_List(
+				Module		: in out Entity_Module_Type;
+				Request		: in     AWS.Status.Data;
+				Output		:    out Unbounded_String
+			);
+	-- render the entity list;
+	-- the process is broken down into
+	-- 	=> Query_Entities
+	-- 	=> Render_List_Title
+	-- 	=> Render_List_Navigation_Bar
+	-- 	=> foreach Entity <li>Render_View</li>
+	-- 	=> Render_List_Navigation_Bar
+
+	procedure Render_List_Title(
+				Module		: in out Entity_Module_Type;
+				Request		: in     AWS.Status.Data;
+				Output		:    out Unbounded_String
+			);
+	
+
+	procedure Render_List_Navigation_Bar(
 				Module		: in out Entity_Module_Type;
 				Request		: in     AWS.Status.Data;
 				From		: in     Positive;
@@ -143,41 +188,88 @@ package KOW_View.Entities.Modules is
 				Total_Shown	: in     Natural;
 				Output		:    out Unbounded_String
 			);
+	-- render the navigation bar for the entity list
 
 
 	procedure Render_View(
 				Module	: in out Entity_Module_Type;
 				Request	: in     AWS.Status.Data;
 				Entity	: in     KOW_Ent.Entity_Type'Class;
-				Style	: in     KOW_View.Entities.Rendering_Style_Type;
 				Output	:    out Unbounded_String
 			);
-	
-	procedure Set_Values(
-				Module	: in out Entity_Module_Type;
-				Entity	: in out KOW_Ent.Entity_Type'Class;
-				Request	: in     AWS.Status.Data
-			);
-
 	-- render the entity into a unbounded_string variable following the style
 	--
 	-- style is used only by the renderer and every element fits inside a 
-	-- 	<fieldset>
-	-- 		<legend>LABEL</legend>
-	--
 	-- 		<label>
-	-- 			<!-- Render results // -->
+	-- 			<span class="label">LABEL</span>
+	-- 			<span class="value"><!-- RENDER THE INPUT/VALUE DISPLAY --></span>
+	--
 	-- 		</label>
-	-- 		(...)
-	-- 	</fieldset>
 	--
 	-- how this table is displayed is then controlled by the CSS style and browser
-	-- NOTE :: this will assure the form will be usable in any browser
+	-- NOTE :: this will ensure the form will be usable in any browser
+	--
+	-- The process is broken down into
+	-- 	=> Render_View_Title
+	-- 	=> Render_View_Form_Open
+	-- 	=> Render_View_Properties
+	-- 	=> Render_View_Buttons
+	-- 	=> Render_View_Form_Close
 
+	
+	procedure Render_View_Title(
+				Module	: in out Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Entity	: in     KOW_Ent.Entity_Type'Class;
+				Output	:    out Unbounded_String
+			);
+	-- renders the title for the view
+	-- in this case, render the entity title if it's in a big style
+
+
+	procedure Render_View_Form_Open(
+				Module	: in out Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Entity	: in     KOW_Ent.Entity_Type'Class;
+				Output	:    out Unbounded_String
+			);
+	-- render the form start tag (including the fieldset tag).
+	-- by default, only renders <form> when in edit mode
+
+
+	procedure Render_View_Properties(
+				Module	: in out Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Entity	: in     KOW_Ent.Entity_Type'Class;
+				Output	:    out Unbounded_String
+			);
+	-- call the renderering for each <label>...</label>
+	
+	procedure Render_View_Buttons(
+				Module	: in out Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Entity	: in     KOW_Ent.Entity_Type'Class;
+				Output	:    out Unbounded_String
+			);
+	-- render the buttons for interacting with the given entity
+	-- 	=> save when in big edit mode
+	-- 	=> edit when in big view mode
+	-- 	=> none otherwise
+	
+	procedure Render_View_Form_Close(
+				Module	: in out Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Entity	: in     KOW_Ent.Entity_Type'Class;
+				Output	:    out Unbounded_String
+			);
+	-- closes the tags opened by Render_View_Form_Open_
 
 	--------------------
 	-- Helper Methods --
 	--------------------
+
+
+	function Is_Edit( Module : in Entity_Module_Type ) return Boolean;
 
 	procedure Check_Tag( Module : in KOW_View.Modules.Module_Type'Class );
 	-- check if the module is in Entity_Module_Type'Class 

@@ -94,8 +94,9 @@ package body KOW_View.Entities.Modules is
 	begin
 		Module.Entity_Tag := KOW_Config.Value( Config, "entity_tag", "" );
 
-		Module.Submit_Label := E( "submit_label", "Submit" );
-		Module.List_Label := E( "list_label", "List" );
+		Module.Edit_Label	:= E( "edit_label", "Edit" );
+		Module.Submit_Label	:= E( "submit_label", "Submit" );
+		Module.List_Label	:= E( "list_label", "List" );
 
 		Module.Narrow := KOW_Config.Value( Config, "narrow", True );
 		Module.Style := Get_Style;
@@ -115,96 +116,21 @@ package body KOW_View.Entities.Modules is
 
 		Append( Output, "<span class=""" & KOW_View.Modules.Get_Name( Entity_Module_Type'Class( Module ) ) & """>" );
 		if Entity_Id = -1 and then ( Module.Style = Small_Rendering or Module.Style = Big_Rendering ) then
-			declare
-				P	: AWS.Parameters.List := AWS.Status.Parameters( Request );
-				function From return Positive is
-					F : constant String := AWS.Parameters.Get( P, "from" );
-				begin
-					if F = "" then
-						return 1;
-					else
-						return Positive'Value( F );
-					end if;
-				end From;
-
-				function Limit return Natural is
-					L : constant String := AWS.Parameters.Get( P, "limit" );
-				begin
-					if L = "" then
-						return 20;
-					else
-						return Natural'Value( L );
-					end if;
-				end Limit;
-				Ids : KOW_Ent.Id_Array_Type := Query_Entities(
-										Module	=> Entity_Module_Type'Class( Module ),
-										Request	=> Request,
-										From	=> From,
-										Limit	=> Limit
-									);
-			begin
-				Append( Output, "<h1>" );
-				Append( Output, Module.List_Label );
-				Append( Output, "</h1>" );
-
-				Render_Navigation_Bar(
-							Module		=> Entity_Module_Type'Class( Module ),
-							Request		=> Request,
-							From		=> From,
-							Limit		=> Limit,
-							Total_Shown	=> Ids'Length,
-							Output		=> Output
-						);
-				Append( Output, "<ul>" );
-
-				for i in Ids'range loop
-					declare
-						Buffer : Unbounded_String;
-						Entity	: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Ids( i ) );
-					begin
-						Append( Output, "<li>" );
-						Append( Output, "<a href=""" );
-							Append( Output, KOW_View.URI_Util.Build_URL( Request => Request, Key1 => "style", Value1 => "big", key2 => "entity_id", Value2 => KOW_ent.To_String( Entity.ID )  ) );
-							Append( Output, """>" );
-							Render_View(
-									Module	=> Entity_Module_Type'Class( Module ),
-									Request	=> Request,
-									Entity	=> Entity,
-									Style	=> Module.Style,
-									Output	=> Buffer
-								);
-							Append( Output, Buffer );
-						Append( Output, "</a>" );
-						Append( Output, "</li>" );
-					end;
-				end loop;
-				Append( Output, "</ul>" );
-
-				Render_Navigation_Bar(
-							Module		=> Entity_Module_Type'Class( Module ),
-							Request		=> Request,
-							From		=> From,
-							Limit		=> Limit,
-							Total_Shown	=> Ids'Length,
-							Output		=> Output
-						);
-
-			end;
+			Render_List(
+					Module	=> Entity_Module_Type'Class( Module ),
+					Request	=> Request,
+					Output	=> Output
+				);
 		else
 			declare
 				Entity	: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Entity_ID );
-				H1	: constant String := "<h1>" & KOW_Ent.Get_Label( Entity, KOW_View.Locales.Get_Locale( Request ) ) & "</h1>";
-				Buffer	: Unbounded_String;
 			begin
 				Render_View(
 						Module	=> Entity_Module_Type'Class( Module ),
 						Request	=> Request,
 						Entity	=> Entity,
-						Style	=> Module.Style,
-						Output	=> Buffer
+						Output	=> Output
 					);
-				Append( Output, h1 );
-				Append( Output, Buffer );
 			end;
 		end if;
 
@@ -257,6 +183,9 @@ package body KOW_View.Entities.Modules is
 	
 
 
+	-------------------
+	-- Data Handling --
+	-------------------
 
 
 	function Get_Entity_id(
@@ -343,7 +272,137 @@ package body KOW_View.Entities.Modules is
 	end Get_Properties;
 
 
-	procedure Render_Navigation_Bar(
+
+	procedure Set_Values(
+				Module	: in out Entity_Module_Type;
+				Entity	: in out KOW_Ent.Entity_Type'Class;
+				Request	: in     AWS.Status.Data
+			) is
+		Properties : KOW_Ent.Property_Lists.List := Get_Properties( Entity_Module_Type'Class( Module ), Entity );
+
+		Params	: AWS.Parameters.List := AWS.Status.Parameters( Request );
+
+		procedure Iterator( C : in KOW_Ent.Property_Lists.Cursor ) is
+			Property : KOW_Ent.Entity_Property_Ptr := KOW_Ent.Property_Lists.Element( C );
+		begin
+			if KOW_Ent.Is_new( Entity ) or not Property.Immutable then
+				-- we do not touch immutable values as probably we won't even receive
+				-- a value from the browser, which would cause an exception
+				KOW_Ent.Set_Property(
+						Property	=> Property.all,
+						Entity		=> Entity,
+						Value		=> AWS.Parameters.Get( Params, To_String( Property.all.Column_Name ) )
+					);
+			end if;
+		end Iterator;
+	begin
+		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
+	end Set_Values;
+
+
+
+	-----------------------
+	-- Rendering Methods --
+	-----------------------
+
+
+	procedure Render_List(
+				Module	: in out Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Output	:    out Unbounded_String
+			) is
+		P	: AWS.Parameters.List := AWS.Status.Parameters( Request );
+		function From return Positive is
+			F : constant String := AWS.Parameters.Get( P, "from" );
+		begin
+			if F = "" then
+				return 1;
+			else
+				return Positive'Value( F );
+			end if;
+		end From;
+
+		function Limit return Natural is
+			L : constant String := AWS.Parameters.Get( P, "limit" );
+		begin
+			if L = "" then
+				return 20;
+			else
+				return Natural'Value( L );
+			end if;
+		end Limit;
+		Ids : KOW_Ent.Id_Array_Type := Query_Entities(
+								Module	=> Entity_Module_Type'Class( Module ),
+								Request	=> Request,
+								From	=> From,
+								Limit	=> Limit
+							);
+	begin
+		Render_List_Title(
+					Module		=> Entity_MOdule_type'Class( Module ),
+					Request		=> Request,
+					Output		=> Output
+				);
+
+		Render_List_Navigation_Bar(
+					Module		=> Entity_Module_Type'Class( Module ),
+					Request		=> Request,
+					From		=> From,
+					Limit		=> Limit,
+					Total_Shown	=> Ids'Length,
+					Output		=> Output
+				);
+		Append( Output, "<ul>" );
+
+		for i in Ids'range loop
+			declare
+				Buffer : Unbounded_String;
+				Entity	: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Ids( i ) );
+			begin
+				Append( Output, "<li>" );
+				Append( Output, "<a href=""" );
+					Append( Output, KOW_View.URI_Util.Build_URL( Request => Request, Key1 => "style", Value1 => "big", key2 => "entity_id", Value2 => KOW_ent.To_String( Entity.ID )  ) );
+					Append( Output, """>" );
+					Render_View(
+							Module	=> Entity_Module_Type'Class( Module ),
+							Request	=> Request,
+							Entity	=> Entity,
+							Output	=> Buffer
+						);
+					Append( Output, Buffer );
+				Append( Output, "</a>" );
+				Append( Output, "</li>" );
+			end;
+		end loop;
+		Append( Output, "</ul>" );
+
+		Render_List_Navigation_Bar(
+					Module		=> Entity_Module_Type'Class( Module ),
+					Request		=> Request,
+					From		=> From,
+					Limit		=> Limit,
+					Total_Shown	=> Ids'Length,
+					Output		=> Output
+				);
+
+	end Render_List;
+
+
+	procedure Render_List_Title(
+				Module		: in out Entity_Module_Type;
+				Request		: in     AWS.Status.Data;
+				Output		:    out Unbounded_String
+			) is
+	begin
+		Append( Output, "<h1>" );
+		Append( Output, Module.List_Label );
+		Append( Output, "</h1>" );
+	end Render_List_Title;
+
+
+
+
+	procedure Render_List_Navigation_Bar(
 				Module		: in out Entity_Module_Type;
 				Request		: in     AWS.Status.Data;
 				From		: in     Positive;
@@ -410,12 +469,12 @@ package body KOW_View.Entities.Modules is
 
 	begin
 		Include_Dojo_Package( Module, "dijit.form.Button" );
-		Append( Output, "<div class=""entityToolbar"">" );
+		Append( Output, "<div class=""entityToolbar navigation"">" );
 			Append_Paging( "&lt;", Previous_From, Has_Previous );
 			Append_Button( "new", KOW_View.URI_Util.Build_URL( Request, "style", "big_edit" ) );
 			Append_Paging( "&gt;", Next_From, Has_Next );
 		Append( Output, "</div>" );
-	end Render_Navigation_Bar;
+	end Render_List_Navigation_Bar;
 
 
 
@@ -424,11 +483,90 @@ package body KOW_View.Entities.Modules is
 				Module	: in out Entity_Module_Type;
 				Request	: in     AWS.Status.Data;
 				Entity	: in     KOW_Ent.Entity_Type'Class;
-				Style	: in     KOW_View.Entities.Rendering_Style_Type;
 				Output	:    out Unbounded_String
 			) is
-		Buffer : Unbounded_String;
 
+	begin
+		Render_View_Title(
+					Module	=> Entity_Module_Type'Class( Module ),
+					Request	=> Request,
+					Entity	=> Entity,
+					Output	=> Output
+				);
+
+		Render_View_Form_Open(
+				Module	=> Entity_Module_Type'Class( Module ),
+				Request	=> Request,
+				Entity	=> Entity,
+				Output	=> Output
+			);
+
+
+		Render_View_Properties(
+				Module	=> Entity_Module_Type'Class( Module ),
+				Request	=> Request,
+				Entity	=> Entity,
+				Output	=> Output
+			);
+
+		Render_View_Buttons(
+				Module	=> Entity_Module_Type'Class( Module ),
+				Request	=> Request,
+				Entity	=> Entity,
+				Output	=> Output
+			);
+
+		Render_View_Form_Close(
+				Module	=> Entity_Module_Type'Class( Module ),
+				Request	=> Request,
+				Entity	=> Entity,
+				Output	=> Output
+			);
+	end Render_View;
+
+
+
+	procedure Render_View_Title(
+					Module	: in out Entity_Module_Type;
+					Request	: in     AWS.Status.Data;
+					Entity	: in     KOW_ENt.Entity_Type'Class;
+					Output	:    out Unbounded_String
+				) is
+	begin
+		if Module.Style = Big_Edit_Rendering or else Module.Style = Big_Rendering then
+			Append( Output, "<h1>" );
+			declare
+				Label : constant Unbounded_String := KOW_Ent.Get_Label( Entity, KOW_View.Locales.Get_Locale( Request ) );
+			begin
+				Append( Output, Label );
+			end;
+			Append( Output, "</h1>" );
+		end if;
+	end Render_View_Title;
+
+
+	procedure Render_View_Form_Open(
+					Module	: in out Entity_Module_Type;
+					Request	: in     AWS.Status.Data;
+					Entity	: in     KOW_Ent.Entity_Type'Class;
+					Output	:    out Unbounded_String
+				) is
+	begin
+		if Is_Edit( Entity_Module_Type'Class( Module ) ) then
+			Append( Output, "<form method=""POST"" enctype=""multipart/form-data"" id=""entity_form_" );
+			Append( Output, Ada.Strings.Fixed.Trim( Integer'Image( Module.ID ),Ada.Strings.Both ) );
+			Append( Output, """>" );
+		end if;
+	end Render_View_Form_Open;
+
+
+
+	procedure Render_View_Properties(
+				Module	: in out Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Entity	: in     KOW_Ent.Entity_Type'Class;
+				Output	:    out Unbounded_String
+			) is
 		procedure Iterator( C : in KOW_Ent.Property_Lists.Cursor ) is
 			use KOW_View.Entities.Property_Renderers;
 
@@ -443,73 +581,107 @@ package body KOW_View.Entities.Modules is
 							Request		=> Request,
 							Entity		=> Entity,
 			                                Property	=> Property.all,
-							Style		=> Style,
+							Style		=> Module.Style,
 							Output		=> Renderer_Buffer
 						);
 
-			Append( Buffer, "<label class=""" );
-			Append( Buffer, Property.Column_Name );
-			Append( Buffer, """>" );
-			Append( Buffer, Renderer_Buffer );
-			Append( Buffer, "</label>" );
+			Append( Output, "<label class=""" );
+			Append( Output, Property.Column_Name );
+			Append( Output, """>" );
+			Append( Output, Renderer_Buffer );
+			Append( Output, "</label>" );
 		end Iterator;
 
 	begin
-
-		Buffer := To_Unbounded_String( "<fieldset><form method=""POST"" enctype=""multipart/form-data"" id=""entity_form_" );
-		Append( Buffer, Ada.Strings.Fixed.Trim( Integer'Image( Module.ID ),Ada.Strings.Both ) );
-		Append( Buffer, """>" );
-
 		KOW_Ent.Property_Lists.Iterate(
 					Get_Properties( Entity_Module_Type'Class( Module ), Entity ),
 					Iterator'Access
 				);
+	end Render_View_Properties;
 
-		if Style = Small_Edit_Rendering or else Style = Big_Edit_Rendering then
-			Include_Dojo_Package( Module, "dijit.form.Button" );
-			Append( Buffer, "<button onclick=""kowview.entities.submitForm(" );
-			Append( Buffer, Integer'Image( Module.ID ) );
-			Append( Buffer, ")"" dojoType=""dijit.form.Button"">" );
-			Append( Buffer, Module.Submit_Label );
-			Append( Buffer, "</button>" );
-		end if;
-		Append( Buffer, "</form></fieldset>" );
-
-		Output := Buffer;
-	end Render_View;
-
-
-	procedure Set_Values(
+	
+	procedure Render_View_Buttons(
 				Module	: in out Entity_Module_Type;
-				Entity	: in out KOW_Ent.Entity_Type'Class;
-				Request	: in     AWS.Status.Data
+				Request	: in     AWS.Status.Data;
+				Entity	: in     KOW_Ent.Entity_Type'Class;
+				Output	:    out Unbounded_String
 			) is
-		Properties : KOW_Ent.Property_Lists.List := Get_Properties( Entity_Module_Type'Class( Module ), Entity );
-
-		Params	: AWS.Parameters.List := AWS.Status.Parameters( Request );
-
-		procedure Iterator( C : in KOW_Ent.Property_Lists.Cursor ) is
-			Property : KOW_Ent.Entity_Property_Ptr := KOW_Ent.Property_Lists.Element( C );
+		procedure Toolbar_Open is
 		begin
-			if KOW_Ent.Is_new( Entity ) or not Property.Immutable then
-				-- we do not touch immutable values as probably we won't even receive
-				-- a value from the browser, which would cause an exception
-				KOW_Ent.Set_Property(
-						Property	=> Property.all,
-						Entity		=> Entity,
-						Value		=> AWS.Parameters.Get( Params, To_String( Property.all.Column_Name ) )
-					);
-			end if;
-		end Iterator;
+			Include_Dojo_Package( Module, "dijit.form.Button" );
+			Append( Output, "<div class=""entityToolbar view"">" );
+		end Toolbar_Open;
+
+		procedure Toolbar_Close is
+		begin	
+			Append( Output, "</div>" );
+		end Toolbar_Close;
+
+
+		procedure Append_Button( Label : in Unbounded_String; onClick : in String ) is
+		begin
+			Append( Output, "<button onClick=""" & onClick & """ dojoType=""dijit.form.Button"">" );
+			Append( Output, Label );
+			Append( Output, "</button>" );
+		end Append_Button;
+
+		procedure Append_Link_Button( Label : in Unbounded_String; Href : in String ) is
+		begin
+			Append_Button( Label, "document.location.href='" & Href & ''' );
+		end Append_Link_Button;
+
 	begin
-		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
-	end Set_Values;
+		case Module.Style is
+			when Small_Rendering | Small_Edit_Rendering =>
+				null;
+			when Big_Rendering =>
+				Toolbar_Open;
+				Append_Link_Button(
+						Label	=> Module.Edit_Label,
+						Href	=> KOW_View.URI_Util.Build_URL(
+											Request	=> Request,
+											Key1	=> "entity_id",
+											Value1	=> KOW_Ent.To_String( Entity.ID ),
+											Key2	=> "style",
+											Value2	=> "big_edit"
+										)
+								);
+				Toolbar_Close;
+
+			when Big_Edit_Rendering =>
+				Toolbar_Open;
+				Append_Button(
+						Label	=> Module.Submit_Label,
+						onClick	=> "kowview.entities.submitForm(" & Integer'Image( Module.ID ) & ")"
+					);
+				Toolbar_Close;
+		end case;
+	end Render_View_Buttons;
+
+
+
+	procedure Render_View_Form_Close(
+					Module	: in out Entity_Module_Type;
+					Request	: in     AWS.Status.Data;
+					Entity	: in     KOW_Ent.Entity_Type'Class;
+					Output	:    out Unbounded_String
+				) is
+	begin
+		if Is_Edit( Entity_Module_Type'Class( Module ) ) then
+			Append( Output, "</form>" );
+		end if;
+	end Render_View_Form_Close;
 
 
 
 	--------------------
 	-- Helper Methods --
 	--------------------
+
+	function Is_Edit( Module : in Entity_Module_Type ) return Boolean is
+	begin
+		return Module.Style = Small_Edit_Rendering or else Module.Style = Big_Edit_Rendering;
+	end Is_Edit;
 
 	procedure Check_Tag( Module : in KOW_View.Modules.Module_Type'Class ) is
 		-- check if the module is in Entity_Module_Type'Class 
