@@ -50,6 +50,12 @@ package KOW_View.Entities.Modules is
 	-- it's an abstract type to enforce it not being instanciated as it does nothing. :)
 	
 
+	type Navigation_Bar_Position_Enum is (
+				Top,
+				Bottom
+			);
+	type Navigation_Bar_Position_Array is array( Navigation_Bar_Position_Enum range Top .. Bottom ) of Boolean;
+
 	type Entity_Module_Type is abstract new KOW_View.Modules.Module_Type with record
 		Entity_Tag	: Unbounded_String;
 		-- the base/core entity tag..
@@ -71,6 +77,10 @@ package KOW_View.Entities.Modules is
 
 		Style		: Rendering_Style_Type;
 		-- in setup don't use the _rendering sufix
+
+		Enable_List_Navigation_Bar	: Navigation_Bar_Position_Array := ( others => true );
+		-- the extending code can set this variable to control the Render_List behaviour
+		-- there is no configuration flag for it!
 	end record;
 
 	overriding
@@ -191,6 +201,16 @@ package KOW_View.Entities.Modules is
 	-- 	=> Render_List_Navigation_Bar
 	-- 	=> foreach Entity <li>Render_View</li>
 	-- 	=> Render_List_Navigation_Bar
+
+	function Get_List_From(
+				Module	: in Entity_Module_Type;
+				Request	: in AWS.Status.Data
+			) return Positive;
+
+	function Get_List_Limit(
+				Module	: in Entity_Module_Type;
+				Request	: in AWS.Status.Data
+			) return Natural;
 
 	procedure Render_List_Title(
 				Module		: in out Entity_Module_Type;

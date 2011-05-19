@@ -352,26 +352,10 @@ package body KOW_View.Entities.Modules is
 				Request	: in     AWS.Status.Data;
 				Output	:    out Unbounded_String
 			) is
-		P	: AWS.Parameters.List := AWS.Status.Parameters( Request );
-		function From return Positive is
-			F : constant String := AWS.Parameters.Get( P, "from" );
-		begin
-			if F = "" then
-				return 1;
-			else
-				return Positive'Value( F );
-			end if;
-		end From;
 
-		function Limit return Natural is
-			L : constant String := AWS.Parameters.Get( P, "limit" );
-		begin
-			if L = "" then
-				return 20;
-			else
-				return Natural'Value( L );
-			end if;
-		end Limit;
+		From	: constant Positive := Get_List_From( Entity_Module_Type'Class( Module ), Request );
+		Limit	: constant Natural  := Get_List_Limit( Entity_Module_Type'Class( Module ), Request );
+
 		Ids : KOW_Ent.Id_Array_Type := Query_Entities(
 								Module	=> Entity_Module_Type'Class( Module ),
 								Request	=> Request,
@@ -385,14 +369,17 @@ package body KOW_View.Entities.Modules is
 					Output		=> Output
 				);
 
-		Render_List_Navigation_Bar(
-					Module		=> Entity_Module_Type'Class( Module ),
-					Request		=> Request,
-					From		=> From,
-					Limit		=> Limit,
-					Total_Shown	=> Ids'Length,
-					Output		=> Output
-				);
+		if Module.Enable_List_Navigation_Bar( Top ) then
+			Render_List_Navigation_Bar(
+						Module		=> Entity_Module_Type'Class( Module ),
+						Request		=> Request,
+						From		=> From,
+						Limit		=> Limit,
+						Total_Shown	=> Ids'Length,
+						Output		=> Output
+					);
+		end if;
+
 		Append( Output, "<ul>" );
 
 		for i in Ids'range loop
@@ -417,16 +404,49 @@ package body KOW_View.Entities.Modules is
 		end loop;
 		Append( Output, "</ul>" );
 
-		Render_List_Navigation_Bar(
-					Module		=> Entity_Module_Type'Class( Module ),
-					Request		=> Request,
-					From		=> From,
-					Limit		=> Limit,
-					Total_Shown	=> Ids'Length,
-					Output		=> Output
-				);
+		if Module.Enable_List_Navigation_Bar( Bottom ) then
+			Render_List_Navigation_Bar(
+						Module		=> Entity_Module_Type'Class( Module ),
+						Request		=> Request,
+						From		=> From,
+						Limit		=> Limit,
+						Total_Shown	=> Ids'Length,
+						Output		=> Output
+					);
+		end if;
 
 	end Render_List;
+
+	
+	function Get_List_From(
+				Module	: in Entity_Module_Type;
+				Request	: in AWS.Status.Data
+			) return Positive is
+		P	: AWS.Parameters.List := AWS.Status.Parameters( Request );
+		F : constant String := AWS.Parameters.Get( P, "from" );
+	begin
+		if F = "" then
+			return 1;
+		else
+			return Positive'Value( F );
+		end if;
+	end Get_List_From;
+
+	function Get_List_Limit(
+				Module	: in Entity_Module_Type;
+				Request	: in AWS.Status.Data
+			) return Natural is
+		P	: AWS.Parameters.List := AWS.Status.Parameters( Request );
+		L : constant String := AWS.Parameters.Get( P, "limit" );
+	begin
+		if L = "" then
+			return 20;
+		else
+			return Natural'Value( L );
+		end if;
+	end Get_List_Limit;
+
+
 
 
 	procedure Render_List_Title(
