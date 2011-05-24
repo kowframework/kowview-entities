@@ -118,7 +118,8 @@ package body KOW_View.Entities.Modules is
 		Entity_Id	: Integer := Get_Entity_id( Entity_Module_Type'Class( Module ), Request );
 	begin
 
-		Append( Output, "<span class=""" & KOW_View.Modules.Get_Name( Entity_Module_Type'Class( Module ) ) & """>" );
+		Append( Output, "<span class=""" & KOW_View.Modules.Get_Name( Entity_Module_Type'Class( Module ) ) & ' '  );
+		Append( Output, Rendering_Style_Type'Image( Module.Style ) & """>" );
 		if Entity_Id = -1 and then ( Module.Style = Small_Rendering or Module.Style = Big_Rendering ) then
 			Render_List(
 					Module	=> Entity_Module_Type'Class( Module ),
