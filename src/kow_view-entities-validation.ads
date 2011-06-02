@@ -48,13 +48,13 @@ package KOW_View.Entities.Validation is
 				Entity	: in out Validatable_Entity_Interface;
 				Property: in     KOW_Ent.Entity_Property_Ptr;
 				Value	: in     String
-			) is abstract;
+			) is null;
 	-- validate each one of the values before calling "set";
 
 	procedure Validate(
 				Entity	: in out Validatable_Entity_Interface;
 				Request	: in     AWS.Status.Data
-			) is abstract;
+			) is null;
  	-- validate an entity after all the properties have been set
 	-- not really useful when the entity has properties that store data in-disk.
 
