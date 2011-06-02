@@ -324,10 +324,27 @@ package body KOW_View.Entities.Modules is
 
 		Params	: AWS.Parameters.List := AWS.Status.Parameters( Request );
 
+
+
+		procedure Validation_Iterator( C : in KOW_Ent.Property_Lists.Cursor ) is
+			Property : KOW_Ent.Entity_Property_Ptr := KOW_Ent.Property_Lists.Element( C );
+		begin
+			if KOW_Ent.Is_New( Entity ) or not Property.Immutable then
+				-- we do not touch immutable values as probably we won't even receive
+				-- a value from the browser, which would cause an exception
+				KOW_View.Entities.Validation.Validate_Property(
+						Entity		=> KOW_View.Entities.Validation.Validatable_Entity_Interface'Class( Entity ),
+						Property	=> Property,
+						Value		=> AWS.Parameters.Get( Params, To_String( Property.all.Column_Name ) )
+					);
+			end if;
+		end Validation_Iterator;
+
+
 		procedure Iterator( C : in KOW_Ent.Property_Lists.Cursor ) is
 			Property : KOW_Ent.Entity_Property_Ptr := KOW_Ent.Property_Lists.Element( C );
 		begin
-			if KOW_Ent.Is_new( Entity ) or not Property.Immutable then
+			if KOW_Ent.Is_New( Entity ) or not Property.Immutable then
 				-- we do not touch immutable values as probably we won't even receive
 				-- a value from the browser, which would cause an exception
 				KOW_Ent.Set_Property(
@@ -338,6 +355,9 @@ package body KOW_View.Entities.Modules is
 			end if;
 		end Iterator;
 	begin
+		if Entity in KOW_View.Entities.Validation.Validatable_Entity_Interface'Class then
+			KOW_Ent.Property_Lists.Iterate( Properties, Validation_Iterator'Access );
+		end if;
 		KOW_Ent.Property_Lists.Iterate( Properties, Iterator'Access );
 	end Set_Values;
 

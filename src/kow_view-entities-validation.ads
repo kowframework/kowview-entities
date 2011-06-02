@@ -29,6 +29,11 @@ pragma License( GPL );
 with Ada.Exceptions;
 
 
+-------------------
+-- KOW Framework --
+-------------------
+with KOW_Ent;
+
 package KOW_View.Entities.Validation is
 
 
@@ -38,11 +43,20 @@ package KOW_View.Entities.Validation is
 
 	type Validatable_Entity_Interface is interface;
 
+
+	procedure Validate_Property(
+				Entity	: in out Validatable_Entity_Interface;
+				Property: in     KOW_Ent.Entity_Property_Ptr;
+				Value	: in     String
+			) is abstract;
+	-- validate each one of the values before calling "set";
+
 	procedure Validate(
 				Entity	: in out Validatable_Entity_Interface;
 				Request	: in     AWS.Status.Data
 			) is abstract;
-	-- can be called to validate the given entity
+ 	-- validate an entity after all the properties have been set
+	-- not really useful when the entity has properties that store data in-disk.
 
 
 	procedure Raise_Exception(
