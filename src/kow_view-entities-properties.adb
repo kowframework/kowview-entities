@@ -169,17 +169,14 @@ package body KOW_View.Entities.Properties is
 			use Ada.Text_IO;
 			File	: File_Type;
 			First	: Boolean := True;
+			Ch	: Character;
 		begin
 
 			Open( File, In_File, The_Path );
 
 			while not End_Of_File( File ) loop
-				if First then
-					First := False;
-				else
-					Append( Buffer, Ada.Characters.Latin_1.LF );
-				end if;
-				Append( Buffer, Get_Line( File ) );
+				Get( File, Ch );
+				Append( Buffer, Ch );
 			end loop;
 
 			Close( File );
