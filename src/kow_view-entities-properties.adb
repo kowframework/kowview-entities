@@ -35,6 +35,7 @@ with Ada.Characters.Handling;
 with Ada.Characters.Latin_1;
 with Ada.Directories;
 with Ada.Numerics.Discrete_Random;
+with Ada.Sequential_IO;
 with Ada.Strings;
 with Ada.Strings.Fixed;
 with Ada.Strings.Unbounded;	use Ada.Strings.Unbounded;
@@ -139,6 +140,7 @@ package body KOW_View.Entities.Properties is
 	----------------------------------
 	
 
+	package Character_IO is new Ada.Sequential_IO( Character );
 
 	protected File_Lock is
 		procedure Write( Destination_Path, Old_Path, Value : in String );
@@ -149,7 +151,7 @@ package body KOW_View.Entities.Properties is
 
 	protected body File_Lock is
 		procedure Write( Destination_Path, Old_Path, Value : in String ) is
-			use Ada.Text_IO;
+			use Character_IO;
 			File		: File_Type;
 		begin
 			if Ada.Directories.Exists( Destination_Path ) then
@@ -161,12 +163,14 @@ package body KOW_View.Entities.Properties is
 			end if;
 
 			Create( File, Out_File, Destination_Path );
-			Put( File, Value );
+			for i in Value'Range loop
+				Write( File, Value( i ) );
+			end loop;
 			Close( File );
 		end Write;
 
 		procedure Read( The_path : in String; Buffer : out Unbounded_String ) is
-			use Ada.Text_IO;
+			use Character_IO;
 			File	: File_Type;
 			First	: Boolean := True;
 			Ch	: Character;
@@ -175,7 +179,7 @@ package body KOW_View.Entities.Properties is
 			Open( File, In_File, The_Path );
 
 			while not End_Of_File( File ) loop
-				Get( File, Ch );
+				Read( File, Ch );
 				Append( Buffer, Ch );
 			end loop;
 
