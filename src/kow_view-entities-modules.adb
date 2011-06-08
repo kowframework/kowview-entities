@@ -407,10 +407,11 @@ package body KOW_View.Entities.Modules is
 			declare
 				Buffer : Unbounded_String;
 				Entity	: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Ids( i ) );
+				URL	: constant String := KOW_View.URI_Util.Build_URL( Request => Request, Key1 => "style", Value1 => "big", key2 => "entity_id", Value2 => KOW_ent.To_String( Entity.ID )  );
 			begin
-				Append( Output, "<li>" );
+				Append( Output, "<li onClick=""window.location.href='" & URL & "'"">" );
 				Append( Output, "<a href=""" );
-					Append( Output, KOW_View.URI_Util.Build_URL( Request => Request, Key1 => "style", Value1 => "big", key2 => "entity_id", Value2 => KOW_ent.To_String( Entity.ID )  ) );
+					Append( Output, URL );
 					Append( Output, """>" );
 					Render_View(
 							Module	=> Entity_Module_Type'Class( Module ),
