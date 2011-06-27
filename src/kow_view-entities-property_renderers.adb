@@ -439,7 +439,7 @@ package body KOW_View.Entities.Property_Renderers is
 					if Property.Immutable and then not KOW_Ent.Is_New( Entity ) then
 						Append( Output, " disabled" );
 					end if;
-					Append( Output, "/>" );
+					Append( Output, ">" );
 
 					for i in Ids'range loop
 						declare
