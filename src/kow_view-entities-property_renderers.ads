@@ -221,6 +221,7 @@ package KOW_View.Entities.Property_Renderers is
 				Style		: in     Rendering_Style_Type;
 				Output		:    out Unbounded_String
 			);
+	-- TODO :: split the get_input procedure into several ones so it's easier to extend
 	
 
 	function Query_Entities(
