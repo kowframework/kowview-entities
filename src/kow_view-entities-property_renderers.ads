@@ -130,8 +130,11 @@ package KOW_View.Entities.Property_Renderers is
 	-- Basic Property Renderer --
 	-----------------------------
 
-	type Basic_Property_Renderer_Type is new Property_Renderer_Interface with null record;
-	-- render as text input using dijit.Form.TextBox widget
+	type Basic_Property_Renderer_Type is new Property_Renderer_Interface with record
+		-- render as text input using dijit.Form.TextBox widget
+		HTML_Id : Unbounded_String; -- a module generated ID for this renderer
+	end record;
+
 	overriding
 	procedure Render_Property(
 				Renderer	: in out Basic_Property_Renderer_Type;

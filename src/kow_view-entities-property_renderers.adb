@@ -143,27 +143,36 @@ package body KOW_View.Entities.Property_Renderers is
 			) is
 		-- render the property using the default property renderers registered by the property tag
 
-		Label	: constant String := Get_Label(
-							Renderer	=> Basic_Property_Renderer_Type'Class( Renderer ),
-							Request		=> Request,
-							Entity		=> Entity,
-							Property	=> Property,
-							Style		=> Style
-						);
-
-		Input	: Unbounded_String;		
 	begin
-		Get_Input(
-				Renderer	=> Basic_Property_Renderer_Type'Class( Renderer ),
-				Module		=> Module,
-				Request		=> Request,
-				Entity		=> Entity,
-				Property	=> Property,
-				Style		=> Style,
-				Output		=> Input
-			);
-	
-		Output := To_Unbounded_String( "<span class=""label"">" & Label ) & "</span><span class=""value"">" & Input & "</span>";
+		KOW_View.Modules.Generate_HTML_Id( Module, Renderer.HTML_Id );
+
+		declare
+			Label	: constant String := Get_Label(
+								Renderer	=> Basic_Property_Renderer_Type'Class( Renderer ),
+								Request		=> Request,
+								Entity		=> Entity,
+								Property	=> Property,
+								Style		=> Style
+							);
+
+			Input	: Unbounded_String;
+
+
+			Label_Id : constant String := To_String( Renderer.HTML_id ) & "_label";
+			Value_Id : constant String := To_String( Renderer.HTML_id ) & "_value";
+		begin
+			Get_Input(
+					Renderer	=> Basic_Property_Renderer_Type'Class( Renderer ),
+					Module		=> Module,
+					Request		=> Request,
+					Entity		=> Entity,
+					Property	=> Property,
+					Style		=> Style,
+					Output		=> Input
+				);
+		
+			Output := To_Unbounded_String( "<span id="""&label_id&""" class=""label"">" & Label ) & "</span><span id="""&value_id&""" class=""value"">" & Input & "</span>";
+		end;
 	end Render_Property;
 
 	function Get_Label(
