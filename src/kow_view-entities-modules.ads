@@ -230,6 +230,15 @@ package KOW_View.Entities.Modules is
 	-- render the navigation bar for the entity list
 
 
+	procedure Render_List_Body(
+				Module	: in out Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Ids	: in     KOW_Ent.Id_Array_Type;
+				Output	:    out Unbounded_String
+			);
+	-- do the proper list rendering 
+
+
 	procedure Render_View(
 				Module	: in out Entity_Module_Type;
 				Request	: in     AWS.Status.Data;

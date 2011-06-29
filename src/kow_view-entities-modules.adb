@@ -401,30 +401,15 @@ package body KOW_View.Entities.Modules is
 					);
 		end if;
 
-		Append( Output, "<ul>" );
 
-		for i in Ids'range loop
-			declare
-				Buffer : Unbounded_String;
-				Entity	: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Ids( i ) );
-				URL	: constant String := KOW_View.URI_Util.Build_URL( Request => Request, Key1 => "style", Value1 => "big", key2 => "entity_id", Value2 => KOW_ent.To_String( Entity.ID )  );
-			begin
-				Append( Output, "<li onClick=""window.location.href='" & URL & "'"">" );
-				Append( Output, "<a href=""" );
-					Append( Output, URL );
-					Append( Output, """>" );
-					Render_View(
-							Module	=> Entity_Module_Type'Class( Module ),
-							Request	=> Request,
-							Entity	=> Entity,
-							Output	=> Buffer
-						);
-					Append( Output, Buffer );
-				Append( Output, "</a>" );
-				Append( Output, "</li>" );
-			end;
-		end loop;
-		Append( Output, "</ul>" );
+
+		Render_List_Body(
+				Module	=> Entity_Module_Type'Class( Module ),
+				Request	=> Request,
+				Ids	=> Ids,
+				Output	=> Output
+			);
+
 
 		if Module.Enable_List_Navigation_Bar( Bottom ) then
 			Render_List_Navigation_Bar(
@@ -553,6 +538,40 @@ package body KOW_View.Entities.Modules is
 	end Render_List_Navigation_Bar;
 
 
+
+
+	procedure Render_List_Body(
+				Module	: in out Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Ids	: in     KOW_Ent.Id_Array_Type;
+				Output	:    out Unbounded_String
+			) is
+	begin
+		Append( Output, "<ul>" );
+
+		for i in Ids'range loop
+			declare
+				Buffer	: Unbounded_String;
+				Entity	: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Ids( i ) );
+				URL	: constant String := KOW_View.URI_Util.Build_URL( Request => Request, Key1 => "style", Value1 => "big", key2 => "entity_id", Value2 => KOW_ent.To_String( Entity.ID )  );
+			begin
+				Append( Output, "<li onClick=""window.location.href='" & URL & "'"">" );
+				Append( Output, "<a href=""" );
+					Append( Output, URL );
+					Append( Output, """>" );
+					Render_View(
+							Module	=> Entity_Module_Type'Class( Module ),
+							Request	=> Request,
+							Entity	=> Entity,
+							Output	=> Buffer
+						);
+					Append( Output, Buffer );
+				Append( Output, "</a>" );
+				Append( Output, "</li>" );
+			end;
+		end loop;
+		Append( Output, "</ul>" );
+	end Render_List_Body;
 
 
 	procedure Render_View(
