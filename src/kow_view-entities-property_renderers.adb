@@ -33,6 +33,9 @@ pragma License( GPL );
 --------------
 -- Ada 2005 --
 --------------
+with Ada.Calendar;
+with Ada.Calendar.Formatting;
+with Ada.Calendar.Time_Zones;
 with Ada.Tags;
 with Ada.Strings;
 with Ada.Strings.Fixed;
@@ -46,9 +49,12 @@ with KOW_Ent;
 with KOW_Ent.Generic_Property_Metadata;
 with KOW_Ent.Id_Query_Builders;
 with KOW_Ent.Properties;
+with KOW_Lib.Calendar;
+with KOW_Lib.Locales;
 with KOW_View.Entities.Components;
 with KOW_View.Entities.Properties;
 with KOW_View.Locales;
+with KOW_View.Time_Zones;
 
 with KOW_View.Entities.Modules;
 
@@ -538,6 +544,88 @@ package body KOW_View.Entities.Property_Renderers is
 	begin
 		Output := To_Unbounded_String( File_Input );
 	end Get_Input;
+
+
+
+	----------------------------
+	-- Date Property Renderer --
+	----------------------------
+
+	overriding
+	procedure Get_Input(
+				Renderer	: in out Date_Property_Renderer_Type;
+				Module		: in out KOW_View.Modules.Module_Type'Class;
+				Request		: in     AWS.Status.Data;
+				Entity		: in     KOW_Ent.Entity_Type'Class;
+				Property	: in     KOW_Ent.Entity_Property_Type'Class;
+				Style		: in     Rendering_Style_Type;
+				Output		:    out Unbounded_String
+			) is
+
+		function Formatted_Date return Unbounded_String is
+			use Ada.Calendar;
+			use Ada.Calendar.Formatting;
+
+
+			UTC_Date	: Time; -- TODO :: get the date time
+			Localized_Date	: Time;
+
+
+			Year		: Year_Number;
+			Month		: Month_Number;
+			Day		: Day_Number;
+			Hour		: Formatting.Hour_Number;
+			Minute		: Formatting.Minute_Number;
+			Second		: Formatting.Second_Number;
+			Sub_Second	: Formatting.Second_Duration;
+
+
+			Time_Zone	: Ada.Calendar.Time_Zones.Time_Offset := KOW_View.Time_Zones.Get_Time_Zone( Request );
+			Locale		: KOW_Lib.Locales.Locale := KOW_View.Locales.Get_Locale( Request );
+		begin
+			UTC_Date := UTC_Date + Day_Duration( Time_Zone ) * 60.0;
+			-- first we need to conver the date to given offset
+
+			Formatting.Split(
+					Date		=> UTC_Date,
+					Year		=> Year,
+					Month		=> Month,
+					Day		=> Day,
+					Hour		=> Hour,
+					Minute		=> Minute,
+					Second		=> Second,
+					Sub_Second	=> Sub_Second,
+					Time_Zone	=> 0		-- enforcing UTC
+				);
+
+			Localized_Date := Formatting.Time_Of(
+					Year		=> Year,
+					Month		=> Month,
+					Day		=> Day,
+					Hour		=> Hour,
+					Minute		=> Minute,
+					Second		=> Second,
+					Sub_Second	=> Sub_Second,
+					Time_Zone	=> Time_Zone
+				);
+			return To_Unbounded_String(
+					KOW_Lib.Calendar.Format( 
+							L	=> Locale,
+							F	=> KOW_Lib.Calendar.Get_Formatter( KOW_Lib.Locales.Get_Long_Date_Pattern( Locale ) ),
+							Date	=> Localized_Date
+						)
+					);
+		end Formatted_Date;
+	begin
+		case Style is
+			when Small_Rendering | Big_Rendering =>
+				-- render the good stuff
+				Output := Formatted_Date;
+			when Small_Edit_Rendering | Big_Edit_Rendering =>
+				Output := Formatted_Date;
+		end case;
+	end Get_Input;
+
 
 
 begin
