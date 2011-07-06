@@ -111,18 +111,34 @@ package body KOW_View.Entities.Property_Renderers is
 		function Get(
 					Property_Tag	: in Ada.Tags.Tag
 				) return Property_Renderer_Ptr is
+			use Ada.Tags;
+			The_Tag		: Unbounded_String	:= To_Unbounded_String( Expanded_Name( Property_Tag ) );
+			Renderer	: Property_Renderer_Ptr	:= Get( The_Tag );
 		begin
-			return Get( To_Unbounded_String( Ada.Tags.Expanded_Name( Property_Tag ) ) );
+			if Renderer = null then
+				declare
+					Parent : Tag := Parent_Tag( Property_Tag );
+				begin
+					if Parent = No_Tag then
+						return null;
+					else
+						return Get( Parent );
+					end if;
+				end;
+			else
+				return Renderer;
+			end if;
 		end Get;
 
 		function Get(
 					Property_Tag	: in Unbounded_String
 				) return Property_Renderer_Ptr is
 		begin
-			return Renderer_Maps.Element( Renderer_Map, Property_Tag );
-		exception
-			when others =>
+			if Renderer_Maps.Contains( Renderer_Map, Property_Tag ) then
+				return Renderer_Maps.Element( Renderer_Map, Property_Tag );
+			else
 				return null;
+			end if;
 		end Get;
 	end Default_Renderers_Registry;
 
