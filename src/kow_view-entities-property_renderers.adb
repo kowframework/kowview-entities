@@ -46,6 +46,7 @@ with Ada.Strings.Unbounded;			use Ada.Strings.Unbounded;
 -- KOW Framework --
 -------------------
 with KOW_Ent;
+with KOW_Ent.Extra_Properties;
 with KOW_Ent.Generic_Property_Metadata;
 with KOW_Ent.Id_Query_Builders;
 with KOW_Ent.Properties;
@@ -553,7 +554,7 @@ package body KOW_View.Entities.Property_Renderers is
 
 	overriding
 	procedure Get_Input(
-				Renderer	: in out Date_Property_Renderer_Type;
+				Renderer	: in out Timestamp_Property_Renderer_Type;
 				Module		: in out KOW_View.Modules.Module_Type'Class;
 				Request		: in     AWS.Status.Data;
 				Entity		: in     KOW_Ent.Entity_Type'Class;
@@ -567,52 +568,23 @@ package body KOW_View.Entities.Property_Renderers is
 			use Ada.Calendar.Formatting;
 
 
-			UTC_Date	: Time; -- TODO :: get the date time
-			Localized_Date	: Time;
-
-
-			Year		: Year_Number;
-			Month		: Month_Number;
-			Day		: Day_Number;
-			Hour		: Formatting.Hour_Number;
-			Minute		: Formatting.Minute_Number;
-			Second		: Formatting.Second_Number;
-			Sub_Second	: Formatting.Second_Duration;
-
+			function Date return Time is
+			begin
+				if Property not in KOW_Ent.Extra_Properties.Timestamp_Properties.Property_Type'Class then
+					raise CONSTRAINT_ERROR with "using timestamp renderer in a not-allowed place...";
+				end if;
+				return KOW_Ent.Extra_Properties.Timestamp_Properties.Property_Type'Class( Property ).Getter.all( Entity );
+			end Date;
 
 			Time_Zone	: Ada.Calendar.Time_Zones.Time_Offset := KOW_View.Time_Zones.Get_Time_Zone( Request );
 			Locale		: KOW_Lib.Locales.Locale := KOW_View.Locales.Get_Locale( Request );
 		begin
-			UTC_Date := UTC_Date + Day_Duration( Time_Zone ) * 60.0;
-			-- first we need to conver the date to given offset
-
-			Formatting.Split(
-					Date		=> UTC_Date,
-					Year		=> Year,
-					Month		=> Month,
-					Day		=> Day,
-					Hour		=> Hour,
-					Minute		=> Minute,
-					Second		=> Second,
-					Sub_Second	=> Sub_Second,
-					Time_Zone	=> 0		-- enforcing UTC
-				);
-
-			Localized_Date := Formatting.Time_Of(
-					Year		=> Year,
-					Month		=> Month,
-					Day		=> Day,
-					Hour		=> Hour,
-					Minute		=> Minute,
-					Second		=> Second,
-					Sub_Second	=> Sub_Second,
-					Time_Zone	=> Time_Zone
-				);
 			return To_Unbounded_String(
 					KOW_Lib.Calendar.Format( 
-							L	=> Locale,
-							F	=> KOW_Lib.Calendar.Get_Formatter( KOW_Lib.Locales.Get_Long_Date_Pattern( Locale ) ),
-							Date	=> Localized_Date
+							L		=> Locale,
+							F		=> KOW_Lib.Calendar.Get_Formatter( KOW_Lib.Locales.Get_Long_Date_Pattern( Locale ) ),
+							Date		=> Date,
+							Time_Zone	=> Time_Zone
 						)
 					);
 		end Formatted_Date;
@@ -654,6 +626,11 @@ begin
 	Default_Renderers_Registry.Set(
 					KOW_View.Entities.Properties.File_Upload_Property_Type'Tag,
 					new File_Upload_Property_Renderer_Type
+				);
+
+	Default_Renderers_Registry.Set(
+					KOW_Ent.Extra_Properties.Timestamp_Properties.Property_Type'Tag,
+					new Timestamp_Property_Renderer_Type
 				);
 
 end KOW_View.Entities.Property_Renderers;
