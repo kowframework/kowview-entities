@@ -562,8 +562,17 @@ package body KOW_View.Entities.Property_Renderers is
 				Style		: in     Rendering_Style_Type;
 				Output		:    out Unbounded_String
 			) is
+		use Ada.Calendar.Time_Zones;
 
-		function Formatted_Date return Unbounded_String is
+		Time_Zone	: Time_Offset := KOW_View.Time_Zones.Get_Time_Zone( Request );
+
+
+		procedure Ap( Str : in String ) is
+		begin
+			Append( Output, Str );
+		end Ap;
+
+		procedure Formatted_Date is
 			use Ada.Calendar;
 			use Ada.Calendar.Formatting;
 
@@ -576,25 +585,63 @@ package body KOW_View.Entities.Property_Renderers is
 				return KOW_Ent.Extra_Properties.Timestamp_Properties.Property_Type'Class( Property ).Getter.all( Entity );
 			end Date;
 
-			Time_Zone	: Ada.Calendar.Time_Zones.Time_Offset := KOW_View.Time_Zones.Get_Time_Zone( Request );
 			Locale		: KOW_Lib.Locales.Locale := KOW_View.Locales.Get_Locale( Request );
 		begin
-			return To_Unbounded_String(
-					KOW_Lib.Calendar.Format( 
-							L		=> Locale,
-							F		=> KOW_Lib.Calendar.Get_Formatter( KOW_Lib.Locales.Get_Long_Date_Pattern( Locale ) ),
-							Date		=> Date,
-							Time_Zone	=> Time_Zone
-						)
-					);
+			Ap(
+				KOW_Lib.Calendar.Format( 
+						L		=> Locale,
+						F		=> KOW_Lib.Calendar.Get_Formatter( KOW_Lib.Locales.Get_Long_Date_Pattern( Locale ) ),
+						Date		=> Date,
+						Time_Zone	=> Time_Zone
+					)
+				);
 		end Formatted_Date;
+
+
+
+		procedure Date_Time_Text_Box is
+			The_ID : Unbounded_String;
+
+
+			function Date_Id return String is
+			begin
+				return To_String( The_ID ) & "__date";
+			end Date_Id;
+
+			function Time_Id return String is
+			begin
+				return To_String( The_Id ) & "__time";
+			end Time_Id;
+		begin
+			KOW_View.Modules.Generate_HTML_Id( Module, The_ID );
+
+			KOW_View.Modules.Include_Component_Script(
+							Module		=> Module,
+							Component	=> KOW_View.Entities.Components.Component,
+							Script		=> "kowview-entities-timestamp.js"
+						);
+			KOW_View.Modules.Include_Dojo_Package( Module, "dijit.form.DateTextBox" );
+			KOW_View.Modules.Include_Dojo_Package( Module, "dijit.form.TimeTextBox" );
+
+
+			Ap( "<input type=""hidden"" name=""" & To_String( Property.Column_Name ) & """ value=""" & KOW_Ent.Get_Property( Property, Entity ) & '"' );
+				Ap( " id=""" & To_String( The_Id ) & """ dateId=""" & Date_id & """ timeId=""" & Time_Id & """/>" );
+
+			Ap( "<input type=""text"" dojoType=""dijit.form.DateTextBox"" id=""" & Date_Id & """/>" );
+			Ap( "<input type=""text"" dojoType=""dijit.form.TimeTextBox"" id=""" & Time_Id & """/>" );
+
+			Ap( "<script type=""text/javascript"">dojo.addOnLoad(function() {" );
+				Ap( "kowview.entities.timestamp.init('" & To_String( The_Id ) & "', " & Time_Offset'Image( Time_Zone ) & ");" );
+			Ap( "</script>" );
+
+		end Date_Time_Text_Box;
 	begin
 		case Style is
 			when Small_Rendering | Big_Rendering =>
 				-- render the good stuff
-				Output := Formatted_Date;
+				Formatted_Date;
 			when Small_Edit_Rendering | Big_Edit_Rendering =>
-				Output := Formatted_Date;
+				 Date_Time_Text_Box;
 		end case;
 	end Get_Input;
 

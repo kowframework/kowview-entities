@@ -261,6 +261,16 @@ package KOW_View.Entities.Property_Renderers is
 	---------------------------------
 
 	type Timestamp_Property_Renderer_Type is new Basic_Property_Renderer_Type with null record;
+	-- render timestamp fields;
+	-- handle both:
+	-- 	1. formatting for user
+	-- 	2. converting to/from UTC
+	--
+	-- The user will see the timestamp in it local time zone (see KOW_View.Time_Zones) and
+	-- this code will do the dirty work of converting the timestamp to the time zones.
+	--
+	-- 	Ada => From UTC to Local Time
+	-- 	JavaScript => From Local Time to UTC when submiting form
 
 	overriding
 	procedure Get_Input(
