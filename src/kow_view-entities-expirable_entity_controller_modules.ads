@@ -55,7 +55,8 @@ with AWS.Status;
 
 generic
 	type Entity_Type is new KOW_Ent.Entity_Type with private;
-	with package Controllers is new KOW_Ent.Expirable_Entity_Controllers( Entity_Type );
+	Table_Name : String;
+	with package Controllers is new KOW_Ent.Expirable_Entity_Controllers( Entity_Type, Table_Name );
 package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 
 

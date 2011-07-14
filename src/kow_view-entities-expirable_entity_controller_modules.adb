@@ -109,6 +109,7 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			) is
 		-- act upon actions from Lifetime_Action_Type
 		Obj : KOW_Lib.Json.Object_Type;
+		P   : AWS.Parameters.List := AWS.Status.Parameters( Request );
 
 
 		function Action return Lifetime_Action_Type is
@@ -123,6 +124,17 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			when constraint_error =>
 				raise PROGRAM_ERROR with "Invalid value for action: " & Act;
 		end Action;
+
+
+		function Get_Entity return Entity_Type is
+			Entity : Entity_Type;
+		begin
+			KOW_Ent.Load( Entity, Natural( Get_Entity_Id( Lifetime_Handler_Module_Type'Class( Module ), Request ) ) );
+			if not Can_Edit( Lifetime_Handler_Module_Type'Class( Module ), Request, Entity ) then
+				raise KOW_Sec.Access_Denied with "Sorry, but you can't do that";
+			end if;
+			return Entity;
+		end Get_Entity;
 	begin
 		case Action is
 			when Expire_Entity =>
@@ -130,6 +142,7 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			when Validate_Entity =>
 				Controllers.Validate( Get_Entity );
 			when Store_Validation_Period =>
+				null;
 			when Render_Form =>
 				declare
 					Buffer : Unbounded_String;
@@ -139,7 +152,7 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 					Render_View(
 							Module	=> Lifetime_Handler_Module_Type'Class( Module ),
 							Request	=> Request,
-							Entity	=> Get_Validatinon_Entity(
+							Entity	=> Get_Validation_Entity(
 											Module	=> Lifetime_Handler_Module_Type'Class( Module ),
 											Request	=> Request
 										),
@@ -166,9 +179,11 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 				Request	: in     AWS.Status.Data;
 				Entity	: in     KOW_Ent.Entity_Type'Class;
 				Output	:    out Unbounded_String
-			);
-	-- render the correct buttons for the form
-
+			) is
+		-- render the correct buttons for the form
+	begin
+		Output := To_Unbounded_String( "BOTOES AQUI PLZ" );
+	end Render_View_Buttons;
 
 	-----------------
 	-- New Methods --
@@ -202,15 +217,15 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 				Entity : Entity_Type;
 			begin
 				KOW_Ent.Load( Entity, Natural( Entity_Id ) );
-				Controllers.Get_Validation( Entity );
+				return Controllers.Get_Validation( Entity );
 			end;
-		elsif The_Tag /= "" and The_Tag /= Ada.Tags.Extended_Name( Entity_Type'Tag ) then
+		elsif The_Tag /= "" and The_Tag /= Ada.Tags.Expanded_Name( Entity_Type'Tag ) then
 			declare
-				Available : Get_Validation_Extensions( Lifetime_Handler_Module_Type'Class( Module ), Request );
+				Available : Tag_Array := Get_Validation_Extensions( Lifetime_Handler_Module_Type'Class( Module ), Request );
 			begin
 				for i in Available'Range loop
-					if The_Tag = Available( i ) then
-						return KOW_Ent.New_Entity( The_Tag );
+					if The_Tag = Ada.Tags.Expanded_Name( Available( i ) ) then
+						return Controllers.Validation_Entity'Class( KOW_Ent.New_Entity( To_Unbounded_String( The_Tag ) ) );
 					end if;
 				end loop;
 
@@ -218,7 +233,7 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			end;
 		else
 			declare
-				The_Entity : Entity_Type;
+				The_Entity : COntrollers.Validation_Entity;
 			begin
 				return The_Entity;
 			end;

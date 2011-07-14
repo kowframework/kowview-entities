@@ -73,7 +73,7 @@ package body KOW_View.Entities.Modules is
 				Request	: in     AWS.Status.Data;
 				Config	: in out KOW_Config.Config_File
 			) is
-		-- setup the entity_tag and narrow variables...
+		-- setup configurable variables
 		-- if you override this method remember to call the Entity_Module_Type's implementation of it.
 
 		function Get_Style return Rendering_Style_Type is
