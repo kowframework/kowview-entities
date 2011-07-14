@@ -31,6 +31,16 @@ pragma License( GPL );
 -- ty module type for handling expirable entity controllers                 --
 --                                                                          --
 ------------------------------------------------------------------------------
+--                                                                          --
+--  Throughout this pacakge you'll see two common names apearing all the    --
+-- time:                                                                    --
+--      * Entity_Type                                                       --
+--      * Validation_Entity_Type                                            --
+--                                                                          --
+--  I believe it's quite clear the difference and I'm not goint through this--
+-- now. But remember this when editing this file.                           --
+--                                                                          --
+------------------------------------------------------------------------------
 
 
 --------------

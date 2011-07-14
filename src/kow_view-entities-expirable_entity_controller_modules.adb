@@ -183,6 +183,7 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 		-- render the correct buttons for the form
 	begin
 		Output := To_Unbounded_String( "BOTOES AQUI PLZ" );
+		-- NOTE :: don't forget to put the entity_id in the button function parameter!
 	end Render_View_Buttons;
 
 	-----------------
