@@ -142,7 +142,21 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			when Validate_Entity =>
 				Controllers.Validate( Get_Entity );
 			when Store_Validation_Period =>
-				null;
+				declare
+					Entity			: Entity_Type := Get_Entity; -- just to check if there is really an entity in here..
+					Validation_Entity	: Controllers.Validation_Entity'Class := 
+									Get_Validation_Entity(
+											Module	=> Lifetime_Handler_Module_Type'Class( Module ),
+											Request	=> Request
+										);
+				begin
+					Set_Values(
+							Module		=> Lifetime_Handler_Module_Type'Class( Module ),
+							Entity		=> Validation_Entity,
+							Request		=> Request
+						);
+					KOW_Ent.Store( Validation_Entity );
+				end;
 			when Render_Form =>
 				declare
 					Buffer : Unbounded_String;
