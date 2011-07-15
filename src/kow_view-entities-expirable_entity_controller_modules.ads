@@ -176,6 +176,12 @@ package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			);
 	-- render the correct buttons for the form
 
+	overriding
+	procedure Render_List_Title(
+				Module	: in out Lifetime_Handler_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Output	:    out Unbounded_String
+			);
 
 	overriding
 	procedure Render_List_Body_Item(
