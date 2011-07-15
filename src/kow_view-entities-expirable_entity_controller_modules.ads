@@ -229,7 +229,7 @@ package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 	-- Parameter Getting --
 	-----------------------
 	
-	function Get_View_Entity_Type(
+	function Get_View_Entity(
 				Module	: in Lifetime_Handler_Module_Type;
 				P	: in AWS.Parameters.List
 			) return View_Entity_Type;
