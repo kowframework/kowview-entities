@@ -88,13 +88,28 @@ package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			Every_Entity
 		);
 
+
+
+	------------------------
+	-- Other helper types --
+	------------------------
+
+	type Tag_Array is array( Positive range <> ) of Ada.Tags.Tag;
+
 	---------------------
 	-- The Module Type --
 	---------------------
 
 
-	type Lifetime_Handler_Module_Type is abstract new KOW_View.Entities.Modules.Entity_Module_Type with null record;
-	-- this module will render a list of entities, giving the ability to expire/validate and revalidate entities
+	type Lifetime_Handler_Module_Type is abstract new KOW_View.Entities.Modules.Entity_Module_Type with record
+		-- this module will render a list of entities, giving the ability to expire/validate and revalidate entities
+
+		Initialized : Boolean := False;
+		-- When the module type is of persistent factory, controlls if the module has been
+		-- already initialized or not.
+		-- This is so it's possible to call Initialize_Dojo_Includes only once
+	end record;
+
 
 	overriding
 	procedure Initialize_Request(
@@ -137,12 +152,26 @@ package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 	-- render the correct buttons for the form
 
 
+	overriding
+	procedure Render_List_Body_Item(
+				Module	: in out Lifetime_Handler_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Entity	: in     KOW_Ent.Entity_Type'Class;
+				Output	:    out Unbounded_String
+			);
+	-- render the list item and call Render_List_Body_Item_Initializer()
+
 	-----------------
 	-- New Methods --
 	-----------------
 
 
-	type Tag_Array is array( Positive range <> ) of Ada.Tags.Tag;
+	procedure Initialize_Dojo_Includes(
+				Module	: in out Lifetime_Handler_Module_Type;
+				Request	: in     AWS.Status.Data
+			);
+	-- render every (empty) validation entity using big_edit_rendering
+	-- so the renderers can include the needed dojo packages beforehand.
 
 	function Get_Validation_Extensions(
 				Module	: in Lifetime_Handler_Module_Type;
@@ -159,5 +188,15 @@ package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			) return Controllers.Validation_Entity'Class;
 	-- if entity_id is set, get the validation entity for this entity
 	-- or else, allocate a new entity by the validation_entity_tag parameter
+
+
+	procedure Render_List_Body_Item_Initializer(
+				Module	: in out Lifetime_Handler_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Entity	: in     KOW_Ent.Entity_Type'Class;
+				Li_ID	: in     String;
+				Output	:    out Unbounded_String
+			);
+	-- render the javascript initialization method
 
 end KOW_View.Entities.Expirable_Entity_Controller_Modules;

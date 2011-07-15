@@ -539,7 +539,6 @@ package body KOW_View.Entities.Modules is
 
 
 
-
 	procedure Render_List_Body(
 				Module	: in out Entity_Module_Type;
 				Request	: in     AWS.Status.Data;
@@ -551,27 +550,46 @@ package body KOW_View.Entities.Modules is
 
 		for i in Ids'range loop
 			declare
-				Buffer	: Unbounded_String;
 				Entity	: KOW_Ent.Entity_Type'Class := Load_Entity( Module, Ids( i ) );
-				URL	: constant String := KOW_View.URI_Util.Build_URL( Request => Request, Key1 => "style", Value1 => "big", key2 => "entity_id", Value2 => KOW_ent.To_String( Entity.ID )  );
 			begin
-				Append( Output, "<li onClick=""window.location.href='" & URL & "'"">" );
-				Append( Output, "<a href=""" );
-					Append( Output, URL );
-					Append( Output, """>" );
-					Render_View(
-							Module	=> Entity_Module_Type'Class( Module ),
-							Request	=> Request,
-							Entity	=> Entity,
-							Output	=> Buffer
-						);
-					Append( Output, Buffer );
-				Append( Output, "</a>" );
-				Append( Output, "</li>" );
+				Render_List_Body_Item(
+						Module	=> Entity_Module_Type'Class( Module ),
+						Request	=> Request,
+						Entity	=> Entity,
+						Output	=> Output
+					);
 			end;
 		end loop;
 		Append( Output, "</ul>" );
 	end Render_List_Body;
+
+
+	procedure Render_List_Body_Item(
+				Module	: in out Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Entity	: in     KOW_Ent.Entity_Type'Class;
+				Output	:    out Unbounded_String
+			) is
+		Buffer	: Unbounded_String;
+		URL	: constant String := KOW_View.URI_Util.Build_URL( Request => Request, Key1 => "style", Value1 => "big", key2 => "entity_id", Value2 => KOW_ent.To_String( Entity.ID )  );
+	begin
+		Append( Output, "<li onClick=""window.location.href='" & URL & "'"">" );
+		Append( Output, "<a href=""" );
+			Append( Output, URL );
+			Append( Output, """>" );
+			Render_View(
+					Module	=> Entity_Module_Type'Class( Module ),
+					Request	=> Request,
+					Entity	=> Entity,
+					Output	=> Buffer
+				);
+			Append( Output, Buffer );
+		Append( Output, "</a>" );
+		Append( Output, "</li>" );
+	end Render_List_Body_Item;
+
+
+
 
 
 	procedure Render_View(

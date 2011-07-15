@@ -44,7 +44,9 @@ with Ada.Tags;
 -------------------
 with KOW_Ent;
 with KOW_Sec;
+with KOW_View.Entities.Components;
 with KOW_View.Entities.Modules;
+with KOW_View.URI_Util;
 
 
 ---------
@@ -73,14 +75,37 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 		-- call entity_module_type's setup
 		-- Entity_Tag is always set to Entity_Type'Tag;
 	begin
-		KOW_View.Entities.Modules.Initialize_Request(
-					Module	=> KOW_View.Entities.Modules.Entity_Module_Type( Module ),
-					Request	=> Request,
-					Config	=> Config
-				);
+		if not Module.Initialized then
 
-		Module.Entity_Tag := Entity_Tag;
-		Module.Style := Small_Rendering;
+			KOW_View.Entities.Modules.Initialize_Request(
+						Module	=> KOW_View.Entities.Modules.Entity_Module_Type( Module ),
+						Request	=> Request,
+						Config	=> Config
+					);
+
+			Initialize_Dojo_Includes(
+						Module	=> Lifetime_Handler_Module_Type'Class( Module ),
+						Request	=> Request
+					);
+
+
+			Include_Component_Script(
+						Module		=> Module,
+						Component	=> KOW_View.Entities.Components.Component,
+						Script		=> "kowview-entities.js"
+					);
+
+			Include_Component_Script(
+						Module		=> Module,
+						Component	=> KOW_View.Entities.Components.Component,
+						Script		=> "kowview-entities-expirable_entity_controllers.js"
+					);
+
+
+			Module.Initialized := True;
+			Module.Entity_Tag := Entity_Tag;
+			Module.Style := Small_Rendering;
+		end if;
 	end Initialize_Request;
 
 	overriding
@@ -200,9 +225,84 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 		-- NOTE :: don't forget to put the entity_id in the button function parameter!
 	end Render_View_Buttons;
 
+
+	overriding
+	procedure Render_List_Body_Item(
+				Module	: in out Lifetime_Handler_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Entity	: in     KOW_Ent.Entity_Type'Class;
+				Output	:    out Unbounded_String
+			) is
+		-- render the list item and call Render_List_Body_Item_Initializer()
+		Buffer	: Unbounded_String;
+		URL	: constant String := KOW_View.URI_Util.Build_URL( Request => Request, Key1 => "style", Value1 => "big", key2 => "entity_id", Value2 => KOW_ent.To_String( Entity.ID )  );
+		Id	: Unbounded_String;
+	begin
+		Generate_HTML_Id( Module, ID );
+		Append( Output, "<li onClick=""window.location.href='" & URL & "'"" id=""" );
+		Append( Output, ID );
+		Append( Output, """>" );
+		Append( Output, "<a href=""" );
+			Append( Output, URL );
+			Append( Output, """>" );
+			Render_View(
+					Module	=> Lifetime_Handler_Module_Type'Class( Module ),
+					Request	=> Request,
+					Entity	=> Entity,
+					Output	=> Buffer
+				);
+			Append( Output, Buffer );
+		Append( Output, "</a>" );
+
+		 Render_List_Body_Item_Initializer(
+				Module	=> Lifetime_Handler_Module_Type'Class( Module ),
+				Request	=> Request,
+				Entity	=> Entity,
+				Li_ID	=> To_String( ID ),
+				Output	=> Output
+			);
+		Append( Output, "</li>" );
+
+	end Render_List_Body_Item;
+
 	-----------------
 	-- New Methods --
 	-----------------
+
+	procedure Initialize_Dojo_Includes(
+				Module	: in out Lifetime_Handler_Module_Type;
+				Request	: in     AWS.Status.Data
+			) is
+		-- render every (empty) validation entity using big_edit_rendering
+		-- so the renderers can include the needed dojo packages beforehand.
+		Extensions	: Tag_Array := Get_Validation_Extensions(
+							Module	=> Lifetime_Handler_Module_Type'Class( Module ),
+							Request	=> Request
+						);
+
+		procedure Initialize( The_Tag : in Ada.Tags.Tag ) is
+			Buffer : Unbounded_String;
+			-- a buffer that we trash when the processing is finished
+		begin
+			Render_View(
+					Module	=> Lifetime_Handler_Module_Type'Class( Module ),
+					Request	=> Request,
+					Entity	=> KOW_Ent.New_Entity( The_Tag ),
+					Output	=> Buffer
+				);
+
+		exception
+			when others => null;
+			-- ignore all exceptions at this stage...
+		end Initialize;
+	begin
+
+		Initialize( Entity_Type'Tag );
+		for i in Extensions'Range loop
+			Initialize( Extensions( i ) );
+		end loop;
+	end Initialize_Dojo_Includes;
+
 
 	function Get_Validation_Extensions(
 				Module	: in Lifetime_Handler_Module_Type;
@@ -256,4 +356,24 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 
 	end Get_Validation_Entity;
 
+	procedure Render_List_Body_Item_Initializer(
+				Module	: in out Lifetime_Handler_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Entity	: in     KOW_Ent.Entity_Type'Class;
+				Li_ID	: in     String;
+				Output	:    out Unbounded_String
+			) is
+		-- render the javascript initialization method
+	begin
+		Append( Output, "<script type=""text/javascript"">dojo.addOnLoad( function() {" );
+			
+			Append( Output, "kowview.entities.expirable_entity_controllers.initializeItem(" );
+			Append( Output, Integer'Image( Get_ID ( Module ) ) );
+			Append( Output, ",""" );
+			Append( Output, Li_ID );
+			Append( Output, """);" );
+
+
+		Append( Output, "});</script>" );
+	end Render_list_Body_Item_Initializer;
 end KOW_View.Entities.Expirable_Entity_Controller_Modules;

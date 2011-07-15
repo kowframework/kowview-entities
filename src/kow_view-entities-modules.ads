@@ -238,6 +238,15 @@ package KOW_View.Entities.Modules is
 			);
 	-- do the proper list rendering 
 
+	procedure Render_List_Body_Item(
+				Module	: in out Entity_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Entity	: in     KOW_Ent.Entity_Type'Class;
+				Output	:    out Unbounded_String
+			);
+	-- renders a list item in the body
+
+
 
 	procedure Render_View(
 				Module	: in out Entity_Module_Type;
