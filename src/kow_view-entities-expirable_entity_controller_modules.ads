@@ -85,7 +85,7 @@ package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 	
 	type View_entity_Type is(
 			Valid_Entities,
-			Every_Entity
+			All_Entities
 		);
 
 
@@ -136,6 +136,20 @@ package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 				Response:    out KOW_Lib.Json.Object_Type
 			);
 	-- act upon actions from Lifetime_Action_Type
+
+
+	-----------
+	-- Query --
+	-----------
+
+	overriding
+	function Query_Entities(
+				Module	: in Lifetime_Handler_Module_Type;
+				Request	: in AWS.Status.Data;
+				From	: in Positive;
+				Limit	: in Natural
+			) return KOW_Ent.Id_Array_Type;
+	-- run the query based on the "view_entities" property (View_Entity_Type type)
 
 
 
@@ -198,5 +212,21 @@ package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 				Output	:    out Unbounded_String
 			);
 	-- render the javascript initialization method
+
+
+	-----------------------
+	-- Parameter Getting --
+	-----------------------
+	
+	function Get_View_Entity_Type(
+				Module	: in Lifetime_Handler_Module_Type;
+				Request	: in AWS.Status.Data
+			) return View_Entity_Type;
+	
+
+	function Get_Action(
+				Module	: in Lifetime_Handler_Module_Type;
+				Request	: in AWS.Status.Data
+			) return Lifetime_Action_Type;
 
 end KOW_View.Entities.Expirable_Entity_Controller_Modules;

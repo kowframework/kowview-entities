@@ -43,6 +43,7 @@ with Ada.Tags;
 -- KOW Framework --
 -------------------
 with KOW_Ent;
+with KOW_Ent.ID_Query_Builders;
 with KOW_Sec;
 with KOW_View.Entities.Components;
 with KOW_View.Entities.Modules;
@@ -134,21 +135,10 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			) is
 		-- act upon actions from Lifetime_Action_Type
 		Obj : KOW_Lib.Json.Object_Type;
-		P   : AWS.Parameters.List := AWS.Status.Parameters( Request );
-
-
-		function Action return Lifetime_Action_Type is
-			Act : constant String := AWS.Parameters.Get( P, "action" );
-		begin
-			if Act = "" then
-				raise PROGRAM_ERROR with "Seems like the developer forgot to pass the action parameter...";
-			else
-				return Lifetime_Action_Type'Value( Act );
-			end if;
-		exception
-			when constraint_error =>
-				raise PROGRAM_ERROR with "Invalid value for action: " & Act;
-		end Action;
+		Action : constant Lifetime_Action_Type := Get_Action(
+								Module	=> Lifetime_Handler_Module_Type'Class( Module ),
+								Request	=> Request
+							);
 
 
 		function Get_Entity return Entity_Type is
@@ -207,6 +197,41 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 		KOW_Lib.Json.Set( Obj, "action", Lifetime_Action_Type'Image( Action ) );
 		Response := Obj;
 	end Process_Json_Request;
+
+
+	-----------
+	-- Query --
+	-----------
+
+	overriding
+	function Query_Entities(
+				Module	: in Lifetime_Handler_Module_Type;
+				Request	: in AWS.Status.Data;
+				From	: in Positive;
+				Limit	: in Natural
+			) return KOW_Ent.Id_Array_Type is
+		-- run the query based on the "view_entities" property (View_Entity_Type type)
+	begin
+		case Get_View_Entity_Type( Lifetime_Handler_Module_Type'Class( Module ), Request ) is
+			when Valid_Entities =>
+				return Controllers.Query_Valid( From => From, Limit => Limit );
+			when All_Entities =>
+				declare
+					use KOW_Ent.Id_Query_Builders;
+					Q : Query_Type;
+				begin
+					Prepare( Q, Entity_Type'Tag );
+
+					return Get_Some(
+							Q	=> Q,
+							From	=> From,
+							Limit	=> Limit
+						);
+				end;
+		end case;
+	end Query_Entities;
+
+
 
 
 	---------------
@@ -376,4 +401,46 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 
 		Append( Output, "});</script>" );
 	end Render_list_Body_Item_Initializer;
+
+
+	-----------------------
+	-- Parameter Getting --
+	-----------------------
+	
+	function Get_View_Entity_Type(
+				Module	: in Lifetime_Handler_Module_Type;
+				Request	: in AWS.Status.Data
+			) return View_Entity_Type is
+		View_Entity : constant String := AWS.Parameters.Get( AWS.Status.Parameters( Request ), "view_entity" );
+	begin
+		if View_Entity = "" then
+			return Valid_Entities;
+		else
+			return View_Entity_Type'Value( View_Entity );
+		end if;
+	exception
+		when CONSTRAINT_ERROR =>
+			raise PROGRAM_ERROR with "Invalid value for view mode: " & View_Entity;
+	end Get_View_Entity_Type;
+	
+
+	function Get_Action(
+				Module	: in Lifetime_Handler_Module_Type;
+				Request	: in AWS.Status.Data
+			) return Lifetime_Action_Type is
+		Act : constant String := AWS.Parameters.Get( AWS.Status.Parameters( Request ), "action" );
+	begin
+		if Act = "" then
+			raise PROGRAM_ERROR with "Seems like the developer forgot to pass the action parameter...";
+		else
+			return Lifetime_Action_Type'Value( Act );
+		end if;
+	exception
+		when constraint_error =>
+			raise PROGRAM_ERROR with "Invalid value for action: " & Act;
+	end Get_Action;
+
+
+
+
 end KOW_View.Entities.Expirable_Entity_Controller_Modules;
