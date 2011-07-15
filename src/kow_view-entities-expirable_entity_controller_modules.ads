@@ -60,6 +60,7 @@ with KOW_View.Entities.Modules;
 ---------
 -- AWS --
 ---------
+with AWS.Parameters;
 with AWS.Status;
 
 
@@ -82,11 +83,16 @@ package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			Store_Validation_Period,	-- store (insert a new or update an existing) a validation period
 			Render_Form			-- render the entity form; if the validation_id is suplied, load the entity before
 		);
+
+	Lifetime_Action_Key : constant String := "action";
+	
 	
 	type View_entity_Type is(
 			Valid_Entities,
 			All_Entities
 		);
+
+	View_Entity_Key : constant String := "view_entity";
 
 
 
@@ -108,6 +114,11 @@ package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 		-- When the module type is of persistent factory, controlls if the module has been
 		-- already initialized or not.
 		-- This is so it's possible to call Initialize_Dojo_Includes only once
+
+
+		-- The following attributes are updated in every request
+		Lifetime_Action	: Lifetime_Action_Type;
+		View_Entity	: View_Entity_Type;
 	end record;
 
 
@@ -220,13 +231,14 @@ package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 	
 	function Get_View_Entity_Type(
 				Module	: in Lifetime_Handler_Module_Type;
-				Request	: in AWS.Status.Data
+				P	: in AWS.Parameters.List
 			) return View_Entity_Type;
 	
 
-	function Get_Action(
+	function Get_Lifetime_Action(
 				Module	: in Lifetime_Handler_Module_Type;
-				Request	: in AWS.Status.Data
+				P	: in AWS.Parameters.List
 			) return Lifetime_Action_Type;
+
 
 end KOW_View.Entities.Expirable_Entity_Controller_Modules;

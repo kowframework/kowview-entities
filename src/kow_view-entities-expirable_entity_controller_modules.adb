@@ -75,6 +75,8 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			) is
 		-- call entity_module_type's setup
 		-- Entity_Tag is always set to Entity_Type'Tag;
+
+		P : AWS.Parameters.List := AWS.Status.Parameters( Request );
 	begin
 		if not Module.Initialized then
 
@@ -107,6 +109,17 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			Module.Entity_Tag := Entity_Tag;
 			Module.Style := Small_Rendering;
 		end if;
+
+		Module.View_Entity := Get_View_Entity(
+						Module	=> Lifetime_Handler_Module_Type'Class( Module ),
+						P	=> P
+					);
+		Module.Lifetime_Action := Get_Lifetime_Action(
+						Module	=> Lifetime_Handler_Module_Type'Class( Module ),
+						P	=> P
+					);
+
+
 	end Initialize_Request;
 
 	overriding
@@ -135,11 +148,6 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			) is
 		-- act upon actions from Lifetime_Action_Type
 		Obj : KOW_Lib.Json.Object_Type;
-		Action : constant Lifetime_Action_Type := Get_Action(
-								Module	=> Lifetime_Handler_Module_Type'Class( Module ),
-								Request	=> Request
-							);
-
 
 		function Get_Entity return Entity_Type is
 			Entity : Entity_Type;
@@ -151,7 +159,7 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			return Entity;
 		end Get_Entity;
 	begin
-		case Action is
+		case Module.Lifetime_Action is
 			when Expire_Entity =>
 				Controllers.Expire( Get_Entity );
 			when Validate_Entity =>
@@ -373,7 +381,7 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			end;
 		else
 			declare
-				The_Entity : COntrollers.Validation_Entity;
+				The_Entity : Controllers.Validation_Entity;
 			begin
 				return The_Entity;
 			end;
@@ -409,9 +417,9 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 	
 	function Get_View_Entity_Type(
 				Module	: in Lifetime_Handler_Module_Type;
-				Request	: in AWS.Status.Data
+				P	: in AWS.Parameters.List
 			) return View_Entity_Type is
-		View_Entity : constant String := AWS.Parameters.Get( AWS.Status.Parameters( Request ), "view_entity" );
+		View_Entity : constant String := AWS.Parameters.Get( P, View_Entity_Key );
 	begin
 		if View_Entity = "" then
 			return Valid_Entities;
@@ -424,11 +432,11 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 	end Get_View_Entity_Type;
 	
 
-	function Get_Action(
+	function Get_Lifetime_Action(
 				Module	: in Lifetime_Handler_Module_Type;
-				Request	: in AWS.Status.Data
+				P	: in AWS.Parameters.List
 			) return Lifetime_Action_Type is
-		Act : constant String := AWS.Parameters.Get( AWS.Status.Parameters( Request ), "action" );
+		Act : constant String := AWS.Parameters.Get( P, Action_Key );
 	begin
 		if Act = "" then
 			raise PROGRAM_ERROR with "Seems like the developer forgot to pass the action parameter...";
@@ -438,7 +446,7 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 	exception
 		when constraint_error =>
 			raise PROGRAM_ERROR with "Invalid value for action: " & Act;
-	end Get_Action;
+	end Get_Lifetime_Action;
 
 
 
