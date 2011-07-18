@@ -260,6 +260,17 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 
 
 	overriding
+	procedure Render_List_Title(
+				Module	: in out Lifetime_Handler_Module_Type;
+				Request	: in     AWS.Status.Data;
+				Output	:    out Unbounded_String
+			) is
+		-- TODO : implement-me
+	begin
+		Append( Output, "Implementme" );
+	end Render_List_Title;
+
+	overriding
 	procedure Render_List_Body_Item(
 				Module	: in out Lifetime_Handler_Module_Type;
 				Request	: in     AWS.Status.Data;
