@@ -78,40 +78,20 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 
 		P : AWS.Parameters.List := AWS.Status.Parameters( Request );
 	begin
-		if not Module.Initialized then
 
-			KOW_View.Entities.Modules.Initialize_Request(
-						Module	=> KOW_View.Entities.Modules.Entity_Module_Type( Module ),
-						Request	=> Request,
-						Config	=> Config
-					);
-
-			Initialize_Dojo_Includes(
-						Module	=> Lifetime_Handler_Module_Type'Class( Module ),
-						Request	=> Request
-					);
+		KOW_View.Entities.Modules.Initialize_Request(
+					Module	=> KOW_View.Entities.Modules.Entity_Module_Type( Module ),
+					Request	=> Request,
+					Config	=> Config
+				);
 
 
-			Include_Component_Script(
-						Module		=> Module,
-						Component	=> KOW_View.Entities.Components.Component,
-						Script		=> "kowview-entities.js"
-					);
 
-			Include_Component_Script(
-						Module		=> Module,
-						Component	=> KOW_View.Entities.Components.Component,
-						Script		=> "kowview-entities-expirable_entity_controllers.js"
-					);
+		Module.Valid_Label := KOW_Config.Value( Config, "valid_label", Default_Valid_Label );
+		Module.All_Label := KOW_Config.Value( Config, "all_label", Default_All_Label );
 
-
-			Module.Valid_Label := KOW_Config.Value( Config, "valid_label", Default_Valid_Label );
-			Module.All_Label := KOW_Config.Value( Config, "all_label", Default_All_Label );
-
-			Module.Initialized := True;
-			Module.Entity_Tag := Entity_Tag;
-			Module.Style := Small_Rendering;
-		end if;
+		Module.Entity_Tag := Entity_Tag;
+		Module.Style := Small_Rendering;
 
 		Module.View_Entity := Get_View_Entity(
 						Module	=> Lifetime_Handler_Module_Type'Class( Module ),
@@ -133,6 +113,24 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			) is
 		-- always render list
 	begin
+		Initialize_Dojo_Includes(
+					Module	=> Lifetime_Handler_Module_Type'Class( Module ),
+					Request	=> Request
+				);
+
+
+		Include_Component_Script(
+					Module		=> Module,
+					Component	=> KOW_View.Entities.Components.Component,
+					Script		=> "kowview-entities.js"
+				);
+
+		Include_Component_Script(
+					Module		=> Module,
+					Component	=> KOW_View.Entities.Components.Component,
+					Script		=> "kowview-entities-expirable_entity_controllers.js"
+				);
+
 		Module.Style := Small_Rendering;
 		Render_List(
 				Module	=> Lifetime_Handler_Module_Type'Class( Module ),
@@ -432,7 +430,7 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 				KOW_Ent.Load( Entity, Natural( Entity_Id ) );
 				return Controllers.Get_Validation( Entity );
 			end;
-		elsif The_Tag /= "" and The_Tag /= Ada.Tags.Expanded_Name( Entity_Type'Tag ) then
+		elsif The_Tag /= "" then
 			declare
 				Available : Tag_Array := Get_Validation_Extensions( Lifetime_Handler_Module_Type'Class( Module ), Request );
 			begin

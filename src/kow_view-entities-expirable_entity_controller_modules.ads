@@ -115,12 +115,6 @@ package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 	type Lifetime_Handler_Module_Type is abstract new KOW_View.Entities.Modules.Entity_Module_Type with record
 		-- this module will render a list of entities, giving the ability to expire/validate and revalidate entities
 
-		Initialized : Boolean := False;
-		-- When the module type is of persistent factory, controlls if the module has been
-		-- already initialized or not.
-		-- This is so it's possible to call Initialize_Dojo_Includes only once
-
-
 		-- The following attributes are updated in every request
 		Lifetime_Action	: Lifetime_Action_Type;
 		View_Entity	: View_Entity_Type;
