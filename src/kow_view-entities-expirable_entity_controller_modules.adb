@@ -105,6 +105,9 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 					);
 
 
+			Module.Valid_Label := KOW_Config.Value( Config, "valid_label", Default_Valid_Label );
+			Module.All_Label := KOW_Config.Value( Config, "all_label", Default_All_Label );
+
 			Module.Initialized := True;
 			Module.Entity_Tag := Entity_Tag;
 			Module.Style := Small_Rendering;
@@ -254,8 +257,20 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			) is
 		-- render the correct buttons for the form
 	begin
-		Output := To_Unbounded_String( "BOTOES AQUI PLZ" );
-		-- NOTE :: don't forget to put the entity_id in the button function parameter!
+
+		if Entity in Entity_Type'Class then
+			-- it's the main view... ignore
+			null;
+		elsif Entity in Controllers.Validation_Entity'Class then
+			-- yeah, we have some buttons to render ;)
+
+			KOW_View.Entities.Modules.Render_View_Buttons(
+						Module	=> KOW_View.Entities.Modules.Entity_Module_Type( Module ),
+						Request	=> Request,
+						Entity	=> Entity,
+						Output	=> Output
+					);
+		end if;
 	end Render_View_Buttons;
 
 
@@ -265,9 +280,48 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 				Request	: in     AWS.Status.Data;
 				Output	:    out Unbounded_String
 			) is
-		-- TODO : implement-me
+
+
+		procedure Begin_Options is
+		begin
+			Include_Dojo_Package( Module, "dijit.form.FilteringSelect" );
+			Append( Output, "<form action=""#"" class=""validationOptions"">" );
+			Append( Output, "<select name="""& View_Entity_Key & """ dojoType=""dijit.form.FilteringSelect"" onChange=""kowview.entities.expirable_entity_controllers.updateList(this)"">" );
+		end Begin_Options;
+
+		procedure Append_Option( Label : in Unbounded_String; Value : in View_Entity_Type ) is
+			function selected return string is
+			begin
+				if Module.View_Entity = Value then
+					return " selected=""selected""";
+				else
+					return "";
+				end if;
+			end selected;
+		begin
+			Append( Output, "<select value=""" & View_Entity_Type'Image( Value ) & '"' & selected & '>' );
+			Append( Output, Label );
+			Append( Output, "</select>" );
+		end Append_Option;
+
+		procedure End_Options is
+		begin
+			Append( Output, "</select>" );
+			Append( Output, "</form>" );
+		end End_Options;
 	begin
-		Append( Output, "Implementme" );
+
+		Append( Output, "<div class=""validation"">" );
+			KOW_View.Entities.Modules.Render_List_Title(
+						Module	=> KOW_View.Entities.Modules.Entity_Module_Type( Module ),
+						Request	=> Request,
+						Output	=> Output
+					);
+			Begin_Options;
+				Append_Option( Module.Valid_Label, Valid_Entities );
+				Append_Option( Module.All_Label, All_Entities );
+			End_Options;
+		Append( Output, "</div>" );
 	end Render_List_Title;
 
 	overriding
@@ -409,16 +463,12 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			) is
 		-- render the javascript initialization method
 	begin
-		Append( Output, "<script type=""text/javascript"">dojo.addOnLoad( function() {" );
-			
+		Append( Output, "<script type=""text/javascript"">" );
 			Append( Output, "kowview.entities.expirable_entity_controllers.initializeItem(" );
-			Append( Output, Integer'Image( Get_ID ( Module ) ) );
-			Append( Output, ",""" );
-			Append( Output, Li_ID );
-			Append( Output, """);" );
-
-
-		Append( Output, "});</script>" );
+				Append( Output, Integer'Image( Get_ID ( Module ) ) & ',' );
+				Append( Output, '"' & Li_ID & '"' );
+			Append( Output, ");" );
+		Append( Output, "</script>" );
 	end Render_list_Body_Item_Initializer;
 
 

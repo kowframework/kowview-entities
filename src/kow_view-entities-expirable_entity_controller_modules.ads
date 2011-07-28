@@ -95,6 +95,11 @@ package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 	View_Entity_Key : constant String := "view_entity";
 
 
+	--------------------
+	-- Default Labels --
+	--------------------
+	Default_Valid_LAbel	: Unbounded_String := To_Unbounded_String( "Valid Entities" );
+	Default_All_Label	: Unbounded_String := To_Unbounded_String( "All Entities" );
 
 	------------------------
 	-- Other helper types --
@@ -119,6 +124,13 @@ package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 		-- The following attributes are updated in every request
 		Lifetime_Action	: Lifetime_Action_Type;
 		View_Entity	: View_Entity_Type;
+
+
+
+		Valid_Label	: Unbounded_String;
+		-- label for "valid entities"
+		All_Label	: Unbounded_String;
+		-- label for "all entities"
 	end record;
 
 
