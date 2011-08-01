@@ -207,6 +207,18 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 		Response := Obj;
 	end Process_Json_Request;
 
+	---------------------
+	-- Entity Handling --
+	---------------------
+	overriding
+	function New_Entity(
+				Module	: in     Lifetime_Handler_Module_Type
+			) return KOW_Ent.Entity_Type'Class is
+		E : Entity_Type;
+	begin
+		return E;
+	end New_Entity;
+
 
 	-----------
 	-- Query --
@@ -460,11 +472,31 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 				Output	:    out Unbounded_String
 			) is
 		-- render the javascript initialization method
+
+		function Is_Valid return Boolean is
+		begin
+			case Module.View_Entity is
+				when Valid_Entities =>
+					return True;
+				when All_Entities =>
+					return Controllers.Is_Valid( Entity_Type( Entity ) );
+			end case;
+		end Is_Valid;
+
+		function Is_Valid return String is
+		begin
+			if Is_Valid then
+				return "true";
+			else
+				return "false";
+			end if;
+		end Is_Valid;
 	begin
 		Append( Output, "<script type=""text/javascript"">" );
 			Append( Output, "kowview.entities.expirable_entity_controllers.initializeItem(" );
 				Append( Output, Integer'Image( Get_ID ( Module ) ) & ',' );
-				Append( Output, '"' & Li_ID & '"' );
+				Append( Output, '"' & Li_ID & """," );
+				Append( Output, Is_Valid );
 			Append( Output, ");" );
 		Append( Output, "</script>" );
 	end Render_list_Body_Item_Initializer;

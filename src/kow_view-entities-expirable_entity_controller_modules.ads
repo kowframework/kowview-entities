@@ -154,6 +154,14 @@ package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 	-- act upon actions from Lifetime_Action_Type
 
 
+	---------------------
+	-- Entity Handling --
+	---------------------
+	overriding
+	function New_Entity(
+				Module	: in     Lifetime_Handler_Module_Type
+			) return KOW_Ent.Entity_Type'Class;
+
 	-----------
 	-- Query --
 	-----------
