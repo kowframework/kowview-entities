@@ -1,0 +1,241 @@
+<!-- 
+	This is a demonstration of a default form template.
+	You can use other templates - including one for each entity you've got!
+
+	Not only you got the FIELDS_LABEL, FIELDS_NAME and FIELDS_INPUT set variables but also
+	FIELD_[YOUR_COLUMN_NAME_CAPITALIZED]_INPUT variables for handling input and
+	FIELD_[YOUR_COLUMN_NAME_CAPITALIZED]_NAME variables in case you want to write
+	your own field management routines.
+
+-->
+
+
+<!--
+	FORM_ACTION and FORM_ONCLICK variables are used internally to controll how the data is
+	submited (AJAX/POST) and to send other information (such as entity identification) to the
+	server.
+-->
+	<script language="JavaScript">
+
+
+		/**
+		 * return the first input child element 
+		 */
+		function getInputElement( container )
+		{
+			inputElements = container.getElementsByTagName("input");
+			return inputElements[0];
+		}
+
+
+		/**
+		 * return the first img child element
+		 */
+		function getImgElement( container )
+		{
+			imgElements = container.getElementsByTagName( "img" );
+			return imgElements[0];
+		}
+
+
+		/**
+		 * check if the first input child element has the "TRUE" or "true" value.
+		 * if not, returns false.
+		 */
+		function getTrueFalse( container )
+		{
+			val = inputElement.getAttribute( "value" );
+
+			return val == "true" || val == "TRUE";
+		}
+
+
+		/**
+		 * update the image of the first img child element according to the
+		 * value of the first input child element
+		 */
+		function updateTrueFalseImage( container )
+		{
+			imgElement = getImgElement( container );
+			if( getTrueFalse( container ) )
+				imgElement.setAttribute( "src", "/themes/true.png" );
+			else
+				imgElement.setAttribute( "src", "/themes/false.png" );
+		}
+
+
+		/**
+		 * Switch the first input child element from true to false and false to true
+		 * and runs updateTrueFalseImage();
+		 */
+		function trueFalseMe( container )
+		{
+
+			inputElement = getInputElement( container );
+
+			if( getTrueFalse( container ) )
+				inputElement.setAttribute( "value", "false" );
+			else
+				inputElement.setAttribute( "value", "true" );
+			
+			updateTrueFalseImage( container );
+		}
+
+
+
+
+
+		  /*****************/
+		 /* Inlined Forms */
+		/*****************/
+
+
+		/**
+		 * Initialize the inlined form
+		 * Steps involved:
+		 *	. read the template HTML into a JS variable
+		 *	. remove the HTML template from the HTML itself..
+		 */
+		function initialize_inlined(div_id){
+			the_div = document.getElementById( div_id );
+			
+			childs = the_div.getElementsByTagName("tr");
+
+			for( i = 0; i < childs.length; i++ ){
+				if( childs[i].getAttribute("kvtype") == "inlined_template" ) {
+					the_div.inlined_template = childs[i];
+					childs[i].parentNode.removeChild( childs[i] );
+					return;
+				}
+			}
+		}
+
+
+		/**
+		 * Create a new inlined form for the given ID
+		 * Steps involved:
+		 *	. well, simply attach a new form element into the inlined stuff
+		 */
+		function create_inlined(div_id){
+			the_div = document.getElementById( div_id );
+			
+			childs = the_div.getElementsByTagName("table");
+
+			for( i = 0; i < childs.length; i++ ){
+				if( childs[i].getAttribute("kvtype") == "inlined_container" ) {
+					inlinedElement = the_div.inlined_template.cloneNode(true);
+					childs[i].appendChild( inlinedElement );
+					dojo.parser.parse(inlinedElement);
+					return;
+				}
+			}
+			
+		}
+
+
+		function enable_all( childs ) {
+			for( i = 0; i < childs.length; i++ ) {
+				childs[i].disabled=false;
+			}
+		}
+		/**
+		 *enable all fields and then submit the form... the fields gotta be enabled or AWS can't get them
+		 */
+		function submit_form( the_form ) {
+			enable_all( the_form.getElementsByTagName("input") );
+			enable_all( the_form.getElementsByTagName("select") );
+			return true;
+		}
+
+
+	</script>
+
+
+<form action="/store_entity" method="post" enctype="multipart/form-data" onSubmit="submit_form(this)">
+	<div id="@_entity_id_@" class="entity_label">Editar @_entity_label_@</div>
+	<input type="hidden" name="entity_tag" value="@_entity_tag_@"/>
+	<input type="hidden" name="entity_@_entity_tag_@__id" value="@_entity_id_@"/>
+	<table class="entity_table">
+		<!-- Enter the main loop for entities -->
+		@@TABLE@@
+			<tr id="@_entity_column_ids_@">
+				<th id="entity_@_entity_column_ids_@__label">@_entity_labels_@</th>	<!-- the label for this field -->
+			</tr><tr id="@_entity_column_ids_@_value">
+				<td id="entity_@_entity_column_ids_@__value">
+						@_entity_form_elements_@
+						<!--input type="text" name="entity_@_entity_column_ids_@" value="@_entity_values_@"/-->
+				</td>	<!-- the field input -->
+			</tr>
+		@@END_TABLE@@
+			<tr>
+				<th>Tags</th>
+			</tr><tr>
+				<td><input type="text" name="filter_tags" value="@_filter_tags_@" maxlength="255"/></td>
+			</tr>
+
+	
+	</table>
+
+
+
+
+
+	@@TABLE@@
+		<div id="@_inlined_entity_form_ids_@">
+			<a href="#" class="create_entity" onclick="create_inlined('@_inlined_entity_form_ids_@')">[+] CRIAR @_inlined_entity_label_@</a>
+
+
+			<table class="entity_table" kvtype="inlined_container">
+				<tr>
+					@@TABLE@@
+						@@IF@@ @_inlined_entity_labels_@ /= "" OR @_inlined_entity_form_elements_@ /= ""
+							<th class="label">@_inlined_entity_labels_@</span>
+						@@END_IF@@
+					@@END_TABLE@@
+				</tr>
+
+
+
+				@@TABLE@@
+				<tr>
+					@@IF@@ @_inlined_entity_tag_@ /= ""
+
+					<input type="hidden" name="inlined_entity_tag" value="@_inlined_entity_tag_@"/>
+					<input type="hidden" name="inlined_entity_@_inlined_entity_tag_@__id" value="@_inlined_entity_id_@"/>
+					@@TABLE@@
+						@@IF@@ @_inlined_entity_labels_@ /= "" OR @_inlined_entity_form_elements_@ /= ""
+							<td class="value">@_inlined_entity_form_elements_@</td>
+						@@END_IF@@
+					@@END_TABLE@@
+					@@END_IF@@
+				</tr>
+				@@END_TABLE@@
+
+
+				<!-- the following row is automatically removed when the HTML is loaded... -->
+				<tr kvtype="inlined_template">
+
+					<input type="hidden" name="inlined_entity_tag" value="@_inlined_entity_template_tag_@"/>
+					<input type="hidden" name="inlined_entity_@_inlined_entity_template_tag_@__id" value="x"/>
+					@@TABLE@@
+						@@IF@@ @_inlined_entity_labels_@ /= "" OR @_inlined_entity_template_form_elements_@ /= ""
+							<td class="value">@_inlined_entity_template_form_elements_@</td>
+						@@END_IF@@
+					@@END_TABLE@@
+				</tr>
+			</table>
+		</div>
+	@@END_TABLE@@
+
+	<input type="submit" value=">> ENVIAR" class="button"/>
+</form>
+
+
+<script language="javascript">
+<!--
+@@TABLE@@
+	initialize_inlined("@_inlined_entity_form_ids_@");
+@@END_TABLE@@
+-->
+</script>
+

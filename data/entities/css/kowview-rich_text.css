@@ -1,0 +1,142 @@
+/**
+ * CSS for rich text contents.
+ *
+ * @author Marcelo C. de Freitas <marcelo@kow.com.br>
+ */
+
+
+/***********/
+/* Images */
+/*********/
+
+
+img.Here{
+	display			: block;
+	margin-left		: auto;
+	margin-right		: auto;
+}
+
+
+img.Top{
+	display			: block;
+	margin-left		: auto;
+	margin-right		: auto;
+	padding-top		: 20px;
+	border-top		: thin dashed black;
+}
+
+img.Bottom{
+	display			: block;
+	margin-left		: auto;
+	margin-right		: auto;
+	padding-bottom		: 20px;
+	border-bottom		: thin dashed black;
+}
+
+img.NewPage {
+	display			: block;
+	margin-left		: auto;
+	margin-right		: auto;
+
+	padding-bottom		: 20px;
+	padding-top		: 20px;
+	border-bottom		: thin dashed black;
+	border-top		: thin dashed black;
+}
+
+
+
+
+/**********/
+/* Sizes */
+/********/
+img.Small {
+	width	: 150px;
+}
+
+img.Medium {
+	width	: 300px;
+}
+
+img.Big{
+	width	: 400px;
+}
+
+
+
+.workgroup_id span.label{
+	    display		: inline-block;
+	    
+	    font-weight		: bold;
+	    
+	    width		:150px;
+	    
+	    margin		:20px 0px 10px 0px 
+  
+}
+
+.description span.label{
+	    display		: inline-block;
+	    
+	    font-weight		: bold;
+	    
+	    width		:150px;
+	    
+	    margin		:20px 0px 30px 0px 
+  
+}
+
+.description span.value{
+ 
+
+	    display		: inline;
+  
+}
+
+.project h1{
+	    display		: block;
+	    
+	    margin-bottom	:10px;
+  
+}
+
+
+
+p{
+	text-align	: justify; 
+	
+	padding		: 0px 15px 0px 10px;
+	
+	font-weight	:normal;
+  
+  
+}
+
+/******************/
+/* Image Listing */
+/****************/
+
+ul.imageListing{
+	display		: block;
+	padding-left	: 0px;
+	padding-right	: 0px;
+	margin-left	: auto;
+	margin-right	: auto;
+	max-width	: 480px;
+	width		: 490px;
+	height		: 200px;
+	overflow-y	: scroll;
+	overflow-x	: hide;
+	border		: thin solid gray;
+	list-style	: none;
+}
+
+ul.imageListing li{
+	display		: inline-block;
+	padding		: 2px 2px 2px 2px;
+}
+
+
+ul.imageListing li:hover{
+	background-color	: gray;
+}

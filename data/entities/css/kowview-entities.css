@@ -1,0 +1,193 @@
+a:link{
+	text-decoration		:none;
+}
+
+.entityToolbar{/*barra botão new*/
+	text-align		: center;
+	
+	border			:thin dotted #507aaa;
+}
+
+
+#notification_form_container_21{
+
+	margin			: 10px 0px 0px 0px;
+	
+	width 			: 785px;
+  
+}
+
+
+.cover h1{
+  
+      margin			: 20px 0px 30px 0px; 
+      
+      display			:block;
+}
+
+
+
+.title span.value{
+
+      
+      display			: inline-block; 
+      
+      margin			: 10px 0px 10px 10px;
+      
+}
+
+
+#module_20_id_1{
+  
+	    border		:thin solid #507AAA;
+  
+	    width		: 778px;
+	    
+	    margin		:0px 0px 10px 0px 
+}
+
+/**************
+ * CAPAS EDIT *
+ **************/
+
+.cover.BIG_EDIT_RENDERING label{
+	display			:block;
+	margin		:10px 0px 10px 0px 
+}
+
+.cover.BIG_EDIT_RENDERING label span.label {
+	font-weight		:bold;
+	display			:inline-block;
+	width			:150px;
+}
+
+
+
+
+
+.cover.BIG_EDIT_RENDERING label.parameters span.label{
+	display			: block;
+	
+	margin-top		:20px;
+}
+
+
+.cover.BIG_EDIT_RENDERING label.parameters span.value{
+	display			: block;
+	margin-left		: 20px;
+}
+
+
+.cover.BIG_EDIT_RENDERING label.parameters span.value span.label{
+	display			: inline-block;
+	width			: 150px;
+	
+	margin-top		:5px;
+}
+
+.cover.BIG_EDIT_RENDERING label.parameters span.value span.value{
+	display			: inline-block;
+	width			: 300px;
+}
+
+
+
+/****************
+ * CAPAS PREVIEW*
+ ***************/
+
+.cover.SMALL_RENDERING ul li{
+  
+	display		: inline-block;
+  
+	border		: thin solid #507aaa;
+  
+	margin		:0px 0px 10px 10px;
+	
+	padding		:10px 2px 10px 2px;
+	
+	width		:130px;
+	
+	text-align	:center;
+	
+	height		:30px;
+	
+}
+
+
+.cover.SMALL_RENDERING ul li:hover{
+  
+	  background	: #eff6fd;
+	  
+}
+
+
+.cover.SMALL_RENDERING span.label{
+  
+	color		: black;
+	font-weight	:bold;
+	
+}
+
+.cover.SMALL_RENDERING span.value{
+  
+	display		:block;
+	font-style	:italic;
+	color		: black;
+	
+}
+
+
+/******************
+ * CAPAS DETALHES *
+ ******************/
+	  
+
+.cover.BIG_RENDERING label{
+	display			:block;
+	margin			:10px 0px 0px 0px 
+}
+
+.cover.BIG_RENDERING label span.label {
+	font-weight		:bold;
+	display			:inline-block;
+	width			:150px;
+}
+
+
+.cover.BIG_RENDERING label.parameters span{
+	vertical-align		: text-top;
+	margin-top		: 5px;
+}
+
+.cover.BIG_RENDERING label.parameters span.label{
+	display			: block;
+	margin-top		: 20px;
+}
+
+
+.cover.BIG_RENDERING label.parameters span.value{
+	display			: block;
+	margin-left		: 20px;
+	
+}
+
+.cover.BIG_RENDERING label.parameters span.value span.label{
+	display			: inline-block;
+	width			: 150px;
+	margin-top		: 5px;
+	
+}
+
+.cover.BIG_RENDERING label.parameters span.value span.value{
+	display			: inline-block;
+	max-width		: 500px;
+	max-height		: 5em;
+
+	min-height		: 2em;
+
+	overflow-y		: auto;
+
+}
+
+

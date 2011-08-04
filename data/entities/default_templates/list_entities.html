@@ -1,0 +1,48 @@
+
+
+
+
+<table class="list_entities_table">
+	<tr>
+		<caption>
+			<form action="" method="get">
+				Filtrar
+				<input type="text" name="filter" value="@_filter_@"/>
+				<input type="submit" value="ok"/>
+			</form>
+		</caption>
+	@@TABLE@@
+		<tr>
+		@@IF@@ @_allow_editting_@
+			<td class="icon">
+			@@IF@@ @_image_urls_@ /= ""
+				<a href="?entity_browser_action=edit&entity_browser_id=@_ids_@">
+					<img src="@_image_urls_@"/>
+				</a></td>
+			@@END_IF@@
+			</td>
+			<td class="label"><a href="?entity_browser_action=edit&entity_browser_id=@_ids_@">
+				<div class="label">@_labels_@</div>
+				@_descriptions_@
+			</a></td>
+				
+		@@ELSE@@
+			<td class="icon">
+			@@IF@@ @_image_urls_@ /= ""
+				<a href="?entity_browser_action=view&entity_browser_id=@_ids_@">
+					<img src="@_image_urls_@"/>
+				</a>
+			@@END_IF@@
+			</td>
+			<td class="label"><a href="?entity_browser_action=view&entity_browser_id=@_ids_@">
+				<div class="label">@_labels_@</div>
+				@_descriptions_@
+			</a></td>
+		@@END_IF@@
+		</tr>
+	@@END_TABLE@@
+</table>
+
+@@IF@@ @_allow_creation_@
+<a href="?entity_browser_action=create" class="create_entity">[+] CRIAR</a>
+@@END_IF@@
