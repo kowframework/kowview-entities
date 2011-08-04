@@ -1,0 +1,23 @@
+This is the KOW_View.Entities application, which provides the Entities component.
+
+
+Instalation:
+
+
+In your project folder, just do:
+
+$ git clone git://kow.com.br/framework/kowview-entities.git applications/entities
+
+
+And then update your applications.cfg adding
+
+[KOW_View.Entities]
+load="true"
+
+
+
+Don't forget to run 
+
+$ kvdriver setup
+
+After or the entity component won't be registered.
