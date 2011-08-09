@@ -310,9 +310,9 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 				end if;
 			end selected;
 		begin
-			Append( Output, "<select value=""" & View_Entity_Type'Image( Value ) & '"' & selected & '>' );
+			Append( Output, "<option value=""" & View_Entity_Type'Image( Value ) & '"' & selected & '>' );
 			Append( Output, Label );
-			Append( Output, "</select>" );
+			Append( Output, "</option>" );
 		end Append_Option;
 
 		procedure End_Options is
