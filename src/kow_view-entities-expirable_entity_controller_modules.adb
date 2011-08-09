@@ -97,10 +97,6 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 						Module	=> Lifetime_Handler_Module_Type'Class( Module ),
 						P	=> P
 					);
-		Module.Lifetime_Action := Get_Lifetime_Action(
-						Module	=> Lifetime_Handler_Module_Type'Class( Module ),
-						P	=> P
-					);
 
 
 	end Initialize_Request;
@@ -160,6 +156,11 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			return Entity;
 		end Get_Entity;
 	begin
+		Module.Lifetime_Action := Get_Lifetime_Action(
+						Module	=> Lifetime_Handler_Module_Type'Class( Module ),
+						P	=> AWS.Status.Parameters( Request )
+					);
+
 		case Module.Lifetime_Action is
 			when Expire_Entity =>
 				Controllers.Expire( Get_Entity );
