@@ -9,9 +9,15 @@
 kowview.entities.expirable_entity_controllers = new Object();
 
 
-dojo.addOnLoad(function(){console.log("oie!")});
+
+/*************/
+/* Variables */
+/*************/
 
 
+kowview.entities.expirable_entity_controllers.extensions = new Array();
+kowview.entities.expirable_entity_controllers.items = new Array();
+kowview.entities.expirable_entity_controllers.moduleId = null;
 
 
 /*************************************/
@@ -29,20 +35,43 @@ console.dir(select);
 
 
 /**
- * Initialize a item, building the menu
+ * Mark a item for initialization
  */
-kowview.entities.expirable_entity_controllers.initializeItem = function( moduleId, itemId, isValid ) {
+kowview.entities.expirable_entity_controllers.initializeItem = function( itemId, isValid ) {
 	console.log( "initializing item" + itemId );
+	console.log(isValid);
+	kowview.entities.expirable_entity_controllers.items.push( {
+					itemId		: itemId,
+					isValid		: isValid
+				} );
+}
+
+/**
+ * Register the available extensions
+ */
+kowview.entities.expirable_entity_controllers.initExtension = function( entityTag, label ) {
+	kowview.entities.expirable_entity_controllers.extensions.push({
+					entityTag	: entityTag,
+					label		: label
+				});
 }
 
 
+/**
+ * Call the initialization routines
+ */
+kowview.entities.expirable_entity_controllers.init = function( moduleId ) {
+	kowview.entities.expirable_entity_controllers.moduleId = moduleId;
+	dojo.forEach(kowview.entities.expirable_entity_controllers.items, kowview.entities.expirable_entity_controllers.doInitializeItem);
+	console.log("hey");
+	console.dir( kowview.entities.expirable_entity_controllers.extensions );
+}
 
 
+/*****************************/
+/* Interface Initialization */
+/***************************/
 
-
-
-
-
-/*************/
-/* Variables */
-/*************/
+kowview.entities.expirable_entity_controllers.doInitializeItem = function( item, key ) {
+	console.dir( item );
+}

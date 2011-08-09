@@ -44,9 +44,11 @@ with Ada.Tags;
 -------------------
 with KOW_Ent;
 with KOW_Ent.ID_Query_Builders;
+with KOW_Lib.Locales;
 with KOW_Sec;
 with KOW_View.Entities.Components;
 with KOW_View.Entities.Modules;
+with KOW_View.Locales;
 with KOW_View.Modules;
 with KOW_View.URI_Util;
 
@@ -112,7 +114,8 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 	begin
 		Initialize_Dojo_Includes(
 					Module	=> Lifetime_Handler_Module_Type'Class( Module ),
-					Request	=> Request
+					Request	=> Request,
+					Output	=> Output
 				);
 
 
@@ -139,6 +142,11 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 				Output	=> Output
 			);
 		Append( Output, "</span>" );
+
+
+		Append( Output, "<script type=""text/javascript"">dojo.addOnLoad(function() {" );
+			Append( Output, "kowview.entities.expirable_entity_controllers.init( " & Integer'Image( Get_Id( Module ) ) & " );" );
+		Append( Output, "});</script>" );
 	end Process_Body;
 
 
@@ -386,7 +394,8 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 
 	procedure Initialize_Dojo_Includes(
 				Module	: in out Lifetime_Handler_Module_Type;
-				Request	: in     AWS.Status.Data
+				Request	: in     AWS.Status.Data;
+				Output	:    out Unbounded_String
 			) is
 		-- render every (empty) validation entity using big_edit_rendering
 		-- so the renderers can include the needed dojo packages beforehand.
@@ -394,6 +403,8 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 							Module	=> Lifetime_Handler_Module_Type'Class( Module ),
 							Request	=> Request
 						);
+		Locale		: constant KOW_Lib.Locales.Locale := KOW_View.Locales.Get_Locale( Request );
+
 
 		procedure Initialize( The_Tag : in Ada.Tags.Tag ) is
 			Buffer : Unbounded_String;
@@ -406,16 +417,22 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 					Output	=> Buffer
 				);
 
+			Append( Output, "kowview.entities.expirable_entity_controllers.initExtension(" );
+				Append( Output, '"' & Ada.Tags.Expanded_Name( The_Tag ) & """," );
+				Append( Output, '"' & KOW_Ent.Get_Label( The_Tag, Locale ) & '"' );
+			Append( Output, ");" );
 		exception
 			when others => null;
 			-- ignore all exceptions at this stage...
 		end Initialize;
 	begin
 
+		Append( Output, "<script type=""text/javascript"">" );
 		Initialize( Entity_Type'Tag );
 		for i in Extensions'Range loop
 			Initialize( Extensions( i ) );
 		end loop;
+		Append( Output, "</script>" );
 	end Initialize_Dojo_Includes;
 
 
@@ -501,7 +518,6 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 	begin
 		Append( Output, "<script type=""text/javascript"">" );
 			Append( Output, "kowview.entities.expirable_entity_controllers.initializeItem(" );
-				Append( Output, Integer'Image( Get_ID ( Module ) ) & ',' );
 				Append( Output, '"' & Li_ID & """," );
 				Append( Output, Is_Valid );
 			Append( Output, ");" );

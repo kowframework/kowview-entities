@@ -212,7 +212,8 @@ package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 
 	procedure Initialize_Dojo_Includes(
 				Module	: in out Lifetime_Handler_Module_Type;
-				Request	: in     AWS.Status.Data
+				Request	: in     AWS.Status.Data;
+				Output	:    out Unbounded_String
 			);
 	-- render every (empty) validation entity using big_edit_rendering
 	-- so the renderers can include the needed dojo packages beforehand.
