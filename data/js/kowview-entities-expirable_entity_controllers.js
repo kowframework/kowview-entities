@@ -6,7 +6,7 @@
 
 
 
-var kowview.entities.expirable_entity_controllers = new Object();
+kowview.entities.expirable_entity_controllers = new Object();
 
 
 dojo.addOnLoad(function(){console.log("oie!")});
@@ -23,7 +23,7 @@ dojo.addOnLoad(function(){console.log("oie!")});
  * Update the module listing
  */
 kowview.entities.expirable_entity_controllers.updateList = function( select ){
-	console.dir(select);
+	console.dir(select.value);
 }
 
 
@@ -33,3 +33,15 @@ kowview.entities.expirable_entity_controllers.updateList = function( select ){
 kowview.entities.expirable_entity_controllers.initializeItem = function( moduleId, itemId, isValid ) {
 	console.log( "initializing item" + itemId );
 }
+
+
+
+
+
+
+
+
+
+/*************/
+/* Variables */
+/*************/
