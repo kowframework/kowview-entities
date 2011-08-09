@@ -23,7 +23,8 @@ dojo.addOnLoad(function(){console.log("oie!")});
  * Update the module listing
  */
 kowview.entities.expirable_entity_controllers.updateList = function( select ){
-	console.dir(select.value);
+console.dir(select);
+	select.domNode.parentNode.submit();
 }
 
 

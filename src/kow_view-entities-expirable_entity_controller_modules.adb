@@ -47,6 +47,7 @@ with KOW_Ent.ID_Query_Builders;
 with KOW_Sec;
 with KOW_View.Entities.Components;
 with KOW_View.Entities.Modules;
+with KOW_View.Modules;
 with KOW_View.URI_Util;
 
 
@@ -128,11 +129,16 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 				);
 
 		Module.Style := Small_Rendering;
+
+		Append( Output, "<span class=""entity lifetimeHandler ");
+		Append( Output, KOW_View.Modules.Get_Name( Lifetime_Handler_Module_Type'Class( Module ) ) );
+		Append( Output, """>"  );
 		Render_List(
 				Module	=> Lifetime_Handler_Module_Type'Class( Module ),
 				Request	=> Request,
 				Output	=> Output
 			);
+		Append( Output, "</span>" );
 	end Process_Body;
 
 
