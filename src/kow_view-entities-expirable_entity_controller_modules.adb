@@ -114,6 +114,10 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 	begin
 		Include_Dojo_Package(
 					Module		=> Lifetime_Handler_Module_Type'Class( Module ),
+					Dojo_Package	=> "dijit.Dialog"
+				);
+		Include_Dojo_Package(
+					Module		=> Lifetime_Handler_Module_Type'Class( Module ),
 					Dojo_Package	=> "dijit.Menu"
 				);
 		Include_Dojo_Package(
