@@ -29,7 +29,6 @@ kowview.entities.expirable_entity_controllers.moduleId = null;
  * Update the module listing
  */
 kowview.entities.expirable_entity_controllers.updateList = function( select ){
-console.dir(select);
 	select.domNode.parentNode.submit();
 }
 
@@ -38,8 +37,6 @@ console.dir(select);
  * Mark a item for initialization
  */
 kowview.entities.expirable_entity_controllers.initializeItem = function( itemId, isValid ) {
-	console.log( "initializing item" + itemId );
-	console.log(isValid);
 	kowview.entities.expirable_entity_controllers.items.push( {
 					itemId		: itemId,
 					isValid		: isValid
@@ -63,8 +60,6 @@ kowview.entities.expirable_entity_controllers.initExtension = function( entityTa
 kowview.entities.expirable_entity_controllers.init = function( moduleId ) {
 	kowview.entities.expirable_entity_controllers.moduleId = moduleId;
 	dojo.forEach(kowview.entities.expirable_entity_controllers.items, kowview.entities.expirable_entity_controllers.doInitializeItem);
-	console.log("hey");
-	console.dir( kowview.entities.expirable_entity_controllers.extensions );
 }
 
 
@@ -73,5 +68,67 @@ kowview.entities.expirable_entity_controllers.init = function( moduleId ) {
 /***************************/
 
 kowview.entities.expirable_entity_controllers.doInitializeItem = function( item, key ) {
-	console.dir( item );
+
+	console.log("initializing the following item");
+	console.dir(item);
+
+	var menu = new dijit.Menu(
+			{
+					targetNodeIds:[item.itemId]
+				}
+		);
+	
+
+	var validateSubMenu = new dijit.Menu();
+	validateSubMenu.addChild(
+			new dijit.MenuItem({
+					label	: "Rápida",
+					disabled: item.isValid,
+					onClick	: function() { kowview.entities.expirable_entity_controllers.fastValidate( item.itemId ); }
+				})
+		);
+	validateSubMenu.addChild(new dijit.MenuSeparator());
+
+	dojo.forEach(kowview.entities.expirable_entity_controllers.extensions, function(ext) {
+		validateSubMenu.addChild(
+				new dijit.MenuItem( {
+						label	: ext.label,
+						onClick	: function() { kowview.entities.expirable_entity_controllers.formValidate( item.itemId, ext.entityTag ) }
+					} )
+			);
+	});
+
+
+	menu.addChild(
+			new dijit.PopupMenuItem({
+					label	: "Ativar",
+					disabled: item.isValid,
+					popup	: validateSubMenu
+				})
+		);
+
+	menu.addChild(
+			new dijit.MenuItem({
+					label	: "Desativar",
+					disabled: !item.isValid,
+					onClick	: function() { alert('lalala');}
+				})
+		);
+	menu.startup();
+
+}
+
+
+/**************************/
+/* Activation Interfaces */
+/************************/
+
+
+kowview.entities.expirable_entity_controllers.fastValidate = function( itemId ) {
+	console.log("fast validating item " + itemId );
+}
+
+
+kowview.entities.expirable_entity_controllers.formValidate = function( itemId, extensionTag ){
+	console.log( "form validating item " + itemId + " using extension " + extensionTag );
 }

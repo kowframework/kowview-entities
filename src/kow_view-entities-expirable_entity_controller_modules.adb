@@ -112,6 +112,23 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 			) is
 		-- always render list
 	begin
+		Include_Dojo_Package(
+					Module		=> Lifetime_Handler_Module_Type'Class( Module ),
+					Dojo_Package	=> "dijit.Menu"
+				);
+		Include_Dojo_Package(
+					Module		=> Lifetime_Handler_Module_Type'Class( Module ),
+					Dojo_Package	=> "dijit.MenuItem"
+				);
+		Include_Dojo_Package(
+					Module		=> Lifetime_Handler_Module_Type'Class( Module ),
+					Dojo_Package	=> "dijit.MenuSeparator"
+				);
+		Include_Dojo_Package(
+					Module		=> Lifetime_Handler_Module_Type'Class( Module ),
+					Dojo_Package	=> "dijit.PopupMenuItem"
+				);
+
 		Initialize_Dojo_Includes(
 					Module	=> Lifetime_Handler_Module_Type'Class( Module ),
 					Request	=> Request,
