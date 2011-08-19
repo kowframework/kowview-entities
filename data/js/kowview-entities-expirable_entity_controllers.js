@@ -36,9 +36,10 @@ kowview.entities.expirable_entity_controllers.updateList = function( select ){
 /**
  * Mark a item for initialization
  */
-kowview.entities.expirable_entity_controllers.initializeItem = function( itemId, isValid ) {
+kowview.entities.expirable_entity_controllers.initializeItem = function( itemId, entityId, isValid ) {
 	kowview.entities.expirable_entity_controllers.items.push( {
 					itemId		: itemId,
+					entityId	: entityId,
 					isValid		: isValid
 				} );
 }
@@ -84,7 +85,7 @@ kowview.entities.expirable_entity_controllers.doInitializeItem = function( item,
 			new dijit.MenuItem({
 					label	: "Rápida",
 					disabled: item.isValid,
-					onClick	: function() { kowview.entities.expirable_entity_controllers.fastValidate( item.itemId ); }
+					onClick	: function() { kowview.entities.expirable_entity_controllers.fastValidate( item.entityId ); }
 				})
 		);
 	validateSubMenu.addChild(new dijit.MenuSeparator());
@@ -93,7 +94,7 @@ kowview.entities.expirable_entity_controllers.doInitializeItem = function( item,
 		validateSubMenu.addChild(
 				new dijit.MenuItem( {
 						label	: ext.label,
-						onClick	: function() { kowview.entities.expirable_entity_controllers.formValidate( item.itemId, ext.entityTag ) }
+						onClick	: function() { kowview.entities.expirable_entity_controllers.formValidate( item.entityId, ext.entityTag ) }
 					} )
 			);
 	});
@@ -111,7 +112,7 @@ kowview.entities.expirable_entity_controllers.doInitializeItem = function( item,
 			new dijit.MenuItem({
 					label	: "Desativar",
 					disabled: !item.isValid,
-					onClick	: function() { kowview.entities.expirable_entity_controllers.expire( item.itemId ) }
+					onClick	: function() { kowview.entities.expirable_entity_controllers.expire( item.entityId ) }
 				})
 		);
 	menu.startup();
@@ -128,12 +129,12 @@ function reloadMe(data){
 	document.location.reload();
 }
 
-kowview.entities.expirable_entity_controllers.fastValidate = function( itemId ) {
-	kowview.entities.expirable_entity_controllers.callJson( "validate_entity", itemId, null, reloadMe, null );
+kowview.entities.expirable_entity_controllers.fastValidate = function( entityId ) {
+	kowview.entities.expirable_entity_controllers.callJson( "validate_entity", entityId, null, reloadMe, null );
 }
 
 
-kowview.entities.expirable_entity_controllers.formValidate = function( itemId, extensionTag ){
+kowview.entities.expirable_entity_controllers.formValidate = function( entityId, extensionTag ){
 
 	var showDialog = function( data ) {
 		console.dir(data.response);
@@ -145,12 +146,12 @@ kowview.entities.expirable_entity_controllers.formValidate = function( itemId, e
 
 	}
 	
-	kowview.entities.expirable_entity_controllers.callJson( "render_form", itemId, null, showDialog, null, { validation_entity_tag : extensionTag } );
+	kowview.entities.expirable_entity_controllers.callJson( "render_form", entityId, null, showDialog, null, { validation_entity_tag : extensionTag } );
 
 }
 
-kowview.entities.expirable_entity_controllers.expire = function( itemId ){
-	kowview.entities.expirable_entity_controllers.callJson( "expire_entity", itemId, null, reloadMe, null );
+kowview.entities.expirable_entity_controllers.expire = function( entityId ){
+	kowview.entities.expirable_entity_controllers.callJson( "expire_entity", entityId, null, reloadMe, null );
 }
 
 
@@ -169,7 +170,7 @@ kowview.entities.expirable_entity_controllers.expire = function( itemId ){
  */
 
 
-kowview.entities.expirable_entity_controllers.callJson = function( action, itemId, form, load, error, content ) {
+kowview.entities.expirable_entity_controllers.callJson = function( action, entityId, form, load, error, content ) {
 	if ( action != "expire_entity" && action != "validate_entity" && action != "render_form" && action != "store_validation_period" ) {
 		kowview.showErrorMessage( "Ação Inválida", "Aparentemente o desenvolvedor comeu bola. Entre em contato com o fornecedor da aplicação" );
 		throw "Invalid Action";
@@ -189,7 +190,7 @@ kowview.entities.expirable_entity_controllers.callJson = function( action, itemI
 	}
 
 	params.content.action	= action;
-	params.content.entity_id= kowview.entities.expirable_entity_controllers.getEntityId( itemId );
+	params.content.entity_id= entityId;
 
 	params.load = load;
 
@@ -209,11 +210,3 @@ kowview.entities.expirable_entity_controllers.callJson = function( action, itemI
 }
 
 
-
-/**
- * Get the entity to be validadet id from the list item id
- */
-kowview.entities.expirable_entity_controllers.getEntityId = function( itemId ) {
-	// TODO :: implement-me
-	return 1;
-}

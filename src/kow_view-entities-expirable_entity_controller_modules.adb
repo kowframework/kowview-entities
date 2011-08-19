@@ -565,6 +565,7 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 		Append( Output, "<script type=""text/javascript"">" );
 			Append( Output, "kowview.entities.expirable_entity_controllers.initializeItem(" );
 				Append( Output, '"' & Li_ID & """," );
+				Append( Output, KOW_Ent.To_String ( Entity.Id ) & ',' );
 				Append( Output, Is_Valid );
 			Append( Output, ");" );
 		Append( Output, "</script>" );
