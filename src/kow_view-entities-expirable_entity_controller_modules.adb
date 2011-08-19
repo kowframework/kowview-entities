@@ -22,6 +22,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 pragma License( GPL );
+with ada.text_io;
 
 
 
@@ -36,6 +37,7 @@ pragma License( GPL );
 --------------
 -- Ada 2005 --
 --------------
+with Ada.Calendar;
 with Ada.Strings.Unbounded;			use Ada.Strings.Unbounded;
 with Ada.Tags;
 
@@ -221,6 +223,7 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 				declare
 					Buffer : Unbounded_String;
 				begin
+					ada.text_io.put_line( "Rendering form" );
 					Module.Style := Big_Edit_Rendering;
 
 					Render_View(
@@ -428,13 +431,16 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 
 
 		procedure Initialize( The_Tag : in Ada.Tags.Tag ) is
+			use Ada.Calendar;
 			Buffer : Unbounded_String;
 			-- a buffer that we trash when the processing is finished
+			Tag_Str : constant String := Ada.Tags.Expanded_Name( The_Tag );
 		begin
+
 			Render_View(
 					Module	=> Lifetime_Handler_Module_Type'Class( Module ),
 					Request	=> Request,
-					Entity	=> KOW_Ent.New_Entity( The_Tag ),
+					Entity	=> New_Validation_Entity( Lifetime_Handler_Module_Type'Class( Module ), Tag_Str ),
 					Output	=> Buffer
 				);
 
@@ -442,14 +448,10 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 				Append( Output, '"' & Ada.Tags.Expanded_Name( The_Tag ) & """," );
 				Append( Output, '"' & KOW_Ent.Get_Label( The_Tag, Locale ) & '"' );
 			Append( Output, ");" );
-		exception
-			when others => null;
-			-- ignore all exceptions at this stage...
 		end Initialize;
 	begin
 
 		Append( Output, "<script type=""text/javascript"">" );
-		Initialize( Entity_Type'Tag );
 		for i in Extensions'Range loop
 			Initialize( Extensions( i ) );
 		end loop;
@@ -465,11 +467,24 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 		-- create
 		--
 		-- default: return an empty array
-		Empty : Tag_Array( 2 .. 1 );
+		Validations : Tag_Array := ( 1 => Controllers.Validation_Entity'Tag );
 	begin
-		return Empty;
+		return Validations;
 	end Get_Validation_Extensions;
 
+
+	function New_Validation_Entity(
+				Module		: in Lifetime_Handler_Module_Type;
+				Entity_Tag	: in String
+			) return Controllers.Validation_Entity'Class is
+		use Ada.Calendar;
+		Validation : Controllers.Validation_Entity'Class := Controllers.Validation_Entity'Class( KOW_Ent.New_Entity( To_Unbounded_String( Entity_Tag ) ) );
+	begin
+		Validation.From_Date := Clock;
+		Validation.To_Date := Clock + 360000.0;
+
+		return Validation;
+	end New_Validation_Entity;
 
 	function Get_Validation_Entity(
 				Module	: in Lifetime_Handler_Module_Type;
@@ -479,34 +494,44 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 		-- or else, allocate a new entity by the validation_entity_tag parameter
 		Entity_ID	: constant Integer := Get_Entity_Id( Lifetime_Handler_Module_Type'Class( Module ), Request );
 		The_Tag 	: constant String := AWS.Parameters.Get( AWS.Status.Parameters( Request ), "validation_entity_tag" );
+		Entity		: Entity_Type;
 	begin
-		if Entity_Id /= -1 then
-			declare
-				Entity : Entity_Type;
-			begin
-				KOW_Ent.Load( Entity, Natural( Entity_Id ) );
-				return Controllers.Get_Validation( Entity );
-			end;
-		elsif The_Tag /= "" then
-			declare
-				Available : Tag_Array := Get_Validation_Extensions( Lifetime_Handler_Module_Type'Class( Module ), Request );
-			begin
-				for i in Available'Range loop
-					if The_Tag = Ada.Tags.Expanded_Name( Available( i ) ) then
-						return Controllers.Validation_Entity'Class( KOW_Ent.New_Entity( To_Unbounded_String( The_Tag ) ) );
-					end if;
-				end loop;
 
-				raise KOW_Sec.Access_Denied with "Sorry, but you don't have permission to create this entity";
-			end;
-		else
-			declare
-				The_Entity : Controllers.Validation_Entity;
-			begin
-				return The_Entity;
-			end;
+		if Entity_Id = -1 then
+			raise KOW_Sec.Access_Denied with "I need an entity ID to render this form";
 		end if;
+		Ada.Text_IO.Put_Line( The_Tag );
+		Ada.Text_IO.Put_Line( Integer'Image( Entity_ID ) );
 
+
+		KOW_Ent.Load( Entity, Natural( Entity_Id ) );
+		if Controllers.Is_Valid( Entity ) then
+			return Controllers.Get_Validation( Entity );
+		else
+			if The_Tag = "" then
+				declare
+					The_Entity : Controllers.Validation_Entity;
+				begin
+					return The_Entity;
+				end;
+
+			else
+				declare
+					Available : Tag_Array := Get_Validation_Extensions( Lifetime_Handler_Module_Type'Class( Module ), Request );
+				begin
+					ada.text_io.put_line( "OMFG :: " & Integer'IMage( available'length ) );
+					ada.text_io.put_line( ada.tags.expanded_name( Lifetime_Handler_Module_Type'Class( Module )'tag ) );
+					for i in Available'Range loop
+						Ada.Text_IO.Put_line( Ada.Tags.Expanded_Name( Available( i ) ) );
+						if The_Tag = Ada.Tags.Expanded_Name( Available( i ) ) then
+							return New_Validation_Entity( Lifetime_Handler_Module_Type'Class( Module ), The_Tag );
+						end if;
+					end loop;
+					
+					raise KOW_Sec.Access_Denied with "Sorry, but you don't have permission to create this entity";
+				end;
+			end if;
+		end if;
 	end Get_Validation_Entity;
 
 	procedure Render_List_Body_Item_Initializer(

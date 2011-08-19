@@ -227,6 +227,13 @@ package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 	--
 	-- default: return an empty array
 
+	function New_Validation_Entity(
+				Module		: in Lifetime_Handler_Module_Type;
+				Entity_Tag	: in String
+			) return Controllers.Validation_Entity'Class;
+	-- allocate the validation entity and initialize dates
+	-- can be overriden
+
 	function Get_Validation_Entity(
 				Module	: in Lifetime_Handler_Module_Type;
 				Request	: in AWS.Status.Data

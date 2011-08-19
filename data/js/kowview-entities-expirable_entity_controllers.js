@@ -135,15 +135,17 @@ kowview.entities.expirable_entity_controllers.fastValidate = function( itemId ) 
 
 kowview.entities.expirable_entity_controllers.formValidate = function( itemId, extensionTag ){
 
-	var showDialog = function( response ) {
+	var showDialog = function( data ) {
+		console.dir(data.response);
 		theForm = new dijit.Dialog({
 				title		: "Validar entidade",
-				innerHTML	: response.formHTML
+				content	: data.response.formHTML
 			});
+		theForm.show();
 
 	}
 	
-	kowview.entities.expirable_entity_controllers.callJson( "render_form", itemId, null, showDialog, null );
+	kowview.entities.expirable_entity_controllers.callJson( "render_form", itemId, null, showDialog, null, { validation_entity_tag : extensionTag } );
 
 }
 
@@ -167,21 +169,27 @@ kowview.entities.expirable_entity_controllers.expire = function( itemId ){
  */
 
 
-kowview.entities.expirable_entity_controllers.callJson = function( action, itemId, form, load, error ) {
+kowview.entities.expirable_entity_controllers.callJson = function( action, itemId, form, load, error, content ) {
 	if ( action != "expire_entity" && action != "validate_entity" && action != "render_form" && action != "store_validation_period" ) {
 		kowview.showErrorMessage( "Ação Inválida", "Aparentemente o desenvolvedor comeu bola. Entre em contato com o fornecedor da aplicação" );
 		throw "Invalid Action";
 	}
 
-	var params = new Object();
+	var params = new Object();;
+
 
 	if( form != null )
 		params.form = form;
-	
-	params.content = {
-			action		: action,
-			entity_id	: kowview.entities.expirable_entity_controllers.getEntityId( itemId )
-		};
+
+
+	if( kowview.isSet( content ) ) {
+		params.content = content;
+	} else {
+		params.content = new Object();
+	}
+
+	params.content.action	= action;
+	params.content.entity_id= kowview.entities.expirable_entity_controllers.getEntityId( itemId );
 
 	params.load = load;
 
