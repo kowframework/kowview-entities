@@ -111,7 +111,7 @@ kowview.entities.expirable_entity_controllers.doInitializeItem = function( item,
 			new dijit.MenuItem({
 					label	: "Desativar",
 					disabled: !item.isValid,
-					onClick	: function() { kowview.entities.expirable_entity_controllers.expire( itemId ) }
+					onClick	: function() { kowview.entities.expirable_entity_controllers.expire( item.itemId ) }
 				})
 		);
 	menu.startup();
@@ -180,7 +180,7 @@ kowview.entities.expirable_entity_controllers.callJson = function( action, itemI
 	
 	params.content = {
 			action		: action,
-			entityId	: kowview.entities.expirable_entity_controllers.getEntityId( itemId )
+			entity_id	: kowview.entities.expirable_entity_controllers.getEntityId( itemId )
 		};
 
 	params.load = load;
@@ -191,6 +191,8 @@ kowview.entities.expirable_entity_controllers.callJson = function( action, itemI
 		params.error =function( data ) { console.dir(data);};
 	
 
+	console.log( kowview.entities.expirable_entity_controllers.moduleId );
+	console.dir( params );
 	kowview.modules.postJson(
 			kowview.entities.expirable_entity_controllers.moduleId,
 			params
