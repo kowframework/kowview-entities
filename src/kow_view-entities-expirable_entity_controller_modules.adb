@@ -201,8 +201,10 @@ package body KOW_View.Entities.Expirable_Entity_Controller_Modules is
 		case Module.Lifetime_Action is
 			when Expire_Entity =>
 				Controllers.Expire( Get_Entity );
+				delay 0.5; -- small delay so there is time to sync the database
 			when Validate_Entity =>
 				Controllers.Validate( Get_Entity );
+				delay 0.5; -- small delay so there is time to sync the database
 			when Store_Validation_Period =>
 				declare
 					Entity			: Entity_Type := Get_Entity; -- just to check if there is really an entity in here..
