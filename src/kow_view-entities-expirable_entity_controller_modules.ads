@@ -67,6 +67,7 @@ with AWS.Status;
 generic
 	type Entity_Type is new KOW_Ent.Entity_Type with private; 
 	with package Controllers is new KOW_Ent.Expirable_Entity_Controllers( Entity_Type, <> );
+	type Module_Type is new KOW_View.Entities.Modules.Entity_Module_Type with private;
 package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 
 
@@ -111,7 +112,7 @@ package KOW_View.Entities.Expirable_Entity_Controller_Modules is
 	---------------------
 
 
-	type Lifetime_Handler_Module_Type is abstract new KOW_View.Entities.Modules.Entity_Module_Type with record
+	type Lifetime_Handler_Module_Type is abstract new Module_Type with record
 		-- this module will render a list of entities, giving the ability to expire/validate and revalidate entities
 
 		-- The following attributes are updated in every request
